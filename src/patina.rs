@@ -1,6 +1,8 @@
-use std::path::PathBuf;
+use std::{collections::HashMap, path::PathBuf};
 
 use serde::{Deserialize, Serialize};
+
+use crate::errors::{Error, Result};
 
 #[derive(Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct Patina {
@@ -8,6 +10,9 @@ pub struct Patina {
 
     #[serde(default)]
     pub description: String,
+
+    #[serde(default)]
+    pub vars: HashMap<String, String>,
 
     #[serde(default)]
     pub files: Vec<PatinaFile>,
@@ -19,17 +24,8 @@ pub struct PatinaFile {
     pub target: PathBuf,
 }
 
-#[derive(Debug)]
-#[allow(dead_code)]
-pub enum Error {
-    FileRead(std::io::Error),
-    YamlParse(yaml_rust::ScanError),
-    TomlParse(toml::de::Error),
-}
-
-pub type Result<T> = std::result::Result<T, Error>;
-
 impl Patina {
+    // TODO: test
     pub fn from_toml_file(toml_file_path: &PathBuf) -> Result<Patina> {
         let toml_str = match std::fs::read_to_string(toml_file_path) {
             Ok(toml_str) => toml_str,
@@ -39,6 +35,15 @@ impl Patina {
         match toml::from_str(&toml_str) {
             Ok(toml) => Ok(toml),
             Err(e) => Err(Error::TomlParse(e)),
+        }
+    }
+}
+
+impl PatinaFile {
+    pub fn load_template_file_as_string(&self) -> Result<String> {
+        match std::fs::read_to_string(self.template.clone()) {
+            Ok(template_str) => Ok(template_str),
+            Err(e) => Err(Error::FileRead(e)),
         }
     }
 }
@@ -164,5 +169,25 @@ mod tests {
         let patina = toml::from_str::<Patina>(patina);
         assert!(patina.is_err());
         assert_eq!(patina.unwrap_err().message(), "missing field `target`");
+    }
+
+    #[test]
+    fn test_patina_file_load_template_file_as_string() {
+        let patina_file = PatinaFile {
+            template: PathBuf::from("tests/fixtures/template.txt.hbs"),
+            target: PathBuf::from("output/template.txt"),
+        };
+
+        let template_str = patina_file.load_template_file_as_string();
+        assert!(template_str.is_ok());
+        let template_str = template_str.unwrap();
+
+        let expected = r#"Hello, {{ name }}!
+
+This is an example Patina template file.
+
+Templates use the Handebars templating language. For more information, see <https://handlebarsjs.com/guide/>.
+"#;
+        assert_eq!(template_str, expected);
     }
 }

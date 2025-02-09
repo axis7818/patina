@@ -1,3 +1,9 @@
+mod cli;
+mod patina;
+
+use cli::PatinaCli;
+
 fn main() {
-    println!("Hello, world!");
+    let patina_cli = PatinaCli::parse_args();
+    patina_cli.run();
 }

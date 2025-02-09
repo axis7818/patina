@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - axis7818/docs # TODO: remove this before merging
 
 jobs:
   build:

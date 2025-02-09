@@ -1,40 +1,43 @@
-use std::{fs, path::PathBuf};
-use yaml_rust::{Yaml, YamlLoader};
+use std::path::PathBuf;
 
-use super::patina_file::PatinaFile;
-use super::{PatinaError, Result};
+use crate::patina::{Patina, PatinaFile, ValidationError};
+use yaml_rust::Yaml;
 
-#[derive(Debug, Default, PartialEq)]
-pub struct Patina {
-    pub name: String,
-    pub description: String,
-    pub files: Vec<PatinaFile>,
+pub trait FromYaml: Sized {
+    fn from_yaml(yaml: &Yaml) -> Result<Self>;
 }
 
-impl Patina {
-    pub fn from_yaml_file(yaml_file_path: &PathBuf) -> Result<Vec<Patina>> {
-        let yaml_str = match fs::read_to_string(yaml_file_path) {
-            Ok(yaml_str) => yaml_str,
-            Err(e) => return Err(PatinaError::FileReadError(e)),
-        };
+type Result<T> = std::result::Result<T, ValidationError>;
 
-        let yaml = match YamlLoader::load_from_str(&yaml_str) {
-            Ok(yaml) => yaml,
-            Err(e) => return Err(PatinaError::YamlParseError(e)),
-        };
+impl FromYaml for PatinaFile {
+    fn from_yaml(yaml: &Yaml) -> Result<PatinaFile> {
+        let template = yaml["template"]
+            .as_str()
+            .ok_or(ValidationError::FileTemplateMissing)?
+            .to_string();
 
-        yaml.iter().map(Patina::from_yaml).collect()
+        let target = yaml["target"]
+            .as_str()
+            .ok_or(ValidationError::FileTargetMissing)?
+            .to_string();
+
+        Ok(PatinaFile {
+            template: PathBuf::from(template),
+            target: PathBuf::from(target),
+        })
     }
+}
 
+impl FromYaml for Patina {
     fn from_yaml(yaml: &Yaml) -> Result<Patina> {
         let name = yaml["name"]
             .as_str()
-            .ok_or(PatinaError::NameMissing)?
+            .ok_or(ValidationError::NameMissing)?
             .to_string();
 
         let description = yaml["description"]
             .as_str()
-            .ok_or(PatinaError::DescriptionMissing)?
+            .ok_or(ValidationError::DescriptionMissing)?
             .to_string();
 
         let files = yaml["files"]
@@ -53,8 +56,66 @@ impl Patina {
 }
 
 #[cfg(test)]
-mod patina_tests {
+mod tests {
+    use yaml_rust::YamlLoader;
+
+    use crate::patina::ValidationError;
+
     use super::*;
+    use std::path::PathBuf;
+
+    #[test]
+    fn test_patina_file_from_yaml() {
+        let yaml = yaml_rust::YamlLoader::load_from_str(
+            r#"
+            template: "template.txt"
+            target: "target.txt"
+            "#,
+        )
+        .unwrap();
+
+        let patina_file = PatinaFile::from_yaml(&yaml[0]);
+        assert!(patina_file.is_ok());
+        let patina_file = patina_file.unwrap();
+
+        assert_eq!(
+            patina_file,
+            PatinaFile {
+                template: PathBuf::from("template.txt"),
+                target: PathBuf::from("target.txt"),
+            }
+        );
+    }
+
+    #[test]
+    fn test_patina_file_from_yaml_missing_template() {
+        let yaml = yaml_rust::YamlLoader::load_from_str(
+            r#"
+            target: "target.txt"
+            "#,
+        )
+        .unwrap();
+
+        let patina_file = PatinaFile::from_yaml(&yaml[0]);
+        assert!(patina_file.is_err());
+        let patina_file = patina_file.unwrap_err();
+        assert!(matches!(patina_file, ValidationError::FileTemplateMissing));
+    }
+
+    #[test]
+    fn test_patina_file_from_yaml_missing_target() {
+        let yaml = yaml_rust::YamlLoader::load_from_str(
+            r#"
+            template: "template.txt"
+            "#,
+        )
+        .unwrap();
+
+        let patina_file = PatinaFile::from_yaml(&yaml[0]);
+        assert!(patina_file.is_err());
+        let patina_file = patina_file.unwrap_err();
+        assert!(matches!(patina_file, ValidationError::FileTargetMissing));
+    }
 
     #[test]
     fn test_patina_from_yaml() {
@@ -104,7 +165,7 @@ mod patina_tests {
         .unwrap();
 
         let patina = Patina::from_yaml(&yaml[0]);
-        assert!(matches!(patina, Err(PatinaError::NameMissing)));
+        assert!(matches!(patina, Err(ValidationError::NameMissing)));
     }
 
     #[test]
@@ -123,7 +184,7 @@ mod patina_tests {
         .unwrap();
 
         let patina = Patina::from_yaml(&yaml[0]);
-        assert!(matches!(patina, Err(PatinaError::DescriptionMissing)));
+        assert!(matches!(patina, Err(ValidationError::DescriptionMissing)));
     }
 
     #[test]
@@ -142,6 +203,6 @@ mod patina_tests {
         .unwrap();
 
         let patina = Patina::from_yaml(&yaml[0]);
-        assert!(matches!(patina, Err(PatinaError::FileTargetMissing)));
+        assert!(matches!(patina, Err(ValidationError::FileTargetMissing)));
     }
 }

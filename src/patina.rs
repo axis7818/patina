@@ -4,31 +4,41 @@ use serde::{Deserialize, Serialize};
 
 use crate::utils::{Error, Result};
 
+/// A Patina describes a set of variables and templates that can be rendered to files.
 #[derive(Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct Patina {
+    /// The name of the Patina
     pub name: String,
 
+    /// A short description of the Patina
     #[serde(default)]
     pub description: String,
 
+    /// A map of variables that can be used in the templates
     #[serde(default)]
     pub vars: HashMap<String, String>,
 
+    /// A list of files referencing templates and their target output paths
     #[serde(default)]
     pub files: Vec<PatinaFile>,
 }
 
+/// A PatinaFile describes a template file and its target output path.
 #[derive(Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct PatinaFile {
+    /// The path to the template file
     pub template: PathBuf,
+
+    /// The path to the garget output file
     pub target: PathBuf,
 }
 
 impl Patina {
+    /// Load a Patina from a TOML file
     pub fn from_toml_file(toml_file_path: &PathBuf) -> Result<Patina> {
         let toml_str = match std::fs::read_to_string(toml_file_path) {
             Ok(toml_str) => toml_str,
-            Err(e) => return Err(Error::FileRead(e)),
+            Err(e) => return Err(Error::FileRead(toml_file_path.clone(), e)),
         };
 
         match toml::from_str(&toml_str) {
@@ -39,10 +49,11 @@ impl Patina {
 }
 
 impl PatinaFile {
+    /// Load the template file as a string
     pub fn load_template_file_as_string(&self) -> Result<String> {
         match std::fs::read_to_string(self.template.clone()) {
             Ok(template_str) => Ok(template_str),
-            Err(e) => Err(Error::FileRead(e)),
+            Err(e) => Err(Error::FileRead(self.template.clone(), e)),
         }
     }
 }
@@ -190,10 +201,11 @@ mod tests {
             Err(e) => e,
         };
 
-        let err = match err.as_file_read() {
+        let (path, err) = match err.as_file_read() {
             Some(err) => err,
             None => panic!("expected FileRead error"),
         };
+        assert_eq!(path, &PathBuf::from("this/file/does/not/exist.toml"));
         assert_eq!(err.kind(), std::io::ErrorKind::NotFound);
     }
 

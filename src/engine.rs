@@ -2,6 +2,7 @@ use std::path::PathBuf;
 
 use crate::{patina::Patina, templating::render_patina, utils::Result};
 
+/// Renders a Patina from a Patina toml file path.
 pub fn render_patina_from_file(patina_path: PathBuf) -> Result<Vec<String>> {
     let patina = match Patina::from_toml_file(&patina_path) {
         Ok(patina) => patina,

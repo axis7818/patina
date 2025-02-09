@@ -1,12 +1,21 @@
-use crate::patina::Patina;
+use crate::engine::render_patina_from_file;
 use clap::{Args, Parser, Subcommand};
 use std::path::PathBuf;
 
 #[derive(Parser, Debug)]
 #[clap(name = "patina", version)]
 pub struct PatinaCli {
+    #[clap(flatten)]
+    global_options: GlobalOptions,
+
     #[clap(subcommand)]
     command: Command,
+}
+
+#[derive(Debug, Args)]
+struct GlobalOptions {
+    #[arg(short = 'v', long = "verbose")]
+    verbose: bool,
 }
 
 #[derive(Debug, Subcommand)]
@@ -26,6 +35,9 @@ enum Command {
 
 #[derive(Debug, Args)]
 struct PatinaCommandOptions {
+    #[clap(flatten)]
+    global_options: GlobalOptions,
+
     patina_path: PathBuf,
 }
 
@@ -44,8 +56,15 @@ impl PatinaCli {
     }
 
     fn render(options: PatinaCommandOptions) {
-        let patina = Patina::from_toml_file(&options.patina_path);
-        println!("{patina:#?}")
+        let patina_render = match render_patina_from_file(options.patina_path) {
+            Ok(patina_render) => patina_render,
+            Err(e) => panic!("{:?}", e),
+        };
+
+        println!("printing patina render");
+        patina_render.iter().for_each(|p| {
+            println!("{:#?}", p);
+        });
     }
 
     fn apply(_options: PatinaCommandOptions) {

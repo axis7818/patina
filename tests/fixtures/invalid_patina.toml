@@ -1,4 +1,4 @@
-name = "simple-patina"
+# name = "simple-patina"
 description = "This is a simple Patina example"
 
 [vars]

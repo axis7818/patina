@@ -18,6 +18,7 @@ pub struct PatinaFile {
 }
 
 #[derive(Debug)]
+#[allow(clippy::enum_variant_names)]
 pub enum ValidationError {
     NameMissing,
     DescriptionMissing,

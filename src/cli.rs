@@ -2,42 +2,55 @@ use crate::engine::render_patina_from_file;
 use clap::{Args, Parser, Subcommand};
 use std::path::PathBuf;
 
+/// Clap definition of the Patina CLI
 #[derive(Parser, Debug)]
 #[clap(name = "patina", version)]
 pub struct PatinaCli {
+    /// Global options apply to all subcommands
     #[clap(flatten)]
     global_options: GlobalOptions,
 
+    /// The specified command to run
     #[clap(subcommand)]
     command: Command,
 }
 
+/// Options that apply globally to the CLI
 #[derive(Debug, Args)]
 struct GlobalOptions {
+    /// When set, the CLI will print more information to the console
     #[arg(short = 'v', long = "verbose")]
     verbose: bool,
 }
 
+/// The available commands for the CLI
 #[derive(Debug, Subcommand)]
 enum Command {
+    /// Render a patina to stdout
     #[clap(about = "Render a patina to stdout")]
     Render {
+        /// Command line options
         #[clap(flatten)]
         options: PatinaCommandOptions,
     },
 
+    /// Render and apply a patina
     #[clap(about = "Render and apply a patina")]
     Apply {
+        /// Command line options
         #[clap(flatten)]
         options: PatinaCommandOptions,
     },
 }
 
+/// Options that apply to patina subcommands
 #[derive(Debug, Args)]
 struct PatinaCommandOptions {
+    /// Included global options
     #[clap(flatten)]
     global_options: GlobalOptions,
 
+    /// The file path to the patina toml file
     patina_path: PathBuf,
 }
 

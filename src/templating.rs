@@ -3,6 +3,7 @@ use handlebars::Handlebars;
 use crate::patina::{Patina, PatinaFile};
 use crate::utils::{Error, Result};
 
+/// Renders all of the files in a Patina, each to a string in the result vector.
 pub fn render_patina(patina: &Patina) -> Result<Vec<String>> {
     println!("rendering patina");
     let hb = Handlebars::new();

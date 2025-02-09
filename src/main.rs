@@ -1,5 +1,6 @@
 mod cli;
 mod patina;
+mod patina_yaml;
 
 use cli::PatinaCli;
 

@@ -1,0 +1,9 @@
+name = "simple-patina"
+description = "This is a simple Patina example"
+
+[vars]
+name = "Patina"
+
+[[files]]
+template = "./templates/hello.txt"
+target = "./output/hello.txt"

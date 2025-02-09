@@ -13,4 +13,6 @@ categories = ["command-line-utilities", "config"]
 
 [dependencies]
 clap = { version = "4.0", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.8"
 yaml-rust = "0.4"

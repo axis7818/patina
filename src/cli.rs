@@ -44,7 +44,7 @@ impl PatinaCli {
     }
 
     fn render(options: PatinaCommandOptions) {
-        let patina = Patina::from_yaml_file(&options.patina_path);
+        let patina = Patina::from_toml_file(&options.patina_path);
         println!("{patina:#?}")
     }
 

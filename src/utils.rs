@@ -1,5 +1,7 @@
-#[derive(Debug)]
+use enum_as_inner::EnumAsInner;
+
 #[allow(dead_code)]
+#[derive(Debug, EnumAsInner)]
 pub enum Error {
     FileRead(std::io::Error),
     TomlParse(toml::de::Error),

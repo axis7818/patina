@@ -1,8 +1,8 @@
 mod cli;
 mod engine;
-mod errors;
 mod patina;
 mod templating;
+mod utils;
 
 use cli::PatinaCli;
 

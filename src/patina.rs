@@ -2,7 +2,7 @@ use std::{collections::HashMap, path::PathBuf};
 
 use serde::{Deserialize, Serialize};
 
-use crate::errors::{Error, Result};
+use crate::utils::{Error, Result};
 
 #[derive(Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct Patina {
@@ -25,7 +25,6 @@ pub struct PatinaFile {
 }
 
 impl Patina {
-    // TODO: test
     pub fn from_toml_file(toml_file_path: &PathBuf) -> Result<Patina> {
         let toml_str = match std::fs::read_to_string(toml_file_path) {
             Ok(toml_str) => toml_str,
@@ -169,6 +168,43 @@ mod tests {
         let patina = toml::from_str::<Patina>(patina);
         assert!(patina.is_err());
         assert_eq!(patina.unwrap_err().message(), "missing field `target`");
+    }
+
+    #[test]
+    fn test_patina_from_toml_file() {
+        let path = PathBuf::from("tests/fixtures/patina.toml");
+
+        let patina = Patina::from_toml_file(&path);
+        assert!(patina.is_ok());
+        let patina = patina.unwrap();
+        assert_eq!(patina.name, "simple-patina");
+    }
+
+    #[test]
+    fn test_patina_from_toml_file_missing_file() {
+        let path = PathBuf::from("this/file/does/not/exist.toml");
+        let patina = Patina::from_toml_file(&path);
+
+        let err = match patina {
+            Ok(_) => panic!("expected error"),
+            Err(e) => e,
+        };
+
+        let err = match err.as_file_read() {
+            Some(err) => err,
+            None => panic!("expected FileRead error"),
+        };
+        assert_eq!(err.kind(), std::io::ErrorKind::NotFound);
+    }
+
+    #[test]
+    fn test_patina_from_toml_file_invalid_format() {
+        let path = PathBuf::from("tests/fixtures/invalid_patina.toml");
+
+        let patina = Patina::from_toml_file(&path);
+        assert!(patina.is_err());
+        let err = patina.unwrap_err();
+        assert!(matches!(err, Error::TomlParse(_)));
     }
 
     #[test]

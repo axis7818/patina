@@ -1,0 +1,9 @@
+(function() {
+    var implementors = Object.fromEntries([["num_modular",[["impl&lt;T: <a class=\"trait\" href=\"https://doc.rust-lang.org/1.84.1/core/cmp/trait.PartialEq.html\" title=\"trait core::cmp::PartialEq\">PartialEq</a> + <a class=\"trait\" href=\"https://doc.rust-lang.org/1.84.1/core/clone/trait.Clone.html\" title=\"trait core::clone::Clone\">Clone</a>, R: <a class=\"trait\" href=\"num_modular/trait.Reducer.html\" title=\"trait num_modular::Reducer\">Reducer</a>&lt;T&gt; + <a class=\"trait\" href=\"https://doc.rust-lang.org/1.84.1/core/clone/trait.Clone.html\" title=\"trait core::clone::Clone\">Clone</a>&gt; <a class=\"trait\" href=\"https://doc.rust-lang.org/1.84.1/core/ops/arith/trait.Neg.html\" title=\"trait core::ops::arith::Neg\">Neg</a> for &amp;<a class=\"struct\" href=\"num_modular/struct.ReducedInt.html\" title=\"struct num_modular::ReducedInt\">ReducedInt</a>&lt;T, R&gt;"],["impl&lt;T: <a class=\"trait\" href=\"https://doc.rust-lang.org/1.84.1/core/cmp/trait.PartialEq.html\" title=\"trait core::cmp::PartialEq\">PartialEq</a>, R: <a class=\"trait\" href=\"num_modular/trait.Reducer.html\" title=\"trait num_modular::Reducer\">Reducer</a>&lt;T&gt;&gt; <a class=\"trait\" href=\"https://doc.rust-lang.org/1.84.1/core/ops/arith/trait.Neg.html\" title=\"trait core::ops::arith::Neg\">Neg</a> for <a class=\"struct\" href=\"num_modular/struct.ReducedInt.html\" title=\"struct num_modular::ReducedInt\">ReducedInt</a>&lt;T, R&gt;"]]]]);
+    if (window.register_implementors) {
+        window.register_implementors(implementors);
+    } else {
+        window.pending_implementors = implementors;
+    }
+})()
+//{"start":57,"fragment_lengths":[1404]}

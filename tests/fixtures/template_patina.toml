@@ -1,9 +1,0 @@
-name = "template-patina"
-description = "This is a Patina for a test template file"
-
-[vars]
-name = "Patina"
-
-[[files]]
-template = "tests/fixtures/template.txt.hbs"
-target = "tests/fixtures/template.txt"

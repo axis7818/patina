@@ -1,0 +1,22 @@
+name: Continuous Integration
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: cargo build
+
+      - name: Run tests
+        run: cargo test
+
+      - name: Run formatter
+        run: cargo fmt -- --check
+
+      - name: Run linter
+        run: cargo clippy -- -D warnings

@@ -2,6 +2,7 @@ use std::{fs, path::PathBuf};
 use yaml_rust::{Yaml, YamlLoader};
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub enum PatinaError {
     FileReadError(std::io::Error),
     YamlParseError(yaml_rust::ScanError),

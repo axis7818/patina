@@ -13,11 +13,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Install dependencies
-        run: cargo doc --no-deps
-
       - name: Generate docs
-        run: cargo doc
+        run: cargo doc --no-deps
 
       - name: Deploy docs
         uses: peaceiris/actions-gh-pages@v3

@@ -11,7 +11,6 @@ use cli::PatinaCli;
 /// Main entry point for the application.
 /// This launches the CLI interface.
 fn main() {
-    env_logger::init();
     let patina_cli = PatinaCli::parse_args();
     patina_cli.run();
 }

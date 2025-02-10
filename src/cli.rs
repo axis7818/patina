@@ -1,6 +1,6 @@
 use crate::engine::render_patina_from_file;
 use clap::{Args, Parser, Subcommand};
-use log::{debug, info};
+use log::debug;
 use std::path::PathBuf;
 
 /// The patina CLI renders files from templates and sets of variables as defined in patina toml files.
@@ -21,7 +21,7 @@ pub struct PatinaCli {
 struct GlobalOptions {
     /// The verbosity level of the CLI
     #[command(flatten)]
-    verbose: clap_verbosity_flag::Verbosity,
+    verbosity: clap_verbosity_flag::Verbosity,
 }
 
 /// The available commands for the CLI
@@ -63,6 +63,10 @@ impl PatinaCli {
 
     /// Run the CLI
     pub fn run(self) {
+        env_logger::Builder::new()
+            .filter_level(self.global_options.verbosity.into())
+            .init();
+
         match self.command {
             Command::Render { options } => PatinaCli::render(options),
             Command::Apply { options } => PatinaCli::apply(options),
@@ -77,7 +81,7 @@ impl PatinaCli {
 
         debug!("printing patina render");
         patina_render.iter().for_each(|p| {
-            info!("{:#?}", p);
+            println!("{:#?}", p);
         });
     }
 

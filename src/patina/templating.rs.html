@@ -66,14 +66,16 @@
 <a href="#65" id="65">65</a>
 <a href="#66" id="66">66</a>
 <a href="#67" id="67">67</a>
-<a href="#68" id="68">68</a></pre></div><pre class="rust"><code><span class="kw">use </span>handlebars::Handlebars;
+<a href="#68" id="68">68</a>
+<a href="#69" id="69">69</a></pre></div><pre class="rust"><code><span class="kw">use </span>handlebars::Handlebars;
+<span class="kw">use </span>log::{debug, info};
 
 <span class="kw">use </span><span class="kw">crate</span>::patina::{Patina, PatinaFile};
 <span class="kw">use </span><span class="kw">crate</span>::utils::{Error, <span class="prelude-ty">Result</span>};
 
 <span class="doccomment">/// Renders all of the files in a Patina, each to a string in the result vector.
 </span><span class="kw">pub fn </span>render_patina(patina: <span class="kw-2">&amp;</span>Patina) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;String&gt;&gt; {
-    <span class="macro">println!</span>(<span class="string">"rendering patina"</span>);
+    <span class="macro">debug!</span>(<span class="string">"rendering patina"</span>);
     <span class="kw">let </span>hb = Handlebars::new();
     patina
         .files
@@ -87,7 +89,7 @@
     patina: <span class="kw-2">&amp;</span>Patina,
     patina_file: <span class="kw-2">&amp;</span>PatinaFile,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt; {
-    <span class="macro">println!</span>(<span class="string">"rendering patina file: {}"</span>, patina_file.template.display());
+    <span class="macro">info!</span>(<span class="string">"rendering patina file: {}"</span>, patina_file.template.display());
 
     <span class="kw">let </span>template_str = patina_file.load_template_file_as_string()<span class="question-mark">?</span>;
 

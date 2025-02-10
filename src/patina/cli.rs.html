@@ -84,11 +84,17 @@
 <a href="#83" id="83">83</a>
 <a href="#84" id="84">84</a>
 <a href="#85" id="85">85</a>
-<a href="#86" id="86">86</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::engine::render_patina_from_file;
+<a href="#86" id="86">86</a>
+<a href="#87" id="87">87</a>
+<a href="#88" id="88">88</a>
+<a href="#89" id="89">89</a>
+<a href="#90" id="90">90</a>
+<a href="#91" id="91">91</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::engine::render_patina_from_file;
 <span class="kw">use </span>clap::{Args, Parser, Subcommand};
+<span class="kw">use </span>log::debug;
 <span class="kw">use </span>std::path::PathBuf;
 
-<span class="doccomment">/// Clap definition of the Patina CLI
+<span class="doccomment">/// The patina CLI renders files from templates and sets of variables as defined in patina toml files.
 </span><span class="attr">#[derive(Parser, Debug)]
 #[clap(name = <span class="string">"patina"</span>, version)]
 </span><span class="kw">pub struct </span>PatinaCli {
@@ -104,9 +110,9 @@
 <span class="doccomment">/// Options that apply globally to the CLI
 </span><span class="attr">#[derive(Debug, Args)]
 </span><span class="kw">struct </span>GlobalOptions {
-    <span class="doccomment">/// When set, the CLI will print more information to the console
-    </span><span class="attr">#[arg(short = <span class="string">'v'</span>, long = <span class="string">"verbose"</span>)]
-    </span>verbose: bool,
+    <span class="doccomment">/// The verbosity level of the CLI
+    </span><span class="attr">#[command(flatten)]
+    </span>verbosity: clap_verbosity_flag::Verbosity,
 }
 
 <span class="doccomment">/// The available commands for the CLI
@@ -148,6 +154,10 @@
 
     <span class="doccomment">/// Run the CLI
     </span><span class="kw">pub fn </span>run(<span class="self">self</span>) {
+        env_logger::Builder::new()
+            .filter_level(<span class="self">self</span>.global_options.verbosity.into())
+            .init();
+
         <span class="kw">match </span><span class="self">self</span>.command {
             Command::Render { options } =&gt; PatinaCli::render(options),
             Command::Apply { options } =&gt; PatinaCli::apply(options),
@@ -160,7 +170,7 @@
             <span class="prelude-val">Err</span>(e) =&gt; <span class="macro">panic!</span>(<span class="string">"{:?}"</span>, e),
         };
 
-        <span class="macro">println!</span>(<span class="string">"printing patina render"</span>);
+        <span class="macro">debug!</span>(<span class="string">"printing patina render"</span>);
         patina_render.iter().for_each(|p| {
             <span class="macro">println!</span>(<span class="string">"{:#?}"</span>, p);
         });

@@ -5,3 +5,9 @@
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 Patina is a rust application for managing system dotfiles and configuration.
+
+## Examples
+
+```sh
+cargo run -- render examples/simple/patina.toml -vvv
+```

@@ -1,5 +1,7 @@
 use std::path::PathBuf;
 
+use log::info;
+
 use crate::{patina::Patina, templating::render_patina, utils::Result};
 
 /// Renders a Patina from a Patina toml file path.
@@ -9,7 +11,7 @@ pub fn render_patina_from_file(patina_path: PathBuf) -> Result<Vec<String>> {
         Err(e) => panic!("{:?}", e),
     };
 
-    println!("got patina: {:#?}", patina);
+    info!("got patina: {:#?}", patina);
 
     render_patina(&patina)
 }

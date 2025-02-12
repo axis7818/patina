@@ -1,8 +1,12 @@
-use std::path::PathBuf;
+use std::{fs, path::PathBuf};
 
 use log::info;
 
-use crate::{patina::Patina, templating::render_patina, utils::Result};
+use crate::{
+    patina::{Patina, PatinaFile},
+    templating::render_patina,
+    utils::{Error, Result},
+};
 
 /// Renders a Patina from a Patina toml file path.
 pub fn render_patina_from_file(patina_path: PathBuf) -> Result<Vec<String>> {
@@ -14,7 +18,23 @@ pub fn render_patina_from_file(patina_path: PathBuf) -> Result<Vec<String>> {
 }
 
 pub fn apply_patina_from_file(patina_path: PathBuf) -> Result<Vec<String>> {
-    unimplemented!();
+    let patina = Patina::from_toml_file(&patina_path)?;
+
+    info!("got patina: {:#?}", patina);
+
+    let render = render_patina(&patina)?;
+
+    #[allow(clippy::needless_range_loop)]
+    for i in 0..render.len() {
+        let render_str = &render[i];
+        let target_file = &patina.files[i].target;
+
+        if let Err(e) = fs::write(target_file, render_str) {
+            return Err(Error::FileWrite(target_file.clone(), e));
+        }
+    }
+
+    Ok(render)
 }
 
 #[cfg(test)]
@@ -26,6 +46,8 @@ mod tests {
         let patina_path = PathBuf::from("tests/fixtures/template_patina.toml");
 
         let render = render_patina_from_file(patina_path);
+
+        assert!(render.is_ok());
         let render = &render.unwrap()[0];
 
         let expected = r#"Hello, Patina!
@@ -53,5 +75,21 @@ Templates use the Handebars templating language. For more information, see <http
         let render = render_patina_from_file(patina_path);
         assert!(render.is_err());
         assert!(render.unwrap_err().is_file_read());
+    }
+
+    #[test]
+    fn test_apply_patina_from_file() {
+        let patina_path = PathBuf::from("tests/fixtures/template_patina.toml");
+
+        let render = apply_patina_from_file(patina_path);
+
+        assert!(render.is_ok());
+
+        let expected = r#"Hello, Patina!
+
+This is an example Patina template file.
+
+Templates use the Handebars templating language. For more information, see <https://handlebarsjs.com/guide/>.
+"#;
     }
 }

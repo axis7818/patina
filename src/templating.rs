@@ -68,6 +68,46 @@ Templates use the Handebars templating language. For more information, see <http
     }
 
     #[test]
+    fn test_render_patina_multiple_templates() {
+        let patina = Patina {
+            name: String::from("multi-template-patina"),
+            description: String::from("This is a patina with multiple templates"),
+            vars: [
+                ("A", "template_a"),
+                ("B", "template_b"),
+                ("C", "template_c"),
+            ]
+            .iter()
+            .map(|entry| (String::from(entry.0), String::from(entry.1)))
+            .collect::<HashMap<String, String>>(),
+            files: vec![
+                PatinaFile {
+                    template: PathBuf::from("tests/fixtures/template_a.txt.hbs"),
+                    target: PathBuf::from("output_a.txt"),
+                },
+                PatinaFile {
+                    template: PathBuf::from("tests/fixtures/template_b.txt.hbs"),
+                    target: PathBuf::from("output_b.txt"),
+                },
+                PatinaFile {
+                    template: PathBuf::from("tests/fixtures/template_c.txt.hbs"),
+                    target: PathBuf::from("output_c.txt"),
+                },
+            ],
+        };
+
+        let render = render_patina(&patina);
+
+        assert!(render.is_ok());
+        let render = render.unwrap();
+
+        assert_eq!(render.len(), 3);
+        assert_eq!(render[0], "This is template_a.\n");
+        assert_eq!(render[1], "This is template_b.\n");
+        assert_eq!(render[2], "This is template_c.\n");
+    }
+
+    #[test]
     fn test_render_patina_missing_variable() {
         let patina = Patina {
             name: String::from("sample-patina"),

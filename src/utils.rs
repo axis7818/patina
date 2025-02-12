@@ -9,6 +9,9 @@ pub enum Error {
     /// An error that occurs when a file cannot be read
     FileRead(PathBuf, std::io::Error),
 
+    /// An error that occurs when a file cannot be written
+    FileWrite(PathBuf, std::io::Error),
+
     /// An error that occurs when parsing Toml data
     TomlParse(toml::de::Error),
 

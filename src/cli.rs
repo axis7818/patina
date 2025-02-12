@@ -1,6 +1,6 @@
-use crate::engine::render_patina_from_file;
+use crate::engine::{apply_patina_from_file, render_patina_from_file};
 use clap::{Args, Parser, Subcommand};
-use log::debug;
+use log::info;
 use std::path::PathBuf;
 
 /// The patina CLI renders files from templates and sets of variables as defined in patina toml files.
@@ -79,13 +79,16 @@ impl PatinaCli {
             Err(e) => panic!("{:?}", e),
         };
 
-        debug!("printing patina render");
         patina_render.iter().for_each(|p| {
-            println!("{:#?}", p);
+            println!("{p}");
         });
     }
 
-    fn apply(_options: PatinaCommandOptions) {
-        panic!("Not Implemented")
+    fn apply(options: PatinaCommandOptions) {
+        if let Err(e) = apply_patina_from_file(options.patina_path) {
+            panic!("{:?}", e);
+        }
+
+        info!("applied patina successfully");
     }
 }

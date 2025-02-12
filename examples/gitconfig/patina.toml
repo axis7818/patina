@@ -1,0 +1,10 @@
+name = "gitconfig"
+description = "My gitconfig file"
+
+[vars]
+email = "user@domain.com"
+name = "First Last"
+
+[[files]]
+template = "examples/gitconfig/gitconfig.hbs"
+target = "output/.gitconfig"

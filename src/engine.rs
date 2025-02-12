@@ -3,7 +3,7 @@ use std::{fs, path::PathBuf};
 use log::info;
 
 use crate::{
-    patina::{Patina, PatinaFile},
+    patina::Patina,
     templating::render_patina,
     utils::{Error, Result},
 };
@@ -40,6 +40,24 @@ pub fn apply_patina_from_file(patina_path: PathBuf) -> Result<Vec<String>> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    struct TestTargetFile {
+        target: PathBuf,
+    }
+
+    impl TestTargetFile {
+        fn new(target_file_path: &str) -> TestTargetFile {
+            TestTargetFile {
+                target: PathBuf::from(target_file_path),
+            }
+        }
+    }
+
+    impl Drop for TestTargetFile {
+        fn drop(&mut self) {
+            let _ = fs::remove_file(self.target.clone());
+        }
+    }
 
     #[test]
     fn test_render_patina_from_file() {
@@ -91,5 +109,21 @@ This is an example Patina template file.
 
 Templates use the Handebars templating language. For more information, see <https://handlebarsjs.com/guide/>.
 "#;
+
+        let applied_file_path = TestTargetFile::new("tests/fixtures/template.txt");
+
+        let applied_file = fs::read_to_string(&applied_file_path.target);
+        assert!(applied_file.is_ok());
+        assert_eq!(applied_file.unwrap(), expected);
+    }
+
+    #[test]
+    fn test_apply_patina_from_file_write_failed() {
+        let patina_path = PathBuf::from("tests/fixtures/invalid_target_template_patina.toml");
+
+        let render = apply_patina_from_file(patina_path);
+
+        assert!(render.is_err());
+        assert!(render.unwrap_err().is_file_write());
     }
 }

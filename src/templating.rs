@@ -66,4 +66,50 @@ Templates use the Handebars templating language. For more information, see <http
 "#;
         assert_eq!(expected, render);
     }
+
+    #[test]
+    fn test_render_patina_missing_variable() {
+        let patina = Patina {
+            name: String::from("sample-patina"),
+            description: String::from("This is a sample Patina"),
+            vars: HashMap::new(),
+            files: vec![PatinaFile {
+                template: PathBuf::from("tests/fixtures/template.txt.hbs"),
+                target: PathBuf::from("tests/fixtures/template.txt"),
+            }],
+        };
+
+        let render = render_patina(&patina);
+
+        assert!(render.is_ok());
+        let render = render.unwrap();
+        assert_eq!(render.len(), 1);
+        let render = &render[0];
+
+        let expected = r#"Hello, !
+
+This is an example Patina template file.
+
+Templates use the Handebars templating language. For more information, see <https://handlebarsjs.com/guide/>.
+"#;
+        assert_eq!(expected, render);
+    }
+
+    #[test]
+    fn test_render_patina_invalid_template() {
+        let patina = Patina {
+            name: String::from("sample-patina"),
+            description: String::from("This is a sample Patina"),
+            vars: HashMap::new(),
+            files: vec![PatinaFile {
+                template: PathBuf::from("tests/fixtures/invalid_template.txt.hbs"),
+                target: PathBuf::from("tests/fixtures/template.txt"),
+            }],
+        };
+
+        let render = render_patina(&patina);
+
+        assert!(render.is_err());
+        assert!(render.unwrap_err().is_render_template());
+    }
 }

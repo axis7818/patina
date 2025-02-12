@@ -18,7 +18,10 @@
 <a href="#17" id="17">17</a>
 <a href="#18" id="18">18</a>
 <a href="#19" id="19">19</a>
-<a href="#20" id="20">20</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::path::PathBuf;
+<a href="#20" id="20">20</a>
+<a href="#21" id="21">21</a>
+<a href="#22" id="22">22</a>
+<a href="#23" id="23">23</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::path::PathBuf;
 
 <span class="kw">use </span>enum_as_inner::EnumAsInner;
 
@@ -28,6 +31,9 @@
 </span><span class="kw">pub enum </span>Error {
     <span class="doccomment">/// An error that occurs when a file cannot be read
     </span>FileRead(PathBuf, std::io::Error),
+
+    <span class="doccomment">/// An error that occurs when a file cannot be written
+    </span>FileWrite(PathBuf, std::io::Error),
 
     <span class="doccomment">/// An error that occurs when parsing Toml data
     </span>TomlParse(toml::de::Error),

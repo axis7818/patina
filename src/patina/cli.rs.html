@@ -92,10 +92,22 @@
 <a href="#91" id="91">91</a>
 <a href="#92" id="92">92</a>
 <a href="#93" id="93">93</a>
-<a href="#94" id="94">94</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::engine::{apply_patina_from_file, render_patina_from_file};
+<a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::path::PathBuf;
+
+<span class="kw">use </span><span class="kw">crate</span>::engine::interface::PatinaOutput;
+<span class="kw">use </span><span class="kw">crate</span>::engine::{apply_patina_from_file, render_patina_from_file};
 <span class="kw">use </span>clap::{Args, Parser, Subcommand};
-<span class="kw">use </span>log::info;
-<span class="kw">use </span>std::path::PathBuf;
 
 <span class="doccomment">/// The patina CLI renders files from templates and sets of variables as defined in patina toml files.
 </span><span class="attr">#[derive(Parser, Debug)]
@@ -147,6 +159,10 @@
 
     <span class="doccomment">/// The file path to the patina toml file
     </span>patina_path: PathBuf,
+
+    <span class="doccomment">/// Disable colors
+    </span><span class="attr">#[clap(long = <span class="string">"no-color"</span>)]
+    </span>no_color: bool,
 }
 
 <span class="kw">impl </span>PatinaCli {
@@ -156,34 +172,40 @@
     }
 
     <span class="doccomment">/// Run the CLI
-    </span><span class="kw">pub fn </span>run(<span class="self">self</span>) {
+    </span><span class="kw">pub fn </span>run(<span class="kw-2">&amp;</span><span class="self">self</span>) {
         env_logger::Builder::new()
             .filter_level(<span class="self">self</span>.global_options.verbosity.into())
             .init();
 
-        <span class="kw">match </span><span class="self">self</span>.command {
-            Command::Render { options } =&gt; PatinaCli::render(options),
-            Command::Apply { options } =&gt; PatinaCli::apply(options),
+        <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.command {
+            Command::Render { options } =&gt; <span class="self">self</span>.render(options),
+            Command::Apply { options } =&gt; <span class="self">self</span>.apply(options),
         }
     }
 
-    <span class="kw">fn </span>render(options: PatinaCommandOptions) {
-        <span class="kw">let </span>patina_render = <span class="kw">match </span>render_patina_from_file(options.patina_path) {
+    <span class="kw">fn </span>render(<span class="kw-2">&amp;</span><span class="self">self</span>, options: <span class="kw-2">&amp;</span>PatinaCommandOptions) {
+        <span class="self">self</span>.handle_options(options);
+        <span class="kw">match </span>render_patina_from_file(<span class="kw-2">&amp;</span>options.patina_path, <span class="self">self</span>) {
             <span class="prelude-val">Ok</span>(patina_render) =&gt; patina_render,
             <span class="prelude-val">Err</span>(e) =&gt; <span class="macro">panic!</span>(<span class="string">"{:?}"</span>, e),
         };
-
-        patina_render.iter().for_each(|p| {
-            <span class="macro">println!</span>(<span class="string">"{p}"</span>);
-        });
     }
 
-    <span class="kw">fn </span>apply(options: PatinaCommandOptions) {
-        <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = apply_patina_from_file(options.patina_path) {
+    <span class="kw">fn </span>apply(<span class="kw-2">&amp;</span><span class="self">self</span>, options: <span class="kw-2">&amp;</span>PatinaCommandOptions) {
+        <span class="self">self</span>.handle_options(options);
+        <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = apply_patina_from_file(<span class="kw-2">&amp;</span>options.patina_path, <span class="self">self</span>) {
             <span class="macro">panic!</span>(<span class="string">"{:?}"</span>, e);
         }
+    }
 
-        <span class="macro">info!</span>(<span class="string">"applied patina successfully"</span>);
+    <span class="kw">fn </span>handle_options(<span class="kw-2">&amp;</span><span class="self">self</span>, options: <span class="kw-2">&amp;</span>PatinaCommandOptions) {
+        colored::control::set_override(!options.no_color);
+    }
+}
+
+<span class="kw">impl </span>PatinaOutput <span class="kw">for </span>PatinaCli {
+    <span class="kw">fn </span>output(<span class="kw-2">&amp;</span><span class="self">self</span>, s: <span class="kw-2">&amp;</span>str) {
+        <span class="macro">print!</span>(<span class="string">"{}"</span>, s)
     }
 }
 </code></pre></div></section></main></body></html>

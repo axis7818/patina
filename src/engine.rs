@@ -64,6 +64,11 @@ pub fn apply_patina_from_file<PI: PatinaInterface>(patina_path: &PathBuf, pi: &P
         let target_path = patina.get_patina_path(target_file);
 
         pi.output(format!("   {}", target_path.display()));
+        if let Some(target_parent) = target_path.parent() {
+            if let Err(e) = fs::create_dir_all(target_parent) {
+                return Err(Error::FileWrite(target_path, e));
+            }
+        }
         if let Err(e) = fs::write(&target_path, r) {
             return Err(Error::FileWrite(target_path.clone(), e));
         }

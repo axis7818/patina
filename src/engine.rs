@@ -1,6 +1,8 @@
+use colored::Colorize;
 use std::{fs, path::PathBuf};
 
 use log::info;
+use similar::{ChangeTag, TextDiff};
 
 use crate::{
     patina::Patina,
@@ -28,6 +30,21 @@ pub fn apply_patina_from_file(patina_path: PathBuf) -> Result<Vec<String>> {
     for i in 0..render.len() {
         let render_str = &render[i];
         let target_file = &patina.files[i].target;
+
+        let target_file_str = match fs::read_to_string(target_file) {
+            Ok(target_file_str) => target_file_str,
+            Err(e) => return Err(Error::FileRead(target_file.clone(), e)),
+        };
+
+        let diff = TextDiff::from_lines(&target_file_str, render_str);
+
+        for change in diff.iter_all_changes() {
+            match change.tag() {
+                ChangeTag::Insert => print!("{}", format!("+ {}", change).green().bold()),
+                ChangeTag::Equal => print!("{}", format!("  {}", change).bold()),
+                ChangeTag::Delete => print!("{}", format!("- {}", change).red().bold()),
+            }
+        }
 
         if let Err(e) = fs::write(target_file, render_str) {
             return Err(Error::FileWrite(target_file.clone(), e));

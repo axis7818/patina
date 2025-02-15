@@ -33,6 +33,7 @@ pub fn render_patina_from_file<O: PatinaOutput>(patina_path: &PathBuf, output: &
     Ok(())
 }
 
+/// Applies all of the Patina files
 pub fn apply_patina_from_file<O: PatinaOutput>(patina_path: &PathBuf, output: &O) -> Result<()> {
     let patina = Patina::from_toml_file(patina_path)?;
 

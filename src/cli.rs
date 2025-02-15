@@ -80,9 +80,8 @@ impl PatinaCli {
 
     fn render(&self, options: &PatinaCommandOptions) {
         self.handle_options(options);
-        match render_patina_from_file(&options.patina_path, self) {
-            Ok(patina_render) => patina_render,
-            Err(e) => panic!("{:?}", e),
+        if let Err(e) = render_patina_from_file(&options.patina_path, self) {
+            panic!("{:?}", e);
         };
     }
 

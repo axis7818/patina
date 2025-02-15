@@ -83,9 +83,9 @@ mod tests {
 
     impl TestTargetFile {
         fn new(target_file_path: &str) -> TestTargetFile {
-            TestTargetFile {
-                target: PathBuf::from(target_file_path),
-            }
+            let target = PathBuf::from(target_file_path);
+            let _ = fs::remove_file(&target);
+            TestTargetFile { target }
         }
     }
 
@@ -140,11 +140,12 @@ Templates use the Handebars templating language. For more information, see <http
     #[test]
     fn test_apply_patina_from_file() {
         let patina_path = PathBuf::from("tests/fixtures/template_patina.toml");
+        let applied_file_path = TestTargetFile::new("tests/fixtures/template.txt");
 
         let pi = TestPatinaInterface::new();
-        let render = apply_patina_from_file(&patina_path, &pi);
+        let apply = apply_patina_from_file(&patina_path, &pi);
 
-        assert!(render.is_ok());
+        assert!(apply.is_ok());
 
         assert_eq!(
             pi.get_all_output(),
@@ -162,8 +163,6 @@ Done
 "#
         );
 
-        let applied_file_path = TestTargetFile::new("tests/fixtures/template.txt");
-
         let applied_file = fs::read_to_string(&applied_file_path.target);
         assert!(applied_file.is_ok());
         assert_eq!(
@@ -176,12 +175,35 @@ Templates use the Handebars templating language. For more information, see <http
     }
 
     #[test]
+    fn test_apply_patina_from_file_abort_without_user_confirmation() {
+        let patina_path = PathBuf::from("tests/fixtures/template_patina.toml");
+
+        let mut pi = TestPatinaInterface::new();
+        pi.confirm_apply = false;
+        let apply = apply_patina_from_file(&patina_path, &pi);
+
+        assert!(apply.is_ok());
+
+        assert_eq!(
+            pi.get_all_output(),
+            r#"===========================================
+> Patina file tests/fixtures/template.txt <
+===========================================
++ Hello, Patina User!
++ This is an example Patina template file.
++ Templates use the Handebars templating language. For more information, see <https://handlebarsjs.com/guide/>.
+
+Not applying patina."#
+        );
+    }
+
+    #[test]
     fn test_apply_patina_from_file_write_failed() {
         let patina_path = PathBuf::from("tests/fixtures/invalid_target_template_patina.toml");
 
-        let render = apply_patina_from_file(&patina_path, &TestPatinaInterface::new());
+        let apply = apply_patina_from_file(&patina_path, &TestPatinaInterface::new());
 
-        assert!(render.is_err());
-        assert!(render.unwrap_err().is_file_write());
+        assert!(apply.is_err());
+        assert!(apply.unwrap_err().is_file_write());
     }
 }

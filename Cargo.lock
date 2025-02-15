@@ -402,6 +402,7 @@ dependencies = [
  "handlebars",
  "log",
  "serde",
+ "serde_json",
  "toml",
  "yaml-rust",
 ]

@@ -2,7 +2,8 @@ name = "template-patina"
 description = "This is a Patina for a test template file"
 
 [vars]
-name = "Patina"
+name.first = "Patina"
+name.last = "User"
 
 [[files]]
 template = "tests/fixtures/template.txt.hbs"

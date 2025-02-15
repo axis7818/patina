@@ -239,7 +239,13 @@
 <a href="#238" id="238">238</a>
 <a href="#239" id="239">239</a>
 <a href="#240" id="240">240</a>
-<a href="#241" id="241">241</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::{collections::HashMap, path::PathBuf};
+<a href="#241" id="241">241</a>
+<a href="#242" id="242">242</a>
+<a href="#243" id="243">243</a>
+<a href="#244" id="244">244</a>
+<a href="#245" id="245">245</a>
+<a href="#246" id="246">246</a>
+<a href="#247" id="247">247</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::path::PathBuf;
 
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 
@@ -257,7 +263,7 @@
 
     <span class="doccomment">/// A map of variables that can be used in the templates
     </span><span class="attr">#[serde(default)]
-    </span><span class="kw">pub </span>vars: HashMap&lt;String, String&gt;,
+    </span><span class="kw">pub </span>vars: <span class="prelude-ty">Option</span>&lt;serde_json::Value&gt;,
 
     <span class="doccomment">/// A list of files referencing templates and their target output paths
     </span><span class="attr">#[serde(default)]
@@ -323,6 +329,12 @@
 
         <span class="macro">assert_eq!</span>(patina.name, <span class="string">"simple-patina"</span>);
         <span class="macro">assert_eq!</span>(patina.description, <span class="string">"This is a simple Patina example"</span>);
+
+        <span class="comment">// assert vars
+        </span><span class="macro">assert!</span>(patina.vars.is_some());
+        <span class="kw">let </span>vars = patina.vars.unwrap();
+        <span class="macro">assert!</span>(vars.is_object());
+        <span class="macro">assert_eq!</span>(vars.as_object().unwrap().get(<span class="string">"name"</span>).unwrap(), <span class="string">"Patina"</span>);
 
         <span class="kw">let </span>patina_files = patina.files;
         <span class="macro">assert_eq!</span>(patina_files.len(), <span class="number">1</span>);
@@ -471,7 +483,7 @@
         <span class="macro">assert!</span>(template_str.is_ok());
         <span class="kw">let </span>template_str = template_str.unwrap();
 
-        <span class="kw">let </span>expected = <span class="string">r#"Hello, {{ name }}!
+        <span class="kw">let </span>expected = <span class="string">r#"Hello, {{ name.first }} {{ name.last }}!
 
 This is an example Patina template file.
 

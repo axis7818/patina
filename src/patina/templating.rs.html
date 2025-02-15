@@ -152,7 +152,8 @@
 <a href="#151" id="151">151</a>
 <a href="#152" id="152">152</a>
 <a href="#153" id="153">153</a>
-<a href="#154" id="154">154</a></pre></div><pre class="rust"><code><span class="kw">use </span>handlebars::Handlebars;
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a></pre></div><pre class="rust"><code><span class="kw">use </span>handlebars::Handlebars;
 <span class="kw">use </span>log::info;
 
 <span class="kw">use </span><span class="kw">crate</span>::patina::{Patina, PatinaFile};
@@ -185,7 +186,9 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use </span>std::{collections::HashMap, path::PathBuf};
+    <span class="kw">use </span>std::path::PathBuf;
+
+    <span class="kw">use </span>serde_json::json;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
@@ -194,10 +197,12 @@
         <span class="kw">let </span>patina = Patina {
             name: String::from(<span class="string">"sample-patina"</span>),
             description: String::from(<span class="string">"This is a sample Patina"</span>),
-            vars: [(String::from(<span class="string">"name"</span>), String::from(<span class="string">"Patina"</span>))]
-                .iter()
-                .cloned()
-                .collect::&lt;HashMap&lt;String, String&gt;&gt;(),
+            vars: <span class="prelude-val">Some</span>(<span class="macro">json!</span>({
+                <span class="string">"name"</span>: {
+                    <span class="string">"first"</span>: <span class="string">"Patina"</span>,
+                    <span class="string">"last"</span>: <span class="string">"User"
+                </span>}
+            })),
             files: <span class="macro">vec!</span>[PatinaFile {
                 template: PathBuf::from(<span class="string">"tests/fixtures/template.txt.hbs"</span>),
                 target: PathBuf::from(<span class="string">"tests/fixtures/template.txt"</span>),
@@ -211,7 +216,7 @@
         <span class="macro">assert_eq!</span>(render.len(), <span class="number">1</span>);
         <span class="kw">let </span>render = <span class="kw-2">&amp;</span>render[<span class="number">0</span>];
 
-        <span class="kw">let </span>expected = <span class="string">r#"Hello, Patina!
+        <span class="kw">let </span>expected = <span class="string">r#"Hello, Patina User!
 
 This is an example Patina template file.
 
@@ -225,14 +230,11 @@ Templates use the Handebars templating language. For more information, see &lt;h
         <span class="kw">let </span>patina = Patina {
             name: String::from(<span class="string">"multi-template-patina"</span>),
             description: String::from(<span class="string">"This is a patina with multiple templates"</span>),
-            vars: [
-                (<span class="string">"A"</span>, <span class="string">"template_a"</span>),
-                (<span class="string">"B"</span>, <span class="string">"template_b"</span>),
-                (<span class="string">"C"</span>, <span class="string">"template_c"</span>),
-            ]
-            .iter()
-            .map(|entry| (String::from(entry.<span class="number">0</span>), String::from(entry.<span class="number">1</span>)))
-            .collect::&lt;HashMap&lt;String, String&gt;&gt;(),
+            vars: <span class="prelude-val">Some</span>(<span class="macro">json!</span>({
+                <span class="string">"A"</span>: <span class="string">"template_a"</span>,
+                <span class="string">"B"</span>: <span class="string">"template_b"</span>,
+                <span class="string">"C"</span>: <span class="string">"template_c"</span>,
+            })),
             files: <span class="macro">vec!</span>[
                 PatinaFile {
                     template: PathBuf::from(<span class="string">"tests/fixtures/template_a.txt.hbs"</span>),
@@ -265,7 +267,7 @@ Templates use the Handebars templating language. For more information, see &lt;h
         <span class="kw">let </span>patina = Patina {
             name: String::from(<span class="string">"sample-patina"</span>),
             description: String::from(<span class="string">"This is a sample Patina"</span>),
-            vars: HashMap::new(),
+            vars: <span class="prelude-val">Some</span>(<span class="macro">json!</span>({})),
             files: <span class="macro">vec!</span>[PatinaFile {
                 template: PathBuf::from(<span class="string">"tests/fixtures/template.txt.hbs"</span>),
                 target: PathBuf::from(<span class="string">"tests/fixtures/template.txt"</span>),
@@ -279,7 +281,7 @@ Templates use the Handebars templating language. For more information, see &lt;h
         <span class="macro">assert_eq!</span>(render.len(), <span class="number">1</span>);
         <span class="kw">let </span>render = <span class="kw-2">&amp;</span>render[<span class="number">0</span>];
 
-        <span class="kw">let </span>expected = <span class="string">r#"Hello, !
+        <span class="kw">let </span>expected = <span class="string">r#"Hello,  !
 
 This is an example Patina template file.
 
@@ -293,7 +295,7 @@ Templates use the Handebars templating language. For more information, see &lt;h
         <span class="kw">let </span>patina = Patina {
             name: String::from(<span class="string">"sample-patina"</span>),
             description: String::from(<span class="string">"This is a sample Patina"</span>),
-            vars: HashMap::new(),
+            vars: <span class="prelude-val">Some</span>(<span class="macro">json!</span>({})),
             files: <span class="macro">vec!</span>[PatinaFile {
                 template: PathBuf::from(<span class="string">"tests/fixtures/invalid_template.txt.hbs"</span>),
                 target: PathBuf::from(<span class="string">"tests/fixtures/template.txt"</span>),

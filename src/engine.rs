@@ -1,5 +1,6 @@
 use std::{fs, path::PathBuf};
 
+use colored::Colorize;
 use interface::PatinaInterface;
 use log::info;
 use similar::TextDiff;
@@ -56,12 +57,14 @@ pub fn apply_patina_from_file<PI: PatinaInterface>(patina_path: &PathBuf, pi: &P
     }
 
     // Write out all files
-    pi.output("Applying patina files...\n");
+    pi.output("\nApplying patina files\n");
     for (i, r) in render.iter().enumerate() {
         let target_file = &patina.files[i].target;
+        pi.output(format!("   {}", target_file.display()));
         if let Err(e) = fs::write(target_file, r) {
             return Err(Error::FileWrite(target_file.clone(), e));
         }
+        pi.output(" ✓\n".green().to_string());
     }
 
     pi.output("Done\n");
@@ -152,7 +155,9 @@ Templates use the Handebars templating language. For more information, see <http
 + This is an example Patina template file.
 + Templates use the Handebars templating language. For more information, see <https://handlebarsjs.com/guide/>.
 
-Applying patina files...
+
+Applying patina files
+   tests/fixtures/template.txt ✓
 Done
 "#
         );

@@ -1,7 +1,8 @@
+use std::path::PathBuf;
+
+use crate::engine::interface::PatinaOutput;
 use crate::engine::{apply_patina_from_file, render_patina_from_file};
 use clap::{Args, Parser, Subcommand};
-use log::info;
-use std::path::PathBuf;
 
 /// The patina CLI renders files from templates and sets of variables as defined in patina toml files.
 #[derive(Parser, Debug)]
@@ -53,6 +54,10 @@ struct PatinaCommandOptions {
 
     /// The file path to the patina toml file
     patina_path: PathBuf,
+
+    /// Disable colors
+    #[clap(long = "no-color")]
+    no_color: bool,
 }
 
 impl PatinaCli {
@@ -62,33 +67,39 @@ impl PatinaCli {
     }
 
     /// Run the CLI
-    pub fn run(self) {
+    pub fn run(&self) {
         env_logger::Builder::new()
             .filter_level(self.global_options.verbosity.into())
             .init();
 
-        match self.command {
-            Command::Render { options } => PatinaCli::render(options),
-            Command::Apply { options } => PatinaCli::apply(options),
+        match &self.command {
+            Command::Render { options } => self.render(options),
+            Command::Apply { options } => self.apply(options),
         }
     }
 
-    fn render(options: PatinaCommandOptions) {
-        let patina_render = match render_patina_from_file(options.patina_path) {
+    fn render(&self, options: &PatinaCommandOptions) {
+        self.handle_options(options);
+        match render_patina_from_file(&options.patina_path, self) {
             Ok(patina_render) => patina_render,
             Err(e) => panic!("{:?}", e),
         };
-
-        patina_render.iter().for_each(|p| {
-            println!("{p}");
-        });
     }
 
-    fn apply(options: PatinaCommandOptions) {
-        if let Err(e) = apply_patina_from_file(options.patina_path) {
+    fn apply(&self, options: &PatinaCommandOptions) {
+        self.handle_options(options);
+        if let Err(e) = apply_patina_from_file(&options.patina_path, self) {
             panic!("{:?}", e);
         }
+    }
 
-        info!("applied patina successfully");
+    fn handle_options(&self, options: &PatinaCommandOptions) {
+        colored::control::set_override(!options.no_color);
+    }
+}
+
+impl PatinaOutput for PatinaCli {
+    fn output(&self, s: &str) {
+        print!("{}", s)
     }
 }

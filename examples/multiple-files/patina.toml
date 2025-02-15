@@ -1,0 +1,14 @@
+name = "multiple files"
+description = "This is a patina with multiple files"
+
+[vars]
+a = "A"
+b = "B"
+
+[[files]]
+template = "examples/multiple-files/file-a.txt.hbs"
+target = "output/file-a.txt"
+
+[[files]]
+template = "examples/multiple-files/file-b.txt.hbs"
+target = "output/file-b.txt"

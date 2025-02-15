@@ -31,13 +31,8 @@ pub fn apply_patina_from_file(patina_path: PathBuf) -> Result<Vec<String>> {
         let render_str = &render[i];
         let target_file = &patina.files[i].target;
 
-        let target_file_str = match fs::read_to_string(target_file) {
-            Ok(target_file_str) => target_file_str,
-            Err(e) => return Err(Error::FileRead(target_file.clone(), e)),
-        };
-
+        let target_file_str = fs::read_to_string(target_file).unwrap_or_default();
         let diff = TextDiff::from_lines(&target_file_str, render_str);
-
         for change in diff.iter_all_changes() {
             match change.tag() {
                 ChangeTag::Insert => print!("{}", format!("+ {}", change).green().bold()),

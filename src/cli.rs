@@ -1,6 +1,7 @@
+use std::io::Write;
 use std::path::PathBuf;
 
-use crate::engine::interface::PatinaOutput;
+use crate::engine::interface::PatinaInterface;
 use crate::engine::{apply_patina_from_file, render_patina_from_file};
 use clap::{Args, Parser, Subcommand};
 
@@ -97,8 +98,12 @@ impl PatinaCli {
     }
 }
 
-impl PatinaOutput for PatinaCli {
-    fn output(&self, s: &str) {
-        print!("{}", s)
+impl PatinaInterface for PatinaCli {
+    fn output<S>(&self, s: S)
+    where
+        S: Into<String>,
+    {
+        print!("{}", s.into());
+        let _ = std::io::stdout().flush();
     }
 }

@@ -3,28 +3,48 @@ use std::path::Path;
 use colored::Colorize;
 use similar::{ChangeTag, TextDiff};
 
-/// PatinaOutput specifies operations for displaying output from the Patina engine
-pub trait PatinaOutput {
+use crate::utils::{Error, Result};
+
+/// PatinaOutput specifies operations for interfacing with user operations
+pub trait PatinaInterface {
     /// Output a single string
-    fn output(&self, s: &str);
+    fn output<S>(&self, s: S)
+    where
+        S: Into<String>;
+
+    /// Prompts the user for confirmation to apply the patina
+    fn confirm_apply(&self) -> Result<bool> {
+        self.output("Do you want to continue? (y/n): ");
+        let mut input = String::new();
+        match std::io::stdin().read_line(&mut input) {
+            Ok(_) => {
+                if input.trim().to_lowercase() != "y" {
+                    return Ok(false);
+                }
+            }
+            Err(e) => return Err(Error::GetUserInput(e)),
+        }
+
+        Ok(true)
+    }
 
     /// Output a patina render
     fn output_file_header(&self, template_path: &Path) {
         let template_path = template_path.display().to_string();
         self.output(
-            &format!("{}\n", "=".repeat(template_path.len() + 16))
+            format!("{}\n", "=".repeat(template_path.len() + 16))
                 .yellow()
                 .bold()
                 .to_string(),
         );
         self.output(
-            &format!("> Patina file {} <\n", template_path)
+            format!("> Patina file {} <\n", template_path)
                 .yellow()
                 .bold()
                 .to_string(),
         );
         self.output(
-            &format!("{}\n", "=".repeat(template_path.len() + 16))
+            format!("{}\n", "=".repeat(template_path.len() + 16))
                 .yellow()
                 .bold()
                 .to_string(),
@@ -36,10 +56,10 @@ pub trait PatinaOutput {
         for change in diff.iter_all_changes() {
             match change.tag() {
                 ChangeTag::Insert => {
-                    self.output(&format!("+ {}", change).green().bold().to_string())
+                    self.output(format!("+ {}", change).green().bold().to_string())
                 }
-                ChangeTag::Equal => self.output(&format!("| {}", change).bold().to_string()),
-                ChangeTag::Delete => self.output(&format!("- {}", change).red().bold().to_string()),
+                ChangeTag::Equal => self.output(format!("| {}", change).bold().to_string()),
+                ChangeTag::Delete => self.output(format!("- {}", change).red().bold().to_string()),
             }
         }
     }
@@ -51,14 +71,17 @@ pub mod test {
 
     use super::*;
 
-    pub struct TestPatinaOutput {
+    pub struct TestPatinaInterface {
+        pub confirm_apply: bool,
         pub lines: RefCell<Vec<String>>,
     }
 
-    impl TestPatinaOutput {
-        pub fn new() -> TestPatinaOutput {
+    impl TestPatinaInterface {
+        pub fn new() -> TestPatinaInterface {
             colored::control::set_override(false);
-            TestPatinaOutput {
+
+            TestPatinaInterface {
+                confirm_apply: true,
                 lines: RefCell::new(vec![]),
             }
         }
@@ -68,9 +91,16 @@ pub mod test {
         }
     }
 
-    impl PatinaOutput for TestPatinaOutput {
-        fn output(&self, s: &str) {
-            self.lines.borrow_mut().push(s.to_string());
+    impl PatinaInterface for TestPatinaInterface {
+        fn output<S>(&self, s: S)
+        where
+            S: Into<String>,
+        {
+            self.lines.borrow_mut().push(s.into());
+        }
+
+        fn confirm_apply(&self) -> Result<bool> {
+            Ok(self.confirm_apply)
         }
     }
 }

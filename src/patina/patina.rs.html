@@ -243,9 +243,7 @@
 <a href="#242" id="242">242</a>
 <a href="#243" id="243">243</a>
 <a href="#244" id="244">244</a>
-<a href="#245" id="245">245</a>
-<a href="#246" id="246">246</a>
-<a href="#247" id="247">247</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::path::PathBuf;
+<a href="#245" id="245">245</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::path::PathBuf;
 
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 
@@ -484,9 +482,7 @@
         <span class="kw">let </span>template_str = template_str.unwrap();
 
         <span class="kw">let </span>expected = <span class="string">r#"Hello, {{ name.first }} {{ name.last }}!
-
 This is an example Patina template file.
-
 Templates use the Handebars templating language. For more information, see &lt;https://handlebarsjs.com/guide/&gt;.
 "#</span>;
         <span class="macro">assert_eq!</span>(template_str, expected);

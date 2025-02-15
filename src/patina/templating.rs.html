@@ -151,9 +151,7 @@
 <a href="#150" id="150">150</a>
 <a href="#151" id="151">151</a>
 <a href="#152" id="152">152</a>
-<a href="#153" id="153">153</a>
-<a href="#154" id="154">154</a>
-<a href="#155" id="155">155</a></pre></div><pre class="rust"><code><span class="kw">use </span>handlebars::Handlebars;
+<a href="#153" id="153">153</a></pre></div><pre class="rust"><code><span class="kw">use </span>handlebars::Handlebars;
 <span class="kw">use </span>log::info;
 
 <span class="kw">use </span><span class="kw">crate</span>::patina::{Patina, PatinaFile};
@@ -216,13 +214,13 @@
         <span class="macro">assert_eq!</span>(render.len(), <span class="number">1</span>);
         <span class="kw">let </span>render = <span class="kw-2">&amp;</span>render[<span class="number">0</span>];
 
-        <span class="kw">let </span>expected = <span class="string">r#"Hello, Patina User!
-
+        <span class="macro">assert_eq!</span>(
+            render,
+            <span class="string">r#"Hello, Patina User!
 This is an example Patina template file.
-
 Templates use the Handebars templating language. For more information, see &lt;https://handlebarsjs.com/guide/&gt;.
-"#</span>;
-        <span class="macro">assert_eq!</span>(expected, render);
+"#
+        </span>);
     }
 
     <span class="attr">#[test]
@@ -282,9 +280,7 @@ Templates use the Handebars templating language. For more information, see &lt;h
         <span class="kw">let </span>render = <span class="kw-2">&amp;</span>render[<span class="number">0</span>];
 
         <span class="kw">let </span>expected = <span class="string">r#"Hello,  !
-
 This is an example Patina template file.
-
 Templates use the Handebars templating language. For more information, see &lt;https://handlebarsjs.com/guide/&gt;.
 "#</span>;
         <span class="macro">assert_eq!</span>(expected, render);

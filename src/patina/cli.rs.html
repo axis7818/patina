@@ -103,9 +103,32 @@
 <a href="#102" id="102">102</a>
 <a href="#103" id="103">103</a>
 <a href="#104" id="104">104</a>
-<a href="#105" id="105">105</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::path::PathBuf;
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::io::Write;
+<span class="kw">use </span>std::path::PathBuf;
 
-<span class="kw">use </span><span class="kw">crate</span>::engine::interface::PatinaOutput;
+<span class="kw">use </span><span class="kw">crate</span>::engine::interface::PatinaInterface;
 <span class="kw">use </span><span class="kw">crate</span>::engine::{apply_patina_from_file, render_patina_from_file};
 <span class="kw">use </span>clap::{Args, Parser, Subcommand};
 
@@ -120,6 +143,10 @@
     <span class="doccomment">/// The specified command to run
     </span><span class="attr">#[clap(subcommand)]
     </span>command: Command,
+
+    <span class="attr">#[clap(skip)]
+    </span><span class="doccomment">/// When true, confirmation is disabled
+    </span>confirm_disabled: bool,
 }
 
 <span class="doccomment">/// Options that apply globally to the CLI
@@ -147,6 +174,10 @@
         <span class="doccomment">/// Command line options
         </span><span class="attr">#[clap(flatten)]
         </span>options: PatinaCommandOptions,
+
+        <span class="doccomment">/// Don't ask for user input
+        </span><span class="attr">#[clap(long = <span class="string">"no-input"</span>)]
+        </span>no_input: bool,
     },
 }
 
@@ -172,40 +203,53 @@
     }
 
     <span class="doccomment">/// Run the CLI
-    </span><span class="kw">pub fn </span>run(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+    </span><span class="kw">pub fn </span>run(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         env_logger::Builder::new()
             .filter_level(<span class="self">self</span>.global_options.verbosity.into())
             .init();
 
+        <span class="kw">if let </span>Command::Apply { no_input, .. } = <span class="kw-2">&amp;</span><span class="self">self</span>.command {
+            <span class="kw">if </span><span class="kw-2">*</span>no_input {
+                <span class="self">self</span>.disable_confirm();
+            }
+        };
+
         <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.command {
             Command::Render { options } =&gt; <span class="self">self</span>.render(options),
-            Command::Apply { options } =&gt; <span class="self">self</span>.apply(options),
+            Command::Apply { options, .. } =&gt; <span class="self">self</span>.apply(options),
         }
     }
 
     <span class="kw">fn </span>render(<span class="kw-2">&amp;</span><span class="self">self</span>, options: <span class="kw-2">&amp;</span>PatinaCommandOptions) {
-        <span class="self">self</span>.handle_options(options);
-        <span class="kw">match </span>render_patina_from_file(<span class="kw-2">&amp;</span>options.patina_path, <span class="self">self</span>) {
-            <span class="prelude-val">Ok</span>(patina_render) =&gt; patina_render,
-            <span class="prelude-val">Err</span>(e) =&gt; <span class="macro">panic!</span>(<span class="string">"{:?}"</span>, e),
+        colored::control::set_override(!options.no_color);
+        <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = render_patina_from_file(<span class="kw-2">&amp;</span>options.patina_path, <span class="self">self</span>) {
+            <span class="macro">panic!</span>(<span class="string">"{:?}"</span>, e);
         };
     }
 
     <span class="kw">fn </span>apply(<span class="kw-2">&amp;</span><span class="self">self</span>, options: <span class="kw-2">&amp;</span>PatinaCommandOptions) {
-        <span class="self">self</span>.handle_options(options);
+        colored::control::set_override(!options.no_color);
         <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = apply_patina_from_file(<span class="kw-2">&amp;</span>options.patina_path, <span class="self">self</span>) {
             <span class="macro">panic!</span>(<span class="string">"{:?}"</span>, e);
         }
     }
-
-    <span class="kw">fn </span>handle_options(<span class="kw-2">&amp;</span><span class="self">self</span>, options: <span class="kw-2">&amp;</span>PatinaCommandOptions) {
-        colored::control::set_override(!options.no_color);
-    }
 }
 
-<span class="kw">impl </span>PatinaOutput <span class="kw">for </span>PatinaCli {
-    <span class="kw">fn </span>output(<span class="kw-2">&amp;</span><span class="self">self</span>, s: <span class="kw-2">&amp;</span>str) {
-        <span class="macro">print!</span>(<span class="string">"{}"</span>, s)
+<span class="kw">impl </span>PatinaInterface <span class="kw">for </span>PatinaCli {
+    <span class="kw">fn </span>output&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, s: S)
+    <span class="kw">where
+        </span>S: Into&lt;String&gt;,
+    {
+        <span class="macro">print!</span>(<span class="string">"{}"</span>, s.into());
+        <span class="kw">let _ </span>= std::io::stdout().flush();
+    }
+
+    <span class="kw">fn </span>disable_confirm(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.confirm_disabled = <span class="bool-val">true
+    </span>}
+
+    <span class="kw">fn </span>is_confirm_disabled(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.confirm_disabled
     }
 }
 </code></pre></div></section></main></body></html>

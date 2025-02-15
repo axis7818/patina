@@ -157,9 +157,60 @@
 <a href="#156" id="156">156</a>
 <a href="#157" id="157">157</a>
 <a href="#158" id="158">158</a>
-<a href="#159" id="159">159</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::{fs, path::PathBuf};
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
+<a href="#194" id="194">194</a>
+<a href="#195" id="195">195</a>
+<a href="#196" id="196">196</a>
+<a href="#197" id="197">197</a>
+<a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::{fs, path::PathBuf};
 
-<span class="kw">use </span>interface::PatinaOutput;
+<span class="kw">use </span>colored::Colorize;
+<span class="kw">use </span>interface::PatinaInterface;
 <span class="kw">use </span>log::info;
 <span class="kw">use </span>similar::TextDiff;
 
@@ -172,55 +223,66 @@
 };
 
 <span class="doccomment">/// Renders a Patina from a Patina toml file path.
-</span><span class="kw">pub fn </span>render_patina_from_file&lt;O: PatinaOutput&gt;(patina_path: <span class="kw-2">&amp;</span>PathBuf, output: <span class="kw-2">&amp;</span>O) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+</span><span class="kw">pub fn </span>render_patina_from_file&lt;PI: PatinaInterface&gt;(patina_path: <span class="kw-2">&amp;</span>PathBuf, pi: <span class="kw-2">&amp;</span>PI) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="kw">let </span>patina = Patina::from_toml_file(patina_path)<span class="question-mark">?</span>;
 
     <span class="macro">info!</span>(<span class="string">"got patina: {:#?}"</span>, patina);
     <span class="kw">let </span>render = render_patina(<span class="kw-2">&amp;</span>patina)<span class="question-mark">?</span>;
 
-    output.output(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"Rendered {} files\n\n"</span>, render.len()));
-    <span class="attr">#[allow(clippy::needless_range_loop)]
-    </span><span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..render.len() {
-        <span class="kw">let </span>render_str = <span class="kw-2">&amp;</span>render[i];
+    pi.output(<span class="macro">format!</span>(<span class="string">"Rendered {} files\n\n"</span>, render.len()));
+    <span class="kw">for </span>(i, r) <span class="kw">in </span>render.iter().enumerate() {
         <span class="kw">let </span>template_file = <span class="kw-2">&amp;</span>patina.files[i].template;
 
-        output.output_file_header(template_file);
-        output.output(render_str);
-        output.output(<span class="string">"\n"</span>)
+        pi.output_file_header(template_file);
+        pi.output(<span class="macro">format!</span>(<span class="string">"{}\n"</span>, r));
     }
 
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="kw">pub fn </span>apply_patina_from_file&lt;O: PatinaOutput&gt;(patina_path: <span class="kw-2">&amp;</span>PathBuf, output: <span class="kw-2">&amp;</span>O) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+<span class="doccomment">/// Applies all of the Patina files
+</span><span class="kw">pub fn </span>apply_patina_from_file&lt;PI: PatinaInterface&gt;(patina_path: <span class="kw-2">&amp;</span>PathBuf, pi: <span class="kw-2">&amp;</span>PI) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="kw">let </span>patina = Patina::from_toml_file(patina_path)<span class="question-mark">?</span>;
 
     <span class="macro">info!</span>(<span class="string">"got patina: {:#?}"</span>, patina);
 
     <span class="kw">let </span>render = render_patina(<span class="kw-2">&amp;</span>patina)<span class="question-mark">?</span>;
 
-    <span class="attr">#[allow(clippy::needless_range_loop)]
-    </span><span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..render.len() {
-        <span class="kw">let </span>render_str = <span class="kw-2">&amp;</span>render[i];
+    <span class="comment">// Generate and display diffs
+    </span><span class="kw">for </span>(i, r) <span class="kw">in </span>render.iter().enumerate() {
         <span class="kw">let </span>target_file = <span class="kw-2">&amp;</span>patina.files[i].target;
 
         <span class="kw">let </span>target_file_str = fs::read_to_string(target_file).unwrap_or_default();
-        <span class="kw">let </span>diff = TextDiff::from_lines(<span class="kw-2">&amp;</span>target_file_str, render_str);
-        output.output_file_header(target_file);
-        output.output_diff(<span class="kw-2">&amp;</span>diff);
-        output.output(<span class="string">"\n"</span>);
-
-        <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = fs::write(target_file, render_str) {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::FileWrite(target_file.clone(), e));
-        }
+        <span class="kw">let </span>diff = TextDiff::from_lines(<span class="kw-2">&amp;</span>target_file_str, r);
+        pi.output_file_header(target_file);
+        pi.output_diff(<span class="kw-2">&amp;</span>diff);
+        pi.output(<span class="string">"\n"</span>);
     }
 
+    <span class="comment">// Get user confirmation to continue
+    </span><span class="kw">if </span>!pi.confirm_apply()<span class="question-mark">? </span>{
+        pi.output(<span class="string">"Not applying patina."</span>);
+        <span class="kw">return </span><span class="prelude-val">Ok</span>(());
+    }
+
+    <span class="comment">// Write out all files
+    </span>pi.output(<span class="string">"\nApplying patina files\n"</span>);
+    <span class="kw">for </span>(i, r) <span class="kw">in </span>render.iter().enumerate() {
+        <span class="kw">let </span>target_file = <span class="kw-2">&amp;</span>patina.files[i].target;
+        pi.output(<span class="macro">format!</span>(<span class="string">"   {}"</span>, target_file.display()));
+        <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = fs::write(target_file, r) {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::FileWrite(target_file.clone(), e));
+        }
+        pi.output(<span class="string">" ✓\n"</span>.green().to_string());
+    }
+
+    pi.output(<span class="string">"Done\n"</span>);
     <span class="prelude-val">Ok</span>(())
 }
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use </span><span class="kw">crate</span>::engine::interface::test::TestPatinaOutput;
+    <span class="kw">use </span><span class="kw">crate</span>::engine::interface::test::TestPatinaInterface;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
@@ -230,9 +292,9 @@
 
     <span class="kw">impl </span>TestTargetFile {
         <span class="kw">fn </span>new(target_file_path: <span class="kw-2">&amp;</span>str) -&gt; TestTargetFile {
-            TestTargetFile {
-                target: PathBuf::from(target_file_path),
-            }
+            <span class="kw">let </span>target = PathBuf::from(target_file_path);
+            <span class="kw">let _ </span>= fs::remove_file(<span class="kw-2">&amp;</span>target);
+            TestTargetFile { target }
         }
     }
 
@@ -245,32 +307,32 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_render_patina_from_file() {
         <span class="kw">let </span>patina_path = PathBuf::from(<span class="string">"tests/fixtures/template_patina.toml"</span>);
-        <span class="kw">let </span>output = TestPatinaOutput::new();
+        <span class="kw">let </span>output = TestPatinaInterface::new();
 
         <span class="kw">let </span>render = render_patina_from_file(<span class="kw-2">&amp;</span>patina_path, <span class="kw-2">&amp;</span>output);
 
         <span class="macro">assert!</span>(render.is_ok());
 
-        <span class="kw">let </span>expected = <span class="string">r#"Rendered 1 files
+        <span class="macro">assert_eq!</span>(
+            output.get_all_output(),
+            <span class="string">r#"Rendered 1 files
 
 ===============================================
 &gt; Patina file tests/fixtures/template.txt.hbs &lt;
 ===============================================
 Hello, Patina User!
-
 This is an example Patina template file.
-
 Templates use the Handebars templating language. For more information, see &lt;https://handlebarsjs.com/guide/&gt;.
 
-"#</span>;
-        <span class="macro">assert_eq!</span>(expected, output.get_all_output());
+"#
+        </span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_render_patina_from_file_failed_file_load() {
         <span class="kw">let </span>patina_path = PathBuf::from(<span class="string">"this/path/does/not/exist.toml"</span>);
 
-        <span class="kw">let </span>render = render_patina_from_file(<span class="kw-2">&amp;</span>patina_path, <span class="kw-2">&amp;</span>TestPatinaOutput::new());
+        <span class="kw">let </span>render = render_patina_from_file(<span class="kw-2">&amp;</span>patina_path, <span class="kw-2">&amp;</span>TestPatinaInterface::new());
         <span class="macro">assert!</span>(render.is_err());
         <span class="macro">assert!</span>(render.unwrap_err().is_file_read());
     }
@@ -279,7 +341,7 @@ Templates use the Handebars templating language. For more information, see &lt;h
     </span><span class="kw">fn </span>test_render_patina_from_file_render_fails() {
         <span class="kw">let </span>patina_path = PathBuf::from(<span class="string">"tests/fixtures/missing_template_patina.toml"</span>);
 
-        <span class="kw">let </span>render = render_patina_from_file(<span class="kw-2">&amp;</span>patina_path, <span class="kw-2">&amp;</span>TestPatinaOutput::new());
+        <span class="kw">let </span>render = render_patina_from_file(<span class="kw-2">&amp;</span>patina_path, <span class="kw-2">&amp;</span>TestPatinaInterface::new());
         <span class="macro">assert!</span>(render.is_err());
         <span class="macro">assert!</span>(render.unwrap_err().is_file_read());
     }
@@ -287,33 +349,71 @@ Templates use the Handebars templating language. For more information, see &lt;h
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_apply_patina_from_file() {
         <span class="kw">let </span>patina_path = PathBuf::from(<span class="string">"tests/fixtures/template_patina.toml"</span>);
-
-        <span class="kw">let </span>render = apply_patina_from_file(<span class="kw-2">&amp;</span>patina_path, <span class="kw-2">&amp;</span>TestPatinaOutput::new());
-
-        <span class="macro">assert!</span>(render.is_ok());
-
-        <span class="kw">let </span>expected = <span class="string">r#"Hello, Patina User!
-
-This is an example Patina template file.
-
-Templates use the Handebars templating language. For more information, see &lt;https://handlebarsjs.com/guide/&gt;.
-"#</span>;
-
         <span class="kw">let </span>applied_file_path = TestTargetFile::new(<span class="string">"tests/fixtures/template.txt"</span>);
+
+        <span class="kw">let </span>pi = TestPatinaInterface::new();
+        <span class="kw">let </span>apply = apply_patina_from_file(<span class="kw-2">&amp;</span>patina_path, <span class="kw-2">&amp;</span>pi);
+
+        <span class="macro">assert!</span>(apply.is_ok());
+
+        <span class="macro">assert_eq!</span>(
+            pi.get_all_output(),
+            <span class="string">r#"===========================================
+&gt; Patina file tests/fixtures/template.txt &lt;
+===========================================
++ Hello, Patina User!
++ This is an example Patina template file.
++ Templates use the Handebars templating language. For more information, see &lt;https://handlebarsjs.com/guide/&gt;.
+
+
+Applying patina files
+   tests/fixtures/template.txt ✓
+Done
+"#
+        </span>);
 
         <span class="kw">let </span>applied_file = fs::read_to_string(<span class="kw-2">&amp;</span>applied_file_path.target);
         <span class="macro">assert!</span>(applied_file.is_ok());
-        <span class="macro">assert_eq!</span>(applied_file.unwrap(), expected);
+        <span class="macro">assert_eq!</span>(
+            applied_file.unwrap(),
+            <span class="string">r#"Hello, Patina User!
+This is an example Patina template file.
+Templates use the Handebars templating language. For more information, see &lt;https://handlebarsjs.com/guide/&gt;.
+"#
+        </span>);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_apply_patina_from_file_abort_without_user_confirmation() {
+        <span class="kw">let </span>patina_path = PathBuf::from(<span class="string">"tests/fixtures/template_patina.toml"</span>);
+
+        <span class="kw">let </span><span class="kw-2">mut </span>pi = TestPatinaInterface::new();
+        pi.confirm_apply = <span class="bool-val">false</span>;
+        <span class="kw">let </span>apply = apply_patina_from_file(<span class="kw-2">&amp;</span>patina_path, <span class="kw-2">&amp;</span>pi);
+
+        <span class="macro">assert!</span>(apply.is_ok());
+
+        <span class="macro">assert_eq!</span>(
+            pi.get_all_output(),
+            <span class="string">r#"===========================================
+&gt; Patina file tests/fixtures/template.txt &lt;
+===========================================
++ Hello, Patina User!
++ This is an example Patina template file.
++ Templates use the Handebars templating language. For more information, see &lt;https://handlebarsjs.com/guide/&gt;.
+
+Not applying patina."#
+        </span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_apply_patina_from_file_write_failed() {
         <span class="kw">let </span>patina_path = PathBuf::from(<span class="string">"tests/fixtures/invalid_target_template_patina.toml"</span>);
 
-        <span class="kw">let </span>render = apply_patina_from_file(<span class="kw-2">&amp;</span>patina_path, <span class="kw-2">&amp;</span>TestPatinaOutput::new());
+        <span class="kw">let </span>apply = apply_patina_from_file(<span class="kw-2">&amp;</span>patina_path, <span class="kw-2">&amp;</span>TestPatinaInterface::new());
 
-        <span class="macro">assert!</span>(render.is_err());
-        <span class="macro">assert!</span>(render.unwrap_err().is_file_write());
+        <span class="macro">assert!</span>(apply.is_err());
+        <span class="macro">assert!</span>(apply.unwrap_err().is_file_write());
     }
 }
 </code></pre></div></section></main></body></html>

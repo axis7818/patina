@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"trait":["PatinaOutput"]};
+window.SIDEBAR_ITEMS = {"trait":["PatinaInterface"]};

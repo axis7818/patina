@@ -9,6 +9,10 @@ Patina is a rust application for managing system dotfiles and configuration.
 ## Examples
 
 ```sh
+cargo run -- --help
+cargo run -- render --help
+cargo run -- apply --help
+
 # Render
 cargo run -- render examples/simple/patina.toml -vvv
 cargo run -- render examples/gitconfig/patina.toml -vvv

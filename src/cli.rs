@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
-use crate::engine::{apply_patina_from_file, interface::PatinaOutput, render_patina_from_file};
+use crate::engine::interface::PatinaOutput;
+use crate::engine::{apply_patina_from_file, render_patina_from_file};
 use clap::{Args, Parser, Subcommand};
 
 /// The patina CLI renders files from templates and sets of variables as defined in patina toml files.
@@ -53,6 +54,10 @@ struct PatinaCommandOptions {
 
     /// The file path to the patina toml file
     patina_path: PathBuf,
+
+    /// Disable colors
+    #[clap(long = "no-color")]
+    no_color: bool,
 }
 
 impl PatinaCli {
@@ -74,6 +79,7 @@ impl PatinaCli {
     }
 
     fn render(&self, options: &PatinaCommandOptions) {
+        self.handle_options(options);
         match render_patina_from_file(&options.patina_path, self) {
             Ok(patina_render) => patina_render,
             Err(e) => panic!("{:?}", e),
@@ -81,9 +87,14 @@ impl PatinaCli {
     }
 
     fn apply(&self, options: &PatinaCommandOptions) {
+        self.handle_options(options);
         if let Err(e) = apply_patina_from_file(&options.patina_path, self) {
             panic!("{:?}", e);
         }
+    }
+
+    fn handle_options(&self, options: &PatinaCommandOptions) {
+        colored::control::set_override(!options.no_color);
     }
 }
 

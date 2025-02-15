@@ -1,0 +1,9 @@
+name = "absolute-paths"
+description = "This patina shows an example of using absolute paths"
+
+[vars]
+name = "Patina"
+
+[[files]]
+template = "template.txt.hbs"
+target = "/tmp/patina/example.txt"

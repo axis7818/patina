@@ -5,5 +5,5 @@ description = "This is a simple Patina example"
 name = "Patina"
 
 [[files]]
-template = "examples/simple/templates/hello.txt"
-target = "./output/hello.txt"
+template = "templates/hello.txt"
+target = "../../output/hello.txt"

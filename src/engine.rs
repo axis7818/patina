@@ -68,7 +68,7 @@ mod tests {
         assert!(render.is_ok());
         let render = &render.unwrap()[0];
 
-        let expected = r#"Hello, Patina!
+        let expected = r#"Hello, Patina User!
 
 This is an example Patina template file.
 
@@ -103,7 +103,7 @@ Templates use the Handebars templating language. For more information, see <http
 
         assert!(render.is_ok());
 
-        let expected = r#"Hello, Patina!
+        let expected = r#"Hello, Patina User!
 
 This is an example Patina template file.
 

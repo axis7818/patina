@@ -1,4 +1,4 @@
-use std::{collections::HashMap, path::PathBuf};
+use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
@@ -16,7 +16,7 @@ pub struct Patina {
 
     /// A map of variables that can be used in the templates
     #[serde(default)]
-    pub vars: HashMap<String, String>,
+    pub vars: Option<serde_json::Value>,
 
     /// A list of files referencing templates and their target output paths
     #[serde(default)]
@@ -82,6 +82,12 @@ mod tests {
 
         assert_eq!(patina.name, "simple-patina");
         assert_eq!(patina.description, "This is a simple Patina example");
+
+        // assert vars
+        assert!(patina.vars.is_some());
+        let vars = patina.vars.unwrap();
+        assert!(vars.is_object());
+        assert_eq!(vars.as_object().unwrap().get("name").unwrap(), "Patina");
 
         let patina_files = patina.files;
         assert_eq!(patina_files.len(), 1);
@@ -230,7 +236,7 @@ mod tests {
         assert!(template_str.is_ok());
         let template_str = template_str.unwrap();
 
-        let expected = r#"Hello, {{ name }}!
+        let expected = r#"Hello, {{ name.first }} {{ name.last }}!
 
 This is an example Patina template file.
 

@@ -31,7 +31,9 @@ fn render_patina_file(
 
 #[cfg(test)]
 mod tests {
-    use std::{collections::HashMap, path::PathBuf};
+    use std::path::PathBuf;
+
+    use serde_json::json;
 
     use super::*;
 
@@ -40,10 +42,12 @@ mod tests {
         let patina = Patina {
             name: String::from("sample-patina"),
             description: String::from("This is a sample Patina"),
-            vars: [(String::from("name"), String::from("Patina"))]
-                .iter()
-                .cloned()
-                .collect::<HashMap<String, String>>(),
+            vars: Some(json!({
+                "name": {
+                    "first": "Patina",
+                    "last": "User"
+                }
+            })),
             files: vec![PatinaFile {
                 template: PathBuf::from("tests/fixtures/template.txt.hbs"),
                 target: PathBuf::from("tests/fixtures/template.txt"),
@@ -57,7 +61,7 @@ mod tests {
         assert_eq!(render.len(), 1);
         let render = &render[0];
 
-        let expected = r#"Hello, Patina!
+        let expected = r#"Hello, Patina User!
 
 This is an example Patina template file.
 
@@ -71,14 +75,11 @@ Templates use the Handebars templating language. For more information, see <http
         let patina = Patina {
             name: String::from("multi-template-patina"),
             description: String::from("This is a patina with multiple templates"),
-            vars: [
-                ("A", "template_a"),
-                ("B", "template_b"),
-                ("C", "template_c"),
-            ]
-            .iter()
-            .map(|entry| (String::from(entry.0), String::from(entry.1)))
-            .collect::<HashMap<String, String>>(),
+            vars: Some(json!({
+                "A": "template_a",
+                "B": "template_b",
+                "C": "template_c",
+            })),
             files: vec![
                 PatinaFile {
                     template: PathBuf::from("tests/fixtures/template_a.txt.hbs"),
@@ -111,7 +112,7 @@ Templates use the Handebars templating language. For more information, see <http
         let patina = Patina {
             name: String::from("sample-patina"),
             description: String::from("This is a sample Patina"),
-            vars: HashMap::new(),
+            vars: Some(json!({})),
             files: vec![PatinaFile {
                 template: PathBuf::from("tests/fixtures/template.txt.hbs"),
                 target: PathBuf::from("tests/fixtures/template.txt"),
@@ -125,7 +126,7 @@ Templates use the Handebars templating language. For more information, see <http
         assert_eq!(render.len(), 1);
         let render = &render[0];
 
-        let expected = r#"Hello, !
+        let expected = r#"Hello,  !
 
 This is an example Patina template file.
 
@@ -139,7 +140,7 @@ Templates use the Handebars templating language. For more information, see <http
         let patina = Patina {
             name: String::from("sample-patina"),
             description: String::from("This is a sample Patina"),
-            vars: HashMap::new(),
+            vars: Some(json!({})),
             files: vec![PatinaFile {
                 template: PathBuf::from("tests/fixtures/invalid_template.txt.hbs"),
                 target: PathBuf::from("tests/fixtures/template.txt"),

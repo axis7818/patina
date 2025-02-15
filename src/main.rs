@@ -11,6 +11,6 @@ mod utils;
 /// Main entry point for the application.
 /// This launches the CLI interface.
 fn main() {
-    let patina_cli = PatinaCli::parse_args();
+    let mut patina_cli = PatinaCli::parse_args();
     patina_cli.run();
 }

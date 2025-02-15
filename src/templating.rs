@@ -61,13 +61,13 @@ mod tests {
         assert_eq!(render.len(), 1);
         let render = &render[0];
 
-        let expected = r#"Hello, Patina User!
-
+        assert_eq!(
+            render,
+            r#"Hello, Patina User!
 This is an example Patina template file.
-
 Templates use the Handebars templating language. For more information, see <https://handlebarsjs.com/guide/>.
-"#;
-        assert_eq!(expected, render);
+"#
+        );
     }
 
     #[test]
@@ -127,9 +127,7 @@ Templates use the Handebars templating language. For more information, see <http
         let render = &render[0];
 
         let expected = r#"Hello,  !
-
 This is an example Patina template file.
-
 Templates use the Handebars templating language. For more information, see <https://handlebarsjs.com/guide/>.
 "#;
         assert_eq!(expected, render);

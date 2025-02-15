@@ -237,9 +237,7 @@ mod tests {
         let template_str = template_str.unwrap();
 
         let expected = r#"Hello, {{ name.first }} {{ name.last }}!
-
 This is an example Patina template file.
-
 Templates use the Handebars templating language. For more information, see <https://handlebarsjs.com/guide/>.
 "#;
         assert_eq!(template_str, expected);

@@ -237,7 +237,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "dot-patina"
+name = "dotpatina"
 version = "0.1.0"
 dependencies = [
  "clap",

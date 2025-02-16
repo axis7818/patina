@@ -7,7 +7,7 @@ use clap::{Args, Parser, Subcommand};
 
 /// The patina CLI renders files from templates and sets of variables as defined in patina toml files.
 #[derive(Parser, Debug)]
-#[clap(name = "patina", version)]
+#[clap(name = "dotpatina", version)]
 pub struct PatinaCli {
     /// Global options apply to all subcommands
     #[clap(flatten)]

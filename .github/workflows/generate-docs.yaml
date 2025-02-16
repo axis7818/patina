@@ -1,4 +1,4 @@
-name: Documentation
+name: 📜 Documentation
 
 on:
   workflow_run:

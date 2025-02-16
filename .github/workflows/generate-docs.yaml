@@ -1,4 +1,4 @@
-name: Documentation
+name: 📜 Documentation
 
 on:
   workflow_run:
@@ -8,7 +8,7 @@ on:
       - completed
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
 
     steps:

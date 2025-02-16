@@ -1,10 +1,6 @@
 name: 🏷️ Check Version
 
 on:
-  # TODO: remove the branch trigger before merge
-  push:
-    branches:
-      - axis7818/versioning
   pull_request:
     branches:
       - main

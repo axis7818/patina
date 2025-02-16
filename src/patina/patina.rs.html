@@ -243,7 +243,12 @@
 <a href="#242" id="242">242</a>
 <a href="#243" id="243">243</a>
 <a href="#244" id="244">244</a>
-<a href="#245" id="245">245</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::path::PathBuf;
+<a href="#245" id="245">245</a>
+<a href="#246" id="246">246</a>
+<a href="#247" id="247">247</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 
@@ -266,6 +271,10 @@
     <span class="doccomment">/// A list of files referencing templates and their target output paths
     </span><span class="attr">#[serde(default)]
     </span><span class="kw">pub </span>files: Vec&lt;PatinaFile&gt;,
+
+    <span class="doccomment">/// The path to this patina
+    </span><span class="attr">#[serde(skip)]
+    </span><span class="kw">pub </span>base_path: <span class="prelude-ty">Option</span>&lt;PathBuf&gt;,
 }
 
 <span class="doccomment">/// A PatinaFile describes a template file and its target output path.
@@ -286,19 +295,32 @@
             <span class="prelude-val">Err</span>(e) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::FileRead(toml_file_path.clone(), e)),
         };
 
-        <span class="kw">match </span>toml::from_str(<span class="kw-2">&amp;</span>toml_str) {
-            <span class="prelude-val">Ok</span>(toml) =&gt; <span class="prelude-val">Ok</span>(toml),
-            <span class="prelude-val">Err</span>(e) =&gt; <span class="prelude-val">Err</span>(Error::TomlParse(e)),
-        }
-    }
-}
+        <span class="kw">let </span><span class="kw-2">mut </span>patina: Patina = <span class="kw">match </span>toml::from_str(<span class="kw-2">&amp;</span>toml_str) {
+            <span class="prelude-val">Ok</span>(patina) =&gt; patina,
+            <span class="prelude-val">Err</span>(e) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::TomlParse(e)),
+        };
 
-<span class="kw">impl </span>PatinaFile {
-    <span class="doccomment">/// Load the template file as a string
-    </span><span class="kw">pub fn </span>load_template_file_as_string(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt; {
-        <span class="kw">match </span>std::fs::read_to_string(<span class="self">self</span>.template.clone()) {
-            <span class="prelude-val">Ok</span>(template_str) =&gt; <span class="prelude-val">Ok</span>(template_str),
-            <span class="prelude-val">Err</span>(e) =&gt; <span class="prelude-val">Err</span>(Error::FileRead(<span class="self">self</span>.template.clone(), e)),
+        patina.base_path = <span class="prelude-val">Some</span>(toml_file_path.parent().unwrap().to_path_buf());
+
+        <span class="prelude-val">Ok</span>(patina)
+    }
+
+    <span class="doccomment">/// Get a path within the context of this Patina
+    </span><span class="kw">pub fn </span>get_patina_path(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>Path) -&gt; PathBuf {
+        <span class="kw">if </span>path.is_absolute() {
+            <span class="kw">return </span>path.to_path_buf();
+        }
+
+        <span class="kw">let </span><span class="kw-2">mut </span>result = <span class="self">self
+            </span>.base_path
+            .as_ref()
+            .unwrap_or(<span class="kw-2">&amp;</span>PathBuf::from(<span class="string">"."</span>))
+            .clone();
+        result.push(path);
+
+        <span class="kw">match </span>fs::canonicalize(<span class="kw-2">&amp;</span>result) {
+            <span class="prelude-val">Ok</span>(r) =&gt; r,
+            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; result,
         }
     }
 }
@@ -468,24 +490,6 @@
         <span class="macro">assert!</span>(patina.is_err());
         <span class="kw">let </span>err = patina.unwrap_err();
         <span class="macro">assert!</span>(<span class="macro">matches!</span>(err, Error::TomlParse(<span class="kw">_</span>)));
-    }
-
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>test_patina_file_load_template_file_as_string() {
-        <span class="kw">let </span>patina_file = PatinaFile {
-            template: PathBuf::from(<span class="string">"tests/fixtures/template.txt.hbs"</span>),
-            target: PathBuf::from(<span class="string">"output/template.txt"</span>),
-        };
-
-        <span class="kw">let </span>template_str = patina_file.load_template_file_as_string();
-        <span class="macro">assert!</span>(template_str.is_ok());
-        <span class="kw">let </span>template_str = template_str.unwrap();
-
-        <span class="kw">let </span>expected = <span class="string">r#"Hello, {{ name.first }} {{ name.last }}!
-This is an example Patina template file.
-Templates use the Handebars templating language. For more information, see &lt;https://handlebarsjs.com/guide/&gt;.
-"#</span>;
-        <span class="macro">assert_eq!</span>(template_str, expected);
     }
 }
 </code></pre></div></section></main></body></html>

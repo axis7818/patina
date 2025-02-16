@@ -151,7 +151,19 @@
 <a href="#150" id="150">150</a>
 <a href="#151" id="151">151</a>
 <a href="#152" id="152">152</a>
-<a href="#153" id="153">153</a></pre></div><pre class="rust"><code><span class="kw">use </span>handlebars::Handlebars;
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::fs;
+
+<span class="kw">use </span>handlebars::Handlebars;
 <span class="kw">use </span>log::info;
 
 <span class="kw">use </span><span class="kw">crate</span>::patina::{Patina, PatinaFile};
@@ -174,7 +186,11 @@
 ) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt; {
     <span class="macro">info!</span>(<span class="string">"rendering patina file: {}"</span>, patina_file.template.display());
 
-    <span class="kw">let </span>template_str = patina_file.load_template_file_as_string()<span class="question-mark">?</span>;
+    <span class="kw">let </span>template_path = patina.get_patina_path(<span class="kw-2">&amp;</span>patina_file.template);
+    <span class="kw">let </span>template_str = <span class="kw">match </span>fs::read_to_string(<span class="kw-2">&amp;</span>template_path) {
+        <span class="prelude-val">Ok</span>(template_str) =&gt; template_str,
+        <span class="prelude-val">Err</span>(e) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::FileRead(template_path, e)),
+    };
 
     <span class="kw">match </span>hb.render_template(<span class="kw-2">&amp;</span>template_str, <span class="kw-2">&amp;</span>patina.vars) {
         <span class="prelude-val">Ok</span>(render) =&gt; <span class="prelude-val">Ok</span>(render),
@@ -193,6 +209,7 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_render_patina() {
         <span class="kw">let </span>patina = Patina {
+            base_path: <span class="prelude-val">None</span>,
             name: String::from(<span class="string">"sample-patina"</span>),
             description: String::from(<span class="string">"This is a sample Patina"</span>),
             vars: <span class="prelude-val">Some</span>(<span class="macro">json!</span>({
@@ -226,6 +243,7 @@ Templates use the Handebars templating language. For more information, see &lt;h
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_render_patina_multiple_templates() {
         <span class="kw">let </span>patina = Patina {
+            base_path: <span class="prelude-val">None</span>,
             name: String::from(<span class="string">"multi-template-patina"</span>),
             description: String::from(<span class="string">"This is a patina with multiple templates"</span>),
             vars: <span class="prelude-val">Some</span>(<span class="macro">json!</span>({
@@ -263,6 +281,7 @@ Templates use the Handebars templating language. For more information, see &lt;h
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_render_patina_missing_variable() {
         <span class="kw">let </span>patina = Patina {
+            base_path: <span class="prelude-val">None</span>,
             name: String::from(<span class="string">"sample-patina"</span>),
             description: String::from(<span class="string">"This is a sample Patina"</span>),
             vars: <span class="prelude-val">Some</span>(<span class="macro">json!</span>({})),
@@ -289,6 +308,7 @@ Templates use the Handebars templating language. For more information, see &lt;h
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_render_patina_invalid_template() {
         <span class="kw">let </span>patina = Patina {
+            base_path: <span class="prelude-val">None</span>,
             name: String::from(<span class="string">"sample-patina"</span>),
             description: String::from(<span class="string">"This is a sample Patina"</span>),
             vars: <span class="prelude-val">Some</span>(<span class="macro">json!</span>({})),

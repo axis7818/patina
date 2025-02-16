@@ -205,9 +205,7 @@
 <a href="#204" id="204">204</a>
 <a href="#205" id="205">205</a>
 <a href="#206" id="206">206</a>
-<a href="#207" id="207">207</a>
-<a href="#208" id="208">208</a>
-<a href="#209" id="209">209</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::{fs, path::PathBuf};
+<a href="#207" id="207">207</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::{fs, path::PathBuf};
 
 <span class="kw">use </span>colored::Colorize;
 <span class="kw">use </span>interface::PatinaInterface;
@@ -251,10 +249,11 @@
     <span class="comment">// Generate and display diffs
     </span><span class="kw">for </span>(i, r) <span class="kw">in </span>render.iter().enumerate() {
         <span class="kw">let </span>target_file = <span class="kw-2">&amp;</span>patina.files[i].target;
+        <span class="kw">let </span>target_path = patina.get_patina_path(target_file);
 
-        <span class="kw">let </span>target_file_str = fs::read_to_string(target_file).unwrap_or_default();
+        <span class="kw">let </span>target_file_str = fs::read_to_string(<span class="kw-2">&amp;</span>target_path).unwrap_or_default();
         <span class="kw">let </span>diff = TextDiff::from_lines(<span class="kw-2">&amp;</span>target_file_str, r);
-        pi.output_file_header(target_file);
+        pi.output_file_header(<span class="kw-2">&amp;</span>target_path);
         pi.output_diff(<span class="kw-2">&amp;</span>diff);
         pi.output(<span class="string">"\n"</span>);
     }
@@ -269,9 +268,16 @@
     </span>pi.output(<span class="string">"\nApplying patina files\n"</span>);
     <span class="kw">for </span>(i, r) <span class="kw">in </span>render.iter().enumerate() {
         <span class="kw">let </span>target_file = <span class="kw-2">&amp;</span>patina.files[i].target;
-        pi.output(<span class="macro">format!</span>(<span class="string">"   {}"</span>, target_file.display()));
-        <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = fs::write(target_file, r) {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::FileWrite(target_file.clone(), e));
+        <span class="kw">let </span>target_path = patina.get_patina_path(target_file);
+
+        pi.output(<span class="macro">format!</span>(<span class="string">"   {}"</span>, target_path.display()));
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(target_parent) = target_path.parent() {
+            <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = fs::create_dir_all(target_parent) {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::FileWrite(target_path, e));
+            }
+        }
+        <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = fs::write(<span class="kw-2">&amp;</span>target_path, r) {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::FileWrite(target_path.clone(), e));
         }
         pi.output(<span class="string">" ✓\n"</span>.green().to_string());
     }
@@ -317,9 +323,9 @@
             output.get_all_output(),
             <span class="string">r#"Rendered 1 files
 
-===============================================
-&gt; Patina file tests/fixtures/template.txt.hbs &lt;
-===============================================
+====================
+&gt; template.txt.hbs &lt;
+====================
 Hello, Patina User!
 This is an example Patina template file.
 Templates use the Handebars templating language. For more information, see &lt;https://handlebarsjs.com/guide/&gt;.
@@ -358,9 +364,9 @@ Templates use the Handebars templating language. For more information, see &lt;h
 
         <span class="macro">assert_eq!</span>(
             pi.get_all_output(),
-            <span class="string">r#"===========================================
-&gt; Patina file tests/fixtures/template.txt &lt;
-===========================================
+            <span class="string">r#"===============================
+&gt; tests/fixtures/template.txt &lt;
+===============================
 + Hello, Patina User!
 + This is an example Patina template file.
 + Templates use the Handebars templating language. For more information, see &lt;https://handlebarsjs.com/guide/&gt;.
@@ -395,25 +401,15 @@ Templates use the Handebars templating language. For more information, see &lt;h
 
         <span class="macro">assert_eq!</span>(
             pi.get_all_output(),
-            <span class="string">r#"===========================================
-&gt; Patina file tests/fixtures/template.txt &lt;
-===========================================
+            <span class="string">r#"===============================
+&gt; tests/fixtures/template.txt &lt;
+===============================
 + Hello, Patina User!
 + This is an example Patina template file.
 + Templates use the Handebars templating language. For more information, see &lt;https://handlebarsjs.com/guide/&gt;.
 
 Not applying patina."#
         </span>);
-    }
-
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>test_apply_patina_from_file_write_failed() {
-        <span class="kw">let </span>patina_path = PathBuf::from(<span class="string">"tests/fixtures/invalid_target_template_patina.toml"</span>);
-
-        <span class="kw">let </span>apply = apply_patina_from_file(<span class="kw-2">&amp;</span>patina_path, <span class="kw-2">&amp;</span>TestPatinaInterface::new());
-
-        <span class="macro">assert!</span>(apply.is_err());
-        <span class="macro">assert!</span>(apply.unwrap_err().is_file_write());
     }
 }
 </code></pre></div></section></main></body></html>

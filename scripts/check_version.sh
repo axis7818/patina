@@ -1,15 +1,15 @@
 #!/usr/bin/env sh
 
-PREV_VERSION=$(git show main:Cargo.toml | grep '^version' | awk '{print $3}')
+PREV_VERSION=$(git show refs/heads/main:Cargo.toml | grep '^version' | awk '{print $3}')
 if [ -z "$PREV_VERSION" ]; then
-    echo "Previous version not found."
+    echo "❌ Previous version not found."
     exit 1
 fi
 echo "Previous version = ${PREV_VERSION}"
 
 CURR_VERSION=$(grep '^version' Cargo.toml | awk '{print $3}')
 if [ -z "$CURR_VERSION" ]; then
-    echo "Current version not found."
+    echo "❌ Current version not found."
     exit 1
 fi
 echo "Current version = ${CURR_VERSION}"

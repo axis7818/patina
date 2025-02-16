@@ -28,6 +28,7 @@ jobs:
         run: cargo clippy -- -D warnings
 
       - name: Check Cargo version
+        if: github.ref != 'refs/heads/main'
         run: |
           PREV_VERSION=$(git show main:Cargo.toml | grep '^version' | awk '{print $3}')
           CURR_VERSION=$(grep '^version' Cargo.toml | awk '{print $3}')

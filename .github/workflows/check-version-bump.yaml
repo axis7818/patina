@@ -17,22 +17,4 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Check Cargo version
-        run: |
-          PREV_VERSION=$(git show main:Cargo.toml | grep '^version' | awk '{print $3}')
-          if [ -z "$PREV_VERSION" ]; then
-            echo "Previous version not found."
-            exit 1
-          fi
-
-          CURR_VERSION=$(grep '^version' Cargo.toml | awk '{print $3}')
-          if [ -z "$CURR_VERSION" ]; then
-            echo "Current version not found."
-            exit 1
-          fi
-
-          if [ "$PREV_VERSION" = "$CURR_VERSION" ]; then
-            echo "Cargo version has not incremented."
-            exit 1
-          else
-            echo "Cargo version has incremented from ${PREV_VERSION} to ${CURR_VERSION}"
-          fi
+        run: scripts/check_version.sh

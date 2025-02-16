@@ -5,5 +5,5 @@ description = "This is a Patina for a test template file"
 name = "Patina"
 
 [[files]]
-template = "tests/fixtures/template.txt.hbs"
+template = "template.txt.hbs"
 target = "this/directory/does/not/exist/template.txt"

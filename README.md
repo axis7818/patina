@@ -11,7 +11,7 @@ Patina is a rust application for managing system dotfiles and configuration.
 ### Render
 
 ```sh
-❱ cargo run -- render --help
+❱ patina render --help
 Render a patina to stdout
 
 Usage: patina render [OPTIONS] <PATINA_PATH>
@@ -29,7 +29,7 @@ Options:
 ### Apply
 
 ```sh
-❱ cargo run -- apply --help
+❱ patina apply --help
 Render and apply a patina
 
 Usage: patina apply [OPTIONS] <PATINA_PATH>
@@ -49,15 +49,15 @@ Options:
 
 ```sh
 # Help
-cargo run -- --help
-cargo run -- render --help
-cargo run -- apply --help
+patina --help
+patina render --help
+patina apply --help
 
 # Render
-cargo run -- render examples/simple/patina.toml -vvv
-cargo run -- render examples/gitconfig/patina.toml -vvv
+patina render examples/simple/patina.toml -vvv
+patina render examples/gitconfig/patina.toml -vvv
 
 # Apply
-cargo run -- apply examples/simple/patina.toml -vvv
-cargo run -- apply examples/gitconfig/patina.toml -vvv
+patina apply examples/simple/patina.toml -vvv
+patina apply examples/gitconfig/patina.toml -vvv
 ```

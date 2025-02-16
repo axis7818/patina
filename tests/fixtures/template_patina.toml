@@ -6,5 +6,5 @@ name.first = "Patina"
 name.last = "User"
 
 [[files]]
-template = "tests/fixtures/template.txt.hbs"
-target = "tests/fixtures/template.txt"
+template = "template.txt.hbs"
+target = "template.txt"

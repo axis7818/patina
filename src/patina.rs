@@ -1,4 +1,7 @@
-use std::path::PathBuf;
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 use serde::{Deserialize, Serialize};
 
@@ -21,6 +24,10 @@ pub struct Patina {
     /// A list of files referencing templates and their target output paths
     #[serde(default)]
     pub files: Vec<PatinaFile>,
+
+    /// The path to this patina
+    #[serde(skip)]
+    pub base_path: Option<PathBuf>,
 }
 
 /// A PatinaFile describes a template file and its target output path.
@@ -41,19 +48,32 @@ impl Patina {
             Err(e) => return Err(Error::FileRead(toml_file_path.clone(), e)),
         };
 
-        match toml::from_str(&toml_str) {
-            Ok(toml) => Ok(toml),
-            Err(e) => Err(Error::TomlParse(e)),
-        }
-    }
-}
+        let mut patina: Patina = match toml::from_str(&toml_str) {
+            Ok(patina) => patina,
+            Err(e) => return Err(Error::TomlParse(e)),
+        };
 
-impl PatinaFile {
-    /// Load the template file as a string
-    pub fn load_template_file_as_string(&self) -> Result<String> {
-        match std::fs::read_to_string(self.template.clone()) {
-            Ok(template_str) => Ok(template_str),
-            Err(e) => Err(Error::FileRead(self.template.clone(), e)),
+        patina.base_path = Some(toml_file_path.parent().unwrap().to_path_buf());
+
+        Ok(patina)
+    }
+
+    /// Get a path within the context of this Patina
+    pub fn get_patina_path(&self, path: &Path) -> PathBuf {
+        if path.is_absolute() {
+            return path.to_path_buf();
+        }
+
+        let mut result = self
+            .base_path
+            .as_ref()
+            .unwrap_or(&PathBuf::from("."))
+            .clone();
+        result.push(path);
+
+        match fs::canonicalize(&result) {
+            Ok(r) => r,
+            Err(_) => result,
         }
     }
 }
@@ -223,23 +243,5 @@ mod tests {
         assert!(patina.is_err());
         let err = patina.unwrap_err();
         assert!(matches!(err, Error::TomlParse(_)));
-    }
-
-    #[test]
-    fn test_patina_file_load_template_file_as_string() {
-        let patina_file = PatinaFile {
-            template: PathBuf::from("tests/fixtures/template.txt.hbs"),
-            target: PathBuf::from("output/template.txt"),
-        };
-
-        let template_str = patina_file.load_template_file_as_string();
-        assert!(template_str.is_ok());
-        let template_str = template_str.unwrap();
-
-        let expected = r#"Hello, {{ name.first }} {{ name.last }}!
-This is an example Patina template file.
-Templates use the Handebars templating language. For more information, see <https://handlebarsjs.com/guide/>.
-"#;
-        assert_eq!(template_str, expected);
     }
 }

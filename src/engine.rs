@@ -42,10 +42,11 @@ pub fn apply_patina_from_file<PI: PatinaInterface>(patina_path: &PathBuf, pi: &P
     // Generate and display diffs
     for (i, r) in render.iter().enumerate() {
         let target_file = &patina.files[i].target;
+        let target_path = patina.get_patina_path(target_file);
 
-        let target_file_str = fs::read_to_string(target_file).unwrap_or_default();
+        let target_file_str = fs::read_to_string(&target_path).unwrap_or_default();
         let diff = TextDiff::from_lines(&target_file_str, r);
-        pi.output_file_header(target_file);
+        pi.output_file_header(&target_path);
         pi.output_diff(&diff);
         pi.output("\n");
     }
@@ -60,9 +61,16 @@ pub fn apply_patina_from_file<PI: PatinaInterface>(patina_path: &PathBuf, pi: &P
     pi.output("\nApplying patina files\n");
     for (i, r) in render.iter().enumerate() {
         let target_file = &patina.files[i].target;
-        pi.output(format!("   {}", target_file.display()));
-        if let Err(e) = fs::write(target_file, r) {
-            return Err(Error::FileWrite(target_file.clone(), e));
+        let target_path = patina.get_patina_path(target_file);
+
+        pi.output(format!("   {}", target_path.display()));
+        if let Some(target_parent) = target_path.parent() {
+            if let Err(e) = fs::create_dir_all(target_parent) {
+                return Err(Error::FileWrite(target_path, e));
+            }
+        }
+        if let Err(e) = fs::write(&target_path, r) {
+            return Err(Error::FileWrite(target_path.clone(), e));
         }
         pi.output(" ✓\n".green().to_string());
     }
@@ -108,9 +116,9 @@ mod tests {
             output.get_all_output(),
             r#"Rendered 1 files
 
-===============================================
-> Patina file tests/fixtures/template.txt.hbs <
-===============================================
+====================
+> template.txt.hbs <
+====================
 Hello, Patina User!
 This is an example Patina template file.
 Templates use the Handebars templating language. For more information, see <https://handlebarsjs.com/guide/>.
@@ -149,9 +157,9 @@ Templates use the Handebars templating language. For more information, see <http
 
         assert_eq!(
             pi.get_all_output(),
-            r#"===========================================
-> Patina file tests/fixtures/template.txt <
-===========================================
+            r#"===============================
+> tests/fixtures/template.txt <
+===============================
 + Hello, Patina User!
 + This is an example Patina template file.
 + Templates use the Handebars templating language. For more information, see <https://handlebarsjs.com/guide/>.
@@ -186,24 +194,14 @@ Templates use the Handebars templating language. For more information, see <http
 
         assert_eq!(
             pi.get_all_output(),
-            r#"===========================================
-> Patina file tests/fixtures/template.txt <
-===========================================
+            r#"===============================
+> tests/fixtures/template.txt <
+===============================
 + Hello, Patina User!
 + This is an example Patina template file.
 + Templates use the Handebars templating language. For more information, see <https://handlebarsjs.com/guide/>.
 
 Not applying patina."#
         );
-    }
-
-    #[test]
-    fn test_apply_patina_from_file_write_failed() {
-        let patina_path = PathBuf::from("tests/fixtures/invalid_target_template_patina.toml");
-
-        let apply = apply_patina_from_file(&patina_path, &TestPatinaInterface::new());
-
-        assert!(apply.is_err());
-        assert!(apply.unwrap_err().is_file_write());
     }
 }

@@ -1,3 +1,5 @@
+use std::fs;
+
 use handlebars::Handlebars;
 use log::info;
 
@@ -21,7 +23,11 @@ fn render_patina_file(
 ) -> Result<String> {
     info!("rendering patina file: {}", patina_file.template.display());
 
-    let template_str = patina_file.load_template_file_as_string()?;
+    let template_path = patina.get_patina_path(&patina_file.template);
+    let template_str = match fs::read_to_string(&template_path) {
+        Ok(template_str) => template_str,
+        Err(e) => return Err(Error::FileRead(template_path, e)),
+    };
 
     match hb.render_template(&template_str, &patina.vars) {
         Ok(render) => Ok(render),
@@ -40,6 +46,7 @@ mod tests {
     #[test]
     fn test_render_patina() {
         let patina = Patina {
+            base_path: None,
             name: String::from("sample-patina"),
             description: String::from("This is a sample Patina"),
             vars: Some(json!({
@@ -73,6 +80,7 @@ Templates use the Handebars templating language. For more information, see <http
     #[test]
     fn test_render_patina_multiple_templates() {
         let patina = Patina {
+            base_path: None,
             name: String::from("multi-template-patina"),
             description: String::from("This is a patina with multiple templates"),
             vars: Some(json!({
@@ -110,6 +118,7 @@ Templates use the Handebars templating language. For more information, see <http
     #[test]
     fn test_render_patina_missing_variable() {
         let patina = Patina {
+            base_path: None,
             name: String::from("sample-patina"),
             description: String::from("This is a sample Patina"),
             vars: Some(json!({})),
@@ -136,6 +145,7 @@ Templates use the Handebars templating language. For more information, see <http
     #[test]
     fn test_render_patina_invalid_template() {
         let patina = Patina {
+            base_path: None,
             name: String::from("sample-patina"),
             description: String::from("This is a sample Patina"),
             vars: Some(json!({})),

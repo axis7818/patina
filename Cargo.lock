@@ -237,6 +237,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "dotpatina"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "clap-verbosity-flag",
+ "colored",
+ "enum-as-inner",
+ "env_logger",
+ "handlebars",
+ "log",
+ "serde",
+ "serde_json",
+ "similar",
+ "toml",
+ "yaml-rust",
+]
+
+[[package]]
 name = "enum-as-inner"
 version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -399,24 +417,6 @@ name = "once_cell"
 version = "1.20.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "945462a4b81e43c4e3ba96bd7b49d834c6f61198356aa858733bc4acf3cbe62e"
-
-[[package]]
-name = "patina"
-version = "0.1.0"
-dependencies = [
- "clap",
- "clap-verbosity-flag",
- "colored",
- "enum-as-inner",
- "env_logger",
- "handlebars",
- "log",
- "serde",
- "serde_json",
- "similar",
- "toml",
- "yaml-rust",
-]
 
 [[package]]
 name = "pest"

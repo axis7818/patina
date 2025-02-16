@@ -1,17 +1,17 @@
-# Patina
+# dotpatina
 
 [![CI Badge](https://github.com/axis7818/patina/actions/workflows/continuous-integration.yaml/badge.svg?branch=main)](https://github.com/axis7818/patina/actions/workflows/continuous-integration.yaml)
 [![Docs Badge](https://github.com/axis7818/patina/actions/workflows/generate-docs.yaml/badge.svg)](https://camerontaylor.dev/patina/patina/index.html)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
-Patina is a rust application for managing system dotfiles and configuration.
+dotpatina is a rust application for managing system dotfiles and configuration.
 
 ## Usage
 
 ### Render
 
 ```sh
-❱ patina render --help
+❱ dotpatina render --help
 Render a patina to stdout
 
 Usage: patina render [OPTIONS] <PATINA_PATH>
@@ -29,7 +29,7 @@ Options:
 ### Apply
 
 ```sh
-❱ patina apply --help
+❱ dotpatina apply --help
 Render and apply a patina
 
 Usage: patina apply [OPTIONS] <PATINA_PATH>
@@ -49,15 +49,15 @@ Options:
 
 ```sh
 # Help
-patina --help
-patina render --help
-patina apply --help
+dotpatina --help
+dotpatina render --help
+dotpatina apply --help
 
 # Render
-patina render examples/simple/patina.toml -vvv
-patina render examples/gitconfig/patina.toml -vvv
+dotpatina render examples/simple/patina.toml -vvv
+dotpatina render examples/gitconfig/patina.toml -vvv
 
 # Apply
-patina apply examples/simple/patina.toml -vvv
-patina apply examples/gitconfig/patina.toml -vvv
+dotpatina apply examples/simple/patina.toml -vvv
+dotpatina apply examples/gitconfig/patina.toml -vvv
 ```

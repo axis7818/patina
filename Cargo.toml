@@ -1,5 +1,5 @@
 [package]
-name = "patina"
+name = "dot-patina"
 version = "0.1.0"
 edition = "2021"
 authors = ["Cameron Taylor <axis7818@gmail.com>"]

@@ -12,16 +12,21 @@ dotpatina is a rust application for managing system dotfiles and configuration.
 
 ### crates.io
 
-`dotpatina` can be installed from its [crate at crates.io](https://crates.io/crates/dotpatina).
+`dotpatina` can be installed from its crate at crates.io.
 
-`cargo install dotpatina`
+```sh
+cargo install dotpatina
+```
 
 ## Usage
 
 ### Render
 
 ```sh
-❱ dotpatina render --help
+dotpatina render --help
+```
+
+```sh
 Render a patina to stdout
 
 Usage: patina render [OPTIONS] <PATINA_PATH>
@@ -39,7 +44,10 @@ Options:
 ### Apply
 
 ```sh
-❱ dotpatina apply --help
+dotpatina apply --help
+```
+
+```sh
 Render and apply a patina
 
 Usage: patina apply [OPTIONS] <PATINA_PATH>

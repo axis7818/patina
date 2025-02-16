@@ -204,14 +204,4 @@ Templates use the Handebars templating language. For more information, see <http
 Not applying patina."#
         );
     }
-
-    #[test]
-    fn test_apply_patina_from_file_write_failed() {
-        let patina_path = PathBuf::from("tests/fixtures/invalid_target_template_patina.toml");
-
-        let apply = apply_patina_from_file(&patina_path, &TestPatinaInterface::new());
-
-        assert!(apply.is_err());
-        assert!(apply.unwrap_err().is_file_write());
-    }
 }

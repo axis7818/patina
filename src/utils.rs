@@ -94,7 +94,9 @@ pub mod tests {
     #[test]
     fn test_normalize_path_with_hidden_dir() {
         let path = normalize_path(PathBuf::from("~/.dotpatina/file.txt"));
-        assert_eq!(PathBuf::from(format!("{}/.dotpatina/file.txt", get_home_dir())), path.unwrap());
+        assert_eq!(
+            PathBuf::from(format!("{}/.dotpatina/file.txt", get_home_dir())),
+            path.unwrap()
+        );
     }
 }
-

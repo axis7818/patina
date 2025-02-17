@@ -171,12 +171,15 @@ Templates use the Handebars templating language. For more information, see <http
             vars: None,
             files: vec![PatinaFile {
                 template: PathBuf::from("tests/fixtures/template_with_escaped_handlebars.hbs"),
-                target: PathBuf::from("tests/fixtures/output.txt")
-            }]
+                target: PathBuf::from("tests/fixtures/output.txt"),
+            }],
         };
 
         let render = render_patina(&patina);
         assert!(render.is_ok());
-        assert_eq!(render.unwrap()[0], "This file has {{ escaped }} handlebars\n");
+        assert_eq!(
+            render.unwrap()[0],
+            "This file has {{ escaped }} handlebars\n"
+        );
     }
 }

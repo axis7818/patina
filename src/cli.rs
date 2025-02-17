@@ -1,8 +1,7 @@
 use std::io::Write;
 use std::path::PathBuf;
 
-use crate::engine::interface::PatinaInterface;
-use crate::engine::{apply_patina_from_file, render_patina_from_file};
+use crate::engine::{interface::PatinaInterface, PatinaEngine};
 use clap::{Args, Parser, Subcommand};
 
 /// The patina CLI renders files from templates and sets of variables as defined in patina toml files.
@@ -81,11 +80,13 @@ impl PatinaCli {
             .filter_level(self.global_options.verbosity.into())
             .init();
 
-        let pi = CliPatinaInterface::new();
+        let mut pi = CliPatinaInterface::new();
+        // let engine = PatinaEngine::new(&pi, patina_path, tags)
         let result = match &self.command {
-            Command::Render { options } => render_patina_from_file(&options.patina_path, &pi),
+            Command::Render { options } => options.engine(&pi).render_patina(),
             Command::Apply { options, no_input } => {
-                apply_patina_from_file(&options.patina_path, &pi, *no_input)
+                pi.set_is_input_enabled(!*no_input);
+                options.engine(&pi).apply_patina()
             }
         };
 
@@ -95,11 +96,15 @@ impl PatinaCli {
     }
 }
 
-struct CliPatinaInterface {}
+struct CliPatinaInterface {
+    is_input_enabled: bool,
+}
 
 impl CliPatinaInterface {
     fn new() -> CliPatinaInterface {
-        CliPatinaInterface {}
+        CliPatinaInterface {
+            is_input_enabled: true,
+        }
     }
 }
 
@@ -110,5 +115,22 @@ impl PatinaInterface for CliPatinaInterface {
     {
         print!("{}", s.into());
         let _ = std::io::stdout().flush();
+    }
+
+    fn set_is_input_enabled(&mut self, value: bool) {
+        self.is_input_enabled = value
+    }
+
+    fn is_input_enabled(&self) -> bool {
+        self.is_input_enabled
+    }
+}
+
+impl PatinaCommandOptions {
+    fn engine<'a, PI>(&self, pi: &'a PI) -> PatinaEngine<'a, PI>
+    where
+        PI: PatinaInterface,
+    {
+        PatinaEngine::new(pi, &self.patina_path, self.tags.clone())
     }
 }

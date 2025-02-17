@@ -12,6 +12,12 @@ pub trait PatinaInterface {
     where
         S: Into<String>;
 
+    /// Set whether or not input is enabled
+    fn set_is_input_enabled(&mut self, value: bool);
+
+    /// Get whether or not input is enabled
+    fn is_input_enabled(&self) -> bool;
+
     /// Prompts the user for confirmation to apply the patina
     fn confirm_apply(&self) -> Result<bool> {
         self.output("Do you want to continue? (y/n): ");
@@ -69,7 +75,7 @@ pub mod test {
 
     pub struct TestPatinaInterface {
         pub confirm_apply: bool,
-        no_input: bool,
+        is_input_enabled: bool,
         pub lines: RefCell<Vec<String>>,
     }
 
@@ -79,7 +85,7 @@ pub mod test {
 
             TestPatinaInterface {
                 confirm_apply: true,
-                no_input: false,
+                is_input_enabled: true,
                 lines: RefCell::new(vec![]),
             }
         }
@@ -99,6 +105,14 @@ pub mod test {
 
         fn confirm_apply(&self) -> Result<bool> {
             Ok(self.confirm_apply)
+        }
+
+        fn set_is_input_enabled(&mut self, value: bool) {
+            self.is_input_enabled = value
+        }
+
+        fn is_input_enabled(&self) -> bool {
+            self.is_input_enabled
         }
     }
 }

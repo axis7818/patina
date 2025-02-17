@@ -7,34 +7,34 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'patina'",
+            "name": "Debug executable 'dotpatina'",
             "cargo": {
                 "args": [
                     "build",
-                    "--bin=patina",
-                    "--package=patina"
+                    "--bin=dotpatina",
+                    "--package=dotpatina"
                 ],
                 "filter": {
-                    "name": "patina",
+                    "name": "dotpatina",
                     "kind": "bin"
                 }
             },
-            "args": ["-vvvv", "render", "examples/simple/patina.toml"],
+            "args": ["-vvvv", "apply", "examples/gitconfig/patina.toml"],
             "cwd": "${workspaceFolder}"
         },
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in executable 'patina'",
+            "name": "Debug unit tests in executable 'dotpatina'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
-                    "--bin=patina",
-                    "--package=patina"
+                    "--bin=dotpatina",
+                    "--package=dotpatina"
                 ],
                 "filter": {
-                    "name": "patina",
+                    "name": "dotpatina",
                     "kind": "bin"
                 }
             },

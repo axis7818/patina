@@ -1,10 +1,12 @@
 use std::{fs, path::PathBuf};
 
 use colored::Colorize;
+use diff::DiffAnalysis;
 use interface::PatinaInterface;
 use log::info;
 use similar::TextDiff;
 
+mod diff;
 pub mod interface;
 
 use crate::{
@@ -34,10 +36,15 @@ pub fn render_patina_from_file<PI: PatinaInterface>(patina_path: &PathBuf, pi: &
 /// Applies all of the Patina files
 pub fn apply_patina_from_file<PI: PatinaInterface>(patina_path: &PathBuf, pi: &PI) -> Result<()> {
     let patina = Patina::from_toml_file(patina_path)?;
-
     info!("got patina: {:#?}", patina);
+    apply_patina(patina, pi)
+}
 
+/// Applies all of the Patina files
+pub fn apply_patina<PI: PatinaInterface>(patina: Patina, pi: &PI) -> Result<()> {
     let render = render_patina(&patina)?;
+
+    let mut any_changes = false;
 
     // Generate and display diffs
     for (i, r) in render.iter().enumerate() {
@@ -46,9 +53,19 @@ pub fn apply_patina_from_file<PI: PatinaInterface>(patina_path: &PathBuf, pi: &P
 
         let target_file_str = fs::read_to_string(&target_path).unwrap_or_default();
         let diff = TextDiff::from_lines(&target_file_str, r);
+        if diff.any_changes() {
+            any_changes = true
+        }
+
         pi.output_file_header(&target_path);
         pi.output_diff(&diff);
         pi.output("\n");
+    }
+
+    // If there are not changes, quit
+    if !any_changes {
+        pi.output("No file changes detected in the patina");
+        return Ok(());
     }
 
     // Get user confirmation to continue
@@ -191,17 +208,25 @@ Templates use the Handebars templating language. For more information, see <http
         let apply = apply_patina_from_file(&patina_path, &pi);
 
         assert!(apply.is_ok());
+        assert!(pi.get_all_output().contains("Not applying patina."))
+    }
 
-        assert_eq!(
-            pi.get_all_output(),
-            r#"===============================
-> tests/fixtures/template.txt <
-===============================
-+ Hello, Patina User!
-+ This is an example Patina template file.
-+ Templates use the Handebars templating language. For more information, see <https://handlebarsjs.com/guide/>.
+    #[test]
+    fn test_apply_patina_does_nothing_if_there_are_no_changes() {
+        let patina = Patina {
+            name: "test".to_string(),
+            description: "".to_string(),
+            base_path: None,
+            vars: None,
+            files: vec![],
+        };
 
-Not applying patina."#
-        );
+        let pi = TestPatinaInterface::new();
+        let apply = apply_patina(patina, &pi);
+
+        assert!(apply.is_ok());
+        assert!(pi
+            .get_all_output()
+            .contains("No file changes detected in the patina"));
     }
 }

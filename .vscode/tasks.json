@@ -5,6 +5,11 @@
             "label": "rust: cargo doc",
             "command": "cargo doc --no-deps --open",
             "type": "shell",
+        },
+        {
+            "label": "rust: cargo fmt -- --check",
+            "command": "cargo fmt -- --check",
+            "type": "shell",
         }
     ]
 }

@@ -8,7 +8,8 @@ use crate::utils::{Error, Result};
 
 /// Renders all of the files in a Patina, each to a string in the result vector.
 pub fn render_patina(patina: &Patina) -> Result<Vec<String>> {
-    let hb = Handlebars::new();
+    let mut hb = Handlebars::new();
+    hb.register_escape_fn(handlebars::no_escape);
     patina
         .files
         .iter()
@@ -159,5 +160,26 @@ Templates use the Handebars templating language. For more information, see <http
 
         assert!(render.is_err());
         assert!(render.unwrap_err().is_render_template());
+    }
+
+    #[test]
+    fn test_render_patina_escaped_handlebars() {
+        let patina = Patina {
+            name: "escaped_handlebars".to_string(),
+            description: "this patina shows escaping handlebars".to_string(),
+            base_path: None,
+            vars: None,
+            files: vec![PatinaFile {
+                template: PathBuf::from("tests/fixtures/template_with_escaped_handlebars.hbs"),
+                target: PathBuf::from("tests/fixtures/output.txt"),
+            }],
+        };
+
+        let render = render_patina(&patina);
+        assert!(render.is_ok());
+        assert_eq!(
+            render.unwrap()[0],
+            "This file has {{ escaped }} handlebars\n"
+        );
     }
 }

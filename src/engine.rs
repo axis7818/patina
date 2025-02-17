@@ -1,26 +1,29 @@
 use std::{fs, path::PathBuf};
 
 use colored::Colorize;
-use diff::DiffAnalysis;
 use interface::PatinaInterface;
 use log::info;
 use similar::TextDiff;
 
-mod diff;
 pub mod interface;
 
 use crate::{
+    diff::DiffAnalysis,
     patina::Patina,
-    templating::render_patina,
+    templating,
     utils::{Error, Result},
 };
 
 /// Renders a Patina from a Patina toml file path.
 pub fn render_patina_from_file<PI: PatinaInterface>(patina_path: &PathBuf, pi: &PI) -> Result<()> {
     let patina = Patina::from_toml_file(patina_path)?;
-
     info!("got patina: {:#?}", patina);
-    let render = render_patina(&patina)?;
+    render_patina(patina, pi)
+}
+
+/// Renders a Patina
+pub fn render_patina<PI: PatinaInterface>(patina: Patina, pi: &PI) -> Result<()> {
+    let render = templating::render_patina(&patina)?;
 
     pi.output(format!("Rendered {} files\n\n", render.len()));
     for (i, r) in render.iter().enumerate() {
@@ -42,7 +45,7 @@ pub fn apply_patina_from_file<PI: PatinaInterface>(patina_path: &PathBuf, pi: &P
 
 /// Applies all of the Patina files
 pub fn apply_patina<PI: PatinaInterface>(patina: Patina, pi: &PI) -> Result<()> {
-    let render = render_patina(&patina)?;
+    let render = templating::render_patina(&patina)?;
 
     let mut any_changes = false;
 

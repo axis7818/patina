@@ -3,6 +3,7 @@ use std::path::PathBuf;
 
 use crate::engine::{interface::PatinaInterface, PatinaEngine};
 use clap::{Args, Parser, Subcommand};
+use log::info;
 
 /// The patina CLI renders files from templates and sets of variables as defined in patina toml files.
 #[derive(Parser, Debug)]
@@ -131,6 +132,15 @@ impl PatinaCommandOptions {
     where
         PI: PatinaInterface,
     {
-        PatinaEngine::new(pi, &self.patina_path, self.tags.clone())
+        let engine = PatinaEngine::new(pi, &self.patina_path, self.tags.clone());
+        info!(
+            r#"New PatinaEngine
+            path = {}
+            tags = {:?}
+        "#,
+            self.patina_path.display(),
+            self.tags
+        );
+        engine
     }
 }

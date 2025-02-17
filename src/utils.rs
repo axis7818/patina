@@ -68,17 +68,33 @@ pub mod tests {
     fn test_normalize_path() {
         let path = normalize_path(PathBuf::from("path/to/file.txt"));
         assert_eq!(PathBuf::from("path/to/file.txt"), path.unwrap());
+    }
 
+    #[test]
+    fn test_normalize_path_with_dotdot() {
         let path = normalize_path(PathBuf::from("path/to/../file.txt"));
         assert_eq!(PathBuf::from("path/file.txt"), path.unwrap());
+    }
 
+    #[test]
+    fn test_normalize_path_with_multiple_slashes() {
         let path = normalize_path(PathBuf::from("path/to///file.txt"));
         assert_eq!(PathBuf::from("path/to/file.txt"), path.unwrap());
+    }
 
+    #[test]
+    fn test_normalize_path_home_dir() {
         let path = normalize_path(PathBuf::from("~/path/to/file.txt"));
         assert_eq!(
             PathBuf::from(format!("{}/path/to/file.txt", get_home_dir())),
             path.unwrap()
         );
     }
+
+    #[test]
+    fn test_normalize_path_with_hidden_dir() {
+        let path = normalize_path(PathBuf::from("~/.dotpatina/file.txt"));
+        assert_eq!(PathBuf::from(format!("{}/.dotpatina/file.txt", get_home_dir())), path.unwrap());
+    }
 }
+

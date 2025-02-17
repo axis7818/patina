@@ -3,6 +3,7 @@
 use cli::PatinaCli;
 
 mod cli;
+mod diff;
 mod engine;
 mod patina;
 mod templating;

@@ -53,16 +53,19 @@ pub fn normalize_path<P: AsRef<Path>>(path: P) -> Option<PathBuf> {
 }
 
 #[cfg(test)]
-mod tests {
+pub mod tests {
     use std::path::PathBuf;
 
     use super::normalize_path;
 
-    #[test]
-    fn test_normalize_path() {
+    pub fn get_home_dir() -> String {
         let home_dir = dirs::home_dir().unwrap();
         let home_dir = home_dir.to_str().unwrap();
+        String::from(home_dir)
+    }
 
+    #[test]
+    fn test_normalize_path() {
         let path = normalize_path(PathBuf::from("path/to/file.txt"));
         assert_eq!(PathBuf::from("path/to/file.txt"), path.unwrap());
 
@@ -74,7 +77,7 @@ mod tests {
 
         let path = normalize_path(PathBuf::from("~/path/to/file.txt"));
         assert_eq!(
-            PathBuf::from(format!("{}/path/to/file.txt", home_dir)),
+            PathBuf::from(format!("{}/path/to/file.txt", get_home_dir())),
             path.unwrap()
         );
     }

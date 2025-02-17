@@ -56,7 +56,10 @@ impl Patina {
     }
 
     /// Get a path within the context of this Patina
-    pub fn get_patina_path(&self, path: &Path) -> PathBuf {
+    pub fn get_patina_path<P: AsRef<Path>>(&self, path: P) -> PathBuf {
+        let path = path.as_ref();
+        let path = normalize_path(path).unwrap_or(path.to_path_buf());
+
         if path.is_absolute() {
             return path.to_path_buf();
         }
@@ -78,6 +81,7 @@ impl Patina {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::utils::tests::get_home_dir;
 
     #[test]
     fn test_patina_deserialize() {
@@ -240,5 +244,50 @@ mod tests {
         assert!(patina.is_err());
         let err = patina.unwrap_err();
         assert!(matches!(err, Error::TomlParse(_)));
+    }
+
+    #[test]
+    fn test_patina_get_patina_path_in_home_dir() {
+        let patina = Patina {
+            name: "test".to_string(),
+            description: "".to_string(),
+            base_path: Some(PathBuf::from("tests")),
+            vars: None,
+            files: vec![],
+        };
+
+        let result = patina.get_patina_path(PathBuf::from("~/.dotpatina/home-dir-test.txt"));
+        assert_eq!(
+            PathBuf::from(format!("{}/.dotpatina/home-dir-test.txt", get_home_dir())),
+            result
+        );
+    }
+
+    #[test]
+    fn test_patina_get_patina_path_absolute_dir() {
+        let patina = Patina {
+            name: "test".to_string(),
+            description: "".to_string(),
+            base_path: Some(PathBuf::from("tests")),
+            vars: None,
+            files: vec![],
+        };
+
+        let result = patina.get_patina_path(PathBuf::from("/tmp/dotpatina/absolute-test.txt"));
+        assert_eq!(PathBuf::from("/tmp/dotpatina/absolute-test.txt"), result);
+    }
+
+    #[test]
+    fn test_patina_get_patina_path_combine_parts() {
+        let patina = Patina {
+            name: "test".to_string(),
+            description: "".to_string(),
+            base_path: Some(PathBuf::from("tests")),
+            vars: None,
+            files: vec![],
+        };
+
+        let result = patina.get_patina_path(PathBuf::from("fixtures/test.txt"));
+        assert_eq!(PathBuf::from("tests/fixtures/test.txt"), result);
     }
 }

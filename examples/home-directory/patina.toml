@@ -1,0 +1,6 @@
+name = "home directory"
+description = "A patina that targets a file in the home directory"
+
+[[files]]
+template = "home-dir.txt"
+target = "~/.dotpatina/home-dir.txt"

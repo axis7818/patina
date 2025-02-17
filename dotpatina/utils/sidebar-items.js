@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["Error"],"type":["Result"]};
+window.SIDEBAR_ITEMS = {"enum":["Error"],"fn":["normalize_path"],"type":["Result"]};

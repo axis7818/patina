@@ -205,13 +205,40 @@
 <a href="#204" id="204">204</a>
 <a href="#205" id="205">205</a>
 <a href="#206" id="206">206</a>
-<a href="#207" id="207">207</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::{fs, path::PathBuf};
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a>
+<a href="#224" id="224">224</a>
+<a href="#225" id="225">225</a>
+<a href="#226" id="226">226</a>
+<a href="#227" id="227">227</a>
+<a href="#228" id="228">228</a>
+<a href="#229" id="229">229</a>
+<a href="#230" id="230">230</a>
+<a href="#231" id="231">231</a>
+<a href="#232" id="232">232</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::{fs, path::PathBuf};
 
 <span class="kw">use </span>colored::Colorize;
+<span class="kw">use </span>diff::DiffAnalysis;
 <span class="kw">use </span>interface::PatinaInterface;
 <span class="kw">use </span>log::info;
 <span class="kw">use </span>similar::TextDiff;
 
+<span class="kw">mod </span>diff;
 <span class="kw">pub mod </span>interface;
 
 <span class="kw">use crate</span>::{
@@ -241,10 +268,15 @@
 <span class="doccomment">/// Applies all of the Patina files
 </span><span class="kw">pub fn </span>apply_patina_from_file&lt;PI: PatinaInterface&gt;(patina_path: <span class="kw-2">&amp;</span>PathBuf, pi: <span class="kw-2">&amp;</span>PI) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="kw">let </span>patina = Patina::from_toml_file(patina_path)<span class="question-mark">?</span>;
-
     <span class="macro">info!</span>(<span class="string">"got patina: {:#?}"</span>, patina);
+    apply_patina(patina, pi)
+}
 
+<span class="doccomment">/// Applies all of the Patina files
+</span><span class="kw">pub fn </span>apply_patina&lt;PI: PatinaInterface&gt;(patina: Patina, pi: <span class="kw-2">&amp;</span>PI) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="kw">let </span>render = render_patina(<span class="kw-2">&amp;</span>patina)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span><span class="kw-2">mut </span>any_changes = <span class="bool-val">false</span>;
 
     <span class="comment">// Generate and display diffs
     </span><span class="kw">for </span>(i, r) <span class="kw">in </span>render.iter().enumerate() {
@@ -253,9 +285,19 @@
 
         <span class="kw">let </span>target_file_str = fs::read_to_string(<span class="kw-2">&amp;</span>target_path).unwrap_or_default();
         <span class="kw">let </span>diff = TextDiff::from_lines(<span class="kw-2">&amp;</span>target_file_str, r);
+        <span class="kw">if </span>diff.any_changes() {
+            any_changes = <span class="bool-val">true
+        </span>}
+
         pi.output_file_header(<span class="kw-2">&amp;</span>target_path);
         pi.output_diff(<span class="kw-2">&amp;</span>diff);
         pi.output(<span class="string">"\n"</span>);
+    }
+
+    <span class="comment">// If there are not changes, quit
+    </span><span class="kw">if </span>!any_changes {
+        pi.output(<span class="string">"No file changes detected in the patina"</span>);
+        <span class="kw">return </span><span class="prelude-val">Ok</span>(());
     }
 
     <span class="comment">// Get user confirmation to continue
@@ -398,18 +440,26 @@ Templates use the Handebars templating language. For more information, see &lt;h
         <span class="kw">let </span>apply = apply_patina_from_file(<span class="kw-2">&amp;</span>patina_path, <span class="kw-2">&amp;</span>pi);
 
         <span class="macro">assert!</span>(apply.is_ok());
+        <span class="macro">assert!</span>(pi.get_all_output().contains(<span class="string">"Not applying patina."</span>))
+    }
 
-        <span class="macro">assert_eq!</span>(
-            pi.get_all_output(),
-            <span class="string">r#"===============================
-&gt; tests/fixtures/template.txt &lt;
-===============================
-+ Hello, Patina User!
-+ This is an example Patina template file.
-+ Templates use the Handebars templating language. For more information, see &lt;https://handlebarsjs.com/guide/&gt;.
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_apply_patina_does_nothing_if_there_are_no_changes() {
+        <span class="kw">let </span>patina = Patina {
+            name: <span class="string">"test"</span>.to_string(),
+            description: <span class="string">""</span>.to_string(),
+            base_path: <span class="prelude-val">None</span>,
+            vars: <span class="prelude-val">None</span>,
+            files: <span class="macro">vec!</span>[],
+        };
 
-Not applying patina."#
-        </span>);
+        <span class="kw">let </span>pi = TestPatinaInterface::new();
+        <span class="kw">let </span>apply = apply_patina(patina, <span class="kw-2">&amp;</span>pi);
+
+        <span class="macro">assert!</span>(apply.is_ok());
+        <span class="macro">assert!</span>(pi
+            .get_all_output()
+            .contains(<span class="string">"No file changes detected in the patina"</span>));
     }
 }
 </code></pre></div></section></main></body></html>

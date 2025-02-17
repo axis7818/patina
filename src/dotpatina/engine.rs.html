@@ -230,29 +230,35 @@
 <a href="#229" id="229">229</a>
 <a href="#230" id="230">230</a>
 <a href="#231" id="231">231</a>
-<a href="#232" id="232">232</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::{fs, path::PathBuf};
+<a href="#232" id="232">232</a>
+<a href="#233" id="233">233</a>
+<a href="#234" id="234">234</a>
+<a href="#235" id="235">235</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::{fs, path::PathBuf};
 
 <span class="kw">use </span>colored::Colorize;
-<span class="kw">use </span>diff::DiffAnalysis;
 <span class="kw">use </span>interface::PatinaInterface;
 <span class="kw">use </span>log::info;
 <span class="kw">use </span>similar::TextDiff;
 
-<span class="kw">mod </span>diff;
 <span class="kw">pub mod </span>interface;
 
 <span class="kw">use crate</span>::{
+    diff::DiffAnalysis,
     patina::Patina,
-    templating::render_patina,
+    templating,
     utils::{Error, <span class="prelude-ty">Result</span>},
 };
 
 <span class="doccomment">/// Renders a Patina from a Patina toml file path.
 </span><span class="kw">pub fn </span>render_patina_from_file&lt;PI: PatinaInterface&gt;(patina_path: <span class="kw-2">&amp;</span>PathBuf, pi: <span class="kw-2">&amp;</span>PI) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="kw">let </span>patina = Patina::from_toml_file(patina_path)<span class="question-mark">?</span>;
-
     <span class="macro">info!</span>(<span class="string">"got patina: {:#?}"</span>, patina);
-    <span class="kw">let </span>render = render_patina(<span class="kw-2">&amp;</span>patina)<span class="question-mark">?</span>;
+    render_patina(patina, pi)
+}
+
+<span class="doccomment">/// Renders a Patina
+</span><span class="kw">pub fn </span>render_patina&lt;PI: PatinaInterface&gt;(patina: Patina, pi: <span class="kw-2">&amp;</span>PI) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">let </span>render = templating::render_patina(<span class="kw-2">&amp;</span>patina)<span class="question-mark">?</span>;
 
     pi.output(<span class="macro">format!</span>(<span class="string">"Rendered {} files\n\n"</span>, render.len()));
     <span class="kw">for </span>(i, r) <span class="kw">in </span>render.iter().enumerate() {
@@ -274,7 +280,7 @@
 
 <span class="doccomment">/// Applies all of the Patina files
 </span><span class="kw">pub fn </span>apply_patina&lt;PI: PatinaInterface&gt;(patina: Patina, pi: <span class="kw-2">&amp;</span>PI) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-    <span class="kw">let </span>render = render_patina(<span class="kw-2">&amp;</span>patina)<span class="question-mark">?</span>;
+    <span class="kw">let </span>render = templating::render_patina(<span class="kw-2">&amp;</span>patina)<span class="question-mark">?</span>;
 
     <span class="kw">let </span><span class="kw-2">mut </span>any_changes = <span class="bool-val">false</span>;
 

@@ -1,11 +1,8 @@
-use std::{
-    fs,
-    path::{Path, PathBuf},
-};
+use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
-use crate::utils::{Error, Result};
+use crate::utils::{normalize_path, Error, Result};
 
 /// A Patina describes a set of variables and templates that can be rendered to files.
 #[derive(Debug, Default, PartialEq, Serialize, Deserialize)]
@@ -71,9 +68,9 @@ impl Patina {
             .clone();
         result.push(path);
 
-        match fs::canonicalize(&result) {
-            Ok(r) => r,
-            Err(_) => result,
+        match normalize_path(&result) {
+            Some(result) => result,
+            None => result,
         }
     }
 }

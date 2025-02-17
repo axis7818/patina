@@ -5,6 +5,7 @@
         "clippy",
         "dotpatina",
         "Handebars",
-        "serde"
+        "serde",
+        "shellexpand"
     ]
 }

@@ -37,14 +37,18 @@ pub fn render_patina<PI: PatinaInterface>(patina: Patina, pi: &PI) -> Result<()>
 }
 
 /// Applies all of the Patina files
-pub fn apply_patina_from_file<PI: PatinaInterface>(patina_path: &PathBuf, pi: &PI) -> Result<()> {
+pub fn apply_patina_from_file<PI: PatinaInterface>(
+    patina_path: &PathBuf,
+    pi: &PI,
+    no_input: bool,
+) -> Result<()> {
     let patina = Patina::from_toml_file(patina_path)?;
     info!("got patina: {:#?}", patina);
-    apply_patina(patina, pi)
+    apply_patina(patina, pi, no_input)
 }
 
 /// Applies all of the Patina files
-pub fn apply_patina<PI: PatinaInterface>(patina: Patina, pi: &PI) -> Result<()> {
+pub fn apply_patina<PI: PatinaInterface>(patina: Patina, pi: &PI, no_input: bool) -> Result<()> {
     let render = templating::render_patina(&patina)?;
 
     let mut any_changes = false;
@@ -72,7 +76,7 @@ pub fn apply_patina<PI: PatinaInterface>(patina: Patina, pi: &PI) -> Result<()> 
     }
 
     // Get user confirmation to continue
-    if !pi.confirm_apply()? {
+    if !no_input && !pi.confirm_apply()? {
         pi.output("Not applying patina.");
         return Ok(());
     }
@@ -171,7 +175,7 @@ Templates use the Handebars templating language. For more information, see <http
         let applied_file_path = TestTargetFile::new("tests/fixtures/template.txt");
 
         let pi = TestPatinaInterface::new();
-        let apply = apply_patina_from_file(&patina_path, &pi);
+        let apply = apply_patina_from_file(&patina_path, &pi, true);
 
         assert!(apply.is_ok());
 
@@ -208,7 +212,7 @@ Templates use the Handebars templating language. For more information, see <http
 
         let mut pi = TestPatinaInterface::new();
         pi.confirm_apply = false;
-        let apply = apply_patina_from_file(&patina_path, &pi);
+        let apply = apply_patina_from_file(&patina_path, &pi, false);
 
         assert!(apply.is_ok());
         assert!(pi.get_all_output().contains("Not applying patina."))
@@ -225,7 +229,7 @@ Templates use the Handebars templating language. For more information, see <http
         };
 
         let pi = TestPatinaInterface::new();
-        let apply = apply_patina(patina, &pi);
+        let apply = apply_patina(patina, &pi, true);
 
         assert!(apply.is_ok());
         assert!(pi

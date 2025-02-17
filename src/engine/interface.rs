@@ -12,18 +12,8 @@ pub trait PatinaInterface {
     where
         S: Into<String>;
 
-    /// Disable confirmation prompt
-    fn disable_confirm(&mut self);
-
-    /// Check if confirmation is disabled
-    fn is_confirm_disabled(&self) -> bool;
-
     /// Prompts the user for confirmation to apply the patina
     fn confirm_apply(&self) -> Result<bool> {
-        if self.is_confirm_disabled() {
-            return Ok(true);
-        }
-
         self.output("Do you want to continue? (y/n): ");
         let mut input = String::new();
         match std::io::stdin().read_line(&mut input) {
@@ -109,14 +99,6 @@ pub mod test {
 
         fn confirm_apply(&self) -> Result<bool> {
             Ok(self.confirm_apply)
-        }
-
-        fn disable_confirm(&mut self) {
-            self.no_input = true
-        }
-
-        fn is_confirm_disabled(&self) -> bool {
-            self.no_input
         }
     }
 }

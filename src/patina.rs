@@ -1,8 +1,11 @@
 use std::path::{Path, PathBuf};
 
+use patina_file::PatinaFile;
 use serde::{Deserialize, Serialize};
 
 use crate::utils::{normalize_path, Error, Result};
+
+pub mod patina_file;
 
 /// A Patina describes a set of variables and templates that can be rendered to files.
 #[derive(Debug, Default, PartialEq, Serialize, Deserialize)]
@@ -25,16 +28,6 @@ pub struct Patina {
     /// The path to this patina
     #[serde(skip)]
     pub base_path: Option<PathBuf>,
-}
-
-/// A PatinaFile describes a template file and its target output path.
-#[derive(Debug, Default, PartialEq, Serialize, Deserialize)]
-pub struct PatinaFile {
-    /// The path to the template file
-    pub template: PathBuf,
-
-    /// The path to the garget output file
-    pub target: PathBuf,
 }
 
 impl Patina {

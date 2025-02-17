@@ -16,10 +16,6 @@ pub struct PatinaCli {
     /// The specified command to run
     #[clap(subcommand)]
     command: Command,
-
-    #[clap(skip)]
-    /// When true, confirmation is disabled
-    confirm_disabled: bool,
 }
 
 /// Options that apply globally to the CLI
@@ -67,6 +63,10 @@ struct PatinaCommandOptions {
     /// Disable colors
     #[clap(long = "no-color")]
     no_color: bool,
+
+    /// The list of tags to filter on
+    #[clap(short = 't', long = "A list of tags to filter on")]
+    tags: Vec<String>,
 }
 
 impl PatinaCli {
@@ -81,47 +81,34 @@ impl PatinaCli {
             .filter_level(self.global_options.verbosity.into())
             .init();
 
-        if let Command::Apply { no_input, .. } = &self.command {
-            if *no_input {
-                self.disable_confirm();
+        let pi = CliPatinaInterface::new();
+        let result = match &self.command {
+            Command::Render { options } => render_patina_from_file(&options.patina_path, &pi),
+            Command::Apply { options, no_input } => {
+                apply_patina_from_file(&options.patina_path, &pi, *no_input)
             }
         };
 
-        match &self.command {
-            Command::Render { options } => self.render(options),
-            Command::Apply { options, .. } => self.apply(options),
-        }
-    }
-
-    fn render(&self, options: &PatinaCommandOptions) {
-        colored::control::set_override(!options.no_color);
-        if let Err(e) = render_patina_from_file(&options.patina_path, self) {
-            panic!("{:?}", e);
-        };
-    }
-
-    fn apply(&self, options: &PatinaCommandOptions) {
-        colored::control::set_override(!options.no_color);
-        if let Err(e) = apply_patina_from_file(&options.patina_path, self) {
-            panic!("{:?}", e);
+        if let Err(e) = result {
+            panic!("{:?}", e)
         }
     }
 }
 
-impl PatinaInterface for PatinaCli {
+struct CliPatinaInterface {}
+
+impl CliPatinaInterface {
+    fn new() -> CliPatinaInterface {
+        CliPatinaInterface {}
+    }
+}
+
+impl PatinaInterface for CliPatinaInterface {
     fn output<S>(&self, s: S)
     where
         S: Into<String>,
     {
         print!("{}", s.into());
         let _ = std::io::stdout().flush();
-    }
-
-    fn disable_confirm(&mut self) {
-        self.confirm_disabled = true
-    }
-
-    fn is_confirm_disabled(&self) -> bool {
-        self.confirm_disabled
     }
 }

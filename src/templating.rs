@@ -3,7 +3,8 @@ use std::fs;
 use handlebars::Handlebars;
 use log::info;
 
-use crate::patina::{Patina, PatinaFile};
+use crate::patina::patina_file::PatinaFile;
+use crate::patina::Patina;
 use crate::utils::{Error, Result};
 
 /// Renders all of the files in a Patina, each to a string in the result vector.
@@ -38,8 +39,6 @@ fn render_patina_file(
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
-
     use serde_json::json;
 
     use super::*;
@@ -56,10 +55,10 @@ mod tests {
                     "last": "User"
                 }
             })),
-            files: vec![PatinaFile {
-                template: PathBuf::from("tests/fixtures/template.txt.hbs"),
-                target: PathBuf::from("tests/fixtures/template.txt"),
-            }],
+            files: vec![PatinaFile::new(
+                "tests/fixtures/template.txt.hbs",
+                "tests/fixtures/template.txt",
+            )],
         };
 
         let render = render_patina(&patina);
@@ -90,18 +89,9 @@ Templates use the Handebars templating language. For more information, see <http
                 "C": "template_c",
             })),
             files: vec![
-                PatinaFile {
-                    template: PathBuf::from("tests/fixtures/template_a.txt.hbs"),
-                    target: PathBuf::from("output_a.txt"),
-                },
-                PatinaFile {
-                    template: PathBuf::from("tests/fixtures/template_b.txt.hbs"),
-                    target: PathBuf::from("output_b.txt"),
-                },
-                PatinaFile {
-                    template: PathBuf::from("tests/fixtures/template_c.txt.hbs"),
-                    target: PathBuf::from("output_c.txt"),
-                },
+                PatinaFile::new("tests/fixtures/template_a.txt.hbs", "output_a.txt"),
+                PatinaFile::new("tests/fixtures/template_b.txt.hbs", "output_b.txt"),
+                PatinaFile::new("tests/fixtures/template_c.txt.hbs", "output_c.txt"),
             ],
         };
 
@@ -123,10 +113,10 @@ Templates use the Handebars templating language. For more information, see <http
             name: String::from("sample-patina"),
             description: String::from("This is a sample Patina"),
             vars: Some(json!({})),
-            files: vec![PatinaFile {
-                template: PathBuf::from("tests/fixtures/template.txt.hbs"),
-                target: PathBuf::from("tests/fixtures/template.txt"),
-            }],
+            files: vec![PatinaFile::new(
+                "tests/fixtures/template.txt.hbs",
+                "tests/fixtures/template.txt",
+            )],
         };
 
         let render = render_patina(&patina);
@@ -150,10 +140,10 @@ Templates use the Handebars templating language. For more information, see <http
             name: String::from("sample-patina"),
             description: String::from("This is a sample Patina"),
             vars: Some(json!({})),
-            files: vec![PatinaFile {
-                template: PathBuf::from("tests/fixtures/invalid_template.txt.hbs"),
-                target: PathBuf::from("tests/fixtures/template.txt"),
-            }],
+            files: vec![PatinaFile::new(
+                "tests/fixtures/invalid_template.txt.hbs",
+                "tests/fixtures/template.txt",
+            )],
         };
 
         let render = render_patina(&patina);
@@ -169,10 +159,10 @@ Templates use the Handebars templating language. For more information, see <http
             description: "this patina shows escaping handlebars".to_string(),
             base_path: None,
             vars: None,
-            files: vec![PatinaFile {
-                template: PathBuf::from("tests/fixtures/template_with_escaped_handlebars.hbs"),
-                target: PathBuf::from("tests/fixtures/output.txt"),
-            }],
+            files: vec![PatinaFile::new(
+                "tests/fixtures/template_with_escaped_handlebars.hbs",
+                "tests/fixtures/output.txt",
+            )],
         };
 
         let render = render_patina(&patina);

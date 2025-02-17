@@ -29,7 +29,7 @@ where
     patina_path: PathBuf,
 
     /// The set of tags to filter on
-    tags: Vec<String>,
+    tags: Option<Vec<String>>,
 }
 
 impl<'a, PI> PatinaEngine<'a, PI>
@@ -38,6 +38,10 @@ where
 {
     /// Create a new PatinaEngine
     pub fn new(pi: &'a PI, patina_path: &Path, tags: Vec<String>) -> PatinaEngine<'a, PI> {
+        let tags = match &*tags {
+            [] => None,
+            _ => Some(tags),
+        };
         PatinaEngine {
             pi,
             patina_path: patina_path.to_path_buf(),
@@ -49,15 +53,13 @@ where
     pub fn render_patina(&self) -> Result<()> {
         let patina = Patina::from_toml_file(&self.patina_path)?;
         info!("got patina: {:#?}", patina);
-        let render = templating::render_patina(&patina)?;
+        let render = templating::render_patina(&patina, self.tags.clone())?;
 
         self.pi
             .output(format!("Rendered {} files\n\n", render.len()));
-        for (i, r) in render.iter().enumerate() {
-            let template_file = &patina.files[i].template;
-
-            self.pi.output_file_header(template_file);
-            self.pi.output(format!("{}\n", r));
+        for r in render.iter() {
+            self.pi.output_file_header(&r.patina_file.template);
+            self.pi.output(format!("{}\n", r.render_str));
         }
 
         Ok(())
@@ -67,17 +69,16 @@ where
     pub fn apply_patina(&self) -> Result<()> {
         let patina = Patina::from_toml_file(&self.patina_path)?;
         info!("got patina: {:#?}", patina);
-        let render = templating::render_patina(&patina)?;
+        let render = templating::render_patina(&patina, self.tags.clone())?;
 
         let mut any_changes = false;
 
         // Generate and display diffs
-        for (i, r) in render.iter().enumerate() {
-            let target_file = &patina.files[i].target;
-            let target_path = patina.get_patina_path(target_file);
+        for r in render.iter() {
+            let target_path = patina.get_patina_path(&r.patina_file.target);
 
             let target_file_str = fs::read_to_string(&target_path).unwrap_or_default();
-            let diff = TextDiff::from_lines(&target_file_str, r);
+            let diff = TextDiff::from_lines(&target_file_str, &r.render_str);
             if diff.any_changes() {
                 any_changes = true
             }
@@ -101,9 +102,8 @@ where
 
         // Write out all files
         self.pi.output("\nApplying patina files\n");
-        for (i, r) in render.iter().enumerate() {
-            let target_file = &patina.files[i].target;
-            let target_path = patina.get_patina_path(target_file);
+        for r in render.iter() {
+            let target_path = patina.get_patina_path(&r.patina_file.target);
 
             self.pi.output(format!("   {}", target_path.display()));
             if let Some(target_parent) = target_path.parent() {
@@ -111,7 +111,7 @@ where
                     return Err(Error::FileWrite(target_path, e));
                 }
             }
-            if let Err(e) = fs::write(&target_path, r) {
+            if let Err(e) = fs::write(&target_path, &r.render_str) {
                 return Err(Error::FileWrite(target_path.clone(), e));
             }
             self.pi.output(" ✓\n".green().to_string());

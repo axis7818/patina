@@ -71,10 +71,11 @@ impl Patina {
     }
 
     /// Get an iterator for all PatinaFiles that are tagged with any of the provided tags
-    pub fn files_for_tags<'a>(&'a self, tags: Vec<String>) -> impl Iterator<Item = &'a PatinaFile> {
-        self.files
-            .iter()
-            .filter(move |f| f.tags.iter().any(|t| tags.contains(t)))
+    pub fn files_for_tags(&self, tags: Option<Vec<String>>) -> impl Iterator<Item = &PatinaFile> {
+        self.files.iter().filter(move |f| match &tags {
+            Some(tags) => f.tags.iter().any(|t| tags.contains(t)),
+            None => true,
+        })
     }
 }
 
@@ -321,19 +322,24 @@ mod tests {
         let patina_file_b = &patina.files[1];
         let patina_file_ab = &patina.files[2];
 
-        let filter_a: Vec<&PatinaFile> = patina.files_for_tags(vec!["a".to_string()]).collect();
+        let tags = None;
+        let filter_none = patina.files_for_tags(tags).collect::<Vec<&PatinaFile>>();
+        assert_eq!(filter_none.len(), 3);
+
+        let tags = Some(vec!["a".to_string()]);
+        let filter_a: Vec<&PatinaFile> = patina.files_for_tags(tags).collect();
         assert_eq!(filter_a.len(), 2);
         assert_eq!(filter_a[0], patina_file_a);
         assert_eq!(filter_a[1], patina_file_ab);
 
-        let filter_b: Vec<&PatinaFile> = patina.files_for_tags(vec!["b".to_string()]).collect();
+        let tags = Some(vec!["b".to_string()]);
+        let filter_b: Vec<&PatinaFile> = patina.files_for_tags(tags).collect();
         assert_eq!(filter_b.len(), 2);
         assert_eq!(filter_b[0], patina_file_b);
         assert_eq!(filter_b[1], patina_file_ab);
 
-        let filter_ab: Vec<&PatinaFile> = patina
-            .files_for_tags(vec!["a".to_string(), "b".to_string()])
-            .collect();
+        let tags = Some(vec!["a".to_string(), "b".to_string()]);
+        let filter_ab: Vec<&PatinaFile> = patina.files_for_tags(tags).collect();
         assert_eq!(filter_ab.len(), 3);
         assert_eq!(filter_ab[0], patina_file_a);
         assert_eq!(filter_ab[1], patina_file_b);

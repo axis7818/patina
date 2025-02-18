@@ -286,7 +286,7 @@ dependencies = [
 
 [[package]]
 name = "dotpatina"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "clap",
  "clap-verbosity-flag",

@@ -16,13 +16,6 @@ pub struct PatinaFile {
     pub target: PathBuf,
 }
 
-impl PatinaFile {
-    /// Determine if the provided tag is in this PatinaFile's list of tags
-    pub fn contains_tag<S: Into<String>>(&self, tag: S) -> bool {
-        self.tags.contains(&tag.into())
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use std::path::Path;
@@ -71,16 +64,5 @@ mod tests {
         assert_eq!(patina_file.tags[0], "aaa");
         assert_eq!(patina_file.tags[1], "bbb");
         assert_eq!(patina_file.tags[2], "ccc");
-    }
-
-    #[test]
-    fn test_patina_file_contains_tag() {
-        let patina_file =
-            PatinaFile::new_with_tags("template.txt", "target.txt", vec!["aaa", "bbb", "ccc"]);
-
-        assert!(patina_file.contains_tag("aaa"));
-        assert!(patina_file.contains_tag("bbb"));
-        assert!(patina_file.contains_tag("ccc"));
-        assert!(!patina_file.contains_tag("ddd"));
     }
 }

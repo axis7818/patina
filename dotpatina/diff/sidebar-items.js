@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"trait":["DiffAnalysis"]};
+window.SIDEBAR_ITEMS = {"fn":["diff_line_to_string"],"struct":["DiffLine"],"trait":["DiffAnalysis"]};

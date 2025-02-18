@@ -144,7 +144,12 @@
 <a href="#143" id="143">143</a>
 <a href="#144" id="144">144</a>
 <a href="#145" id="145">145</a>
-<a href="#146" id="146">146</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::io::Write;
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::io::Write;
 <span class="kw">use </span>std::path::PathBuf;
 
 <span class="kw">use </span><span class="kw">crate</span>::engine::{interface::PatinaInterface, PatinaEngine};
@@ -287,6 +292,11 @@
             <span class="self">self</span>.patina_path.display(),
             <span class="self">self</span>.tags
         );
+
+        <span class="kw">if </span><span class="self">self</span>.no_color {
+            colored::control::set_override(<span class="bool-val">false</span>);
+        }
+
         engine
     }
 }

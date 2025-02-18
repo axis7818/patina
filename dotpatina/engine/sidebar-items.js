@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["apply_patina","apply_patina_from_file","render_patina","render_patina_from_file"],"mod":["interface"]};
+window.SIDEBAR_ITEMS = {"mod":["interface"],"struct":["PatinaEngine"]};

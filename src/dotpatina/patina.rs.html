@@ -291,11 +291,69 @@
 <a href="#290" id="290">290</a>
 <a href="#291" id="291">291</a>
 <a href="#292" id="292">292</a>
-<a href="#293" id="293">293</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::path::{Path, PathBuf};
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::path::{Path, PathBuf};
 
+<span class="kw">use </span>patina_file::PatinaFile;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 
 <span class="kw">use </span><span class="kw">crate</span>::utils::{normalize_path, Error, <span class="prelude-ty">Result</span>};
+
+<span class="kw">pub mod </span>patina_file;
 
 <span class="doccomment">/// A Patina describes a set of variables and templates that can be rendered to files.
 </span><span class="attr">#[derive(Debug, Default, PartialEq, Serialize, Deserialize)]
@@ -318,16 +376,6 @@
     <span class="doccomment">/// The path to this patina
     </span><span class="attr">#[serde(skip)]
     </span><span class="kw">pub </span>base_path: <span class="prelude-ty">Option</span>&lt;PathBuf&gt;,
-}
-
-<span class="doccomment">/// A PatinaFile describes a template file and its target output path.
-</span><span class="attr">#[derive(Debug, Default, PartialEq, Serialize, Deserialize)]
-</span><span class="kw">pub struct </span>PatinaFile {
-    <span class="doccomment">/// The path to the template file
-    </span><span class="kw">pub </span>template: PathBuf,
-
-    <span class="doccomment">/// The path to the garget output file
-    </span><span class="kw">pub </span>target: PathBuf,
 }
 
 <span class="kw">impl </span>Patina {
@@ -368,6 +416,14 @@
             <span class="prelude-val">Some</span>(result) =&gt; result,
             <span class="prelude-val">None </span>=&gt; result,
         }
+    }
+
+    <span class="doccomment">/// Get an iterator for all PatinaFiles that are tagged with any of the provided tags
+    </span><span class="kw">pub fn </span>files_for_tags(<span class="kw-2">&amp;</span><span class="self">self</span>, tags: <span class="prelude-ty">Option</span>&lt;Vec&lt;String&gt;&gt;) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span>PatinaFile&gt; {
+        <span class="self">self</span>.files.iter().filter(<span class="kw">move </span>|f| <span class="kw">match </span><span class="kw-2">&amp;</span>tags {
+            <span class="prelude-val">Some</span>(tags) =&gt; f.tags.iter().any(|t| tags.contains(t)),
+            <span class="prelude-val">None </span>=&gt; <span class="bool-val">true</span>,
+        })
     }
 }
 
@@ -582,6 +638,60 @@
 
         <span class="kw">let </span>result = patina.get_patina_path(PathBuf::from(<span class="string">"fixtures/test.txt"</span>));
         <span class="macro">assert_eq!</span>(PathBuf::from(<span class="string">"tests/fixtures/test.txt"</span>), result);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_patina_files_for_tags() {
+        <span class="kw">let </span>patina = Patina {
+            name: <span class="string">"test"</span>.to_string(),
+            description: <span class="string">""</span>.to_string(),
+            base_path: <span class="prelude-val">None</span>,
+            vars: <span class="prelude-val">None</span>,
+            files: <span class="macro">vec!</span>[
+                PatinaFile {
+                    template: PathBuf::from(<span class="string">"a.hbs"</span>),
+                    target: PathBuf::from(<span class="string">"a.txt"</span>),
+                    tags: <span class="macro">vec!</span>[<span class="string">"a"</span>.to_string()],
+                },
+                PatinaFile {
+                    template: PathBuf::from(<span class="string">"b.hbs"</span>),
+                    target: PathBuf::from(<span class="string">"b.txt"</span>),
+                    tags: <span class="macro">vec!</span>[<span class="string">"b"</span>.to_string()],
+                },
+                PatinaFile {
+                    template: PathBuf::from(<span class="string">"ab.hbs"</span>),
+                    target: PathBuf::from(<span class="string">"ab.txt"</span>),
+                    tags: <span class="macro">vec!</span>[<span class="string">"a"</span>.to_string(), <span class="string">"b"</span>.to_string()],
+                },
+            ],
+        };
+
+        <span class="kw">let </span>patina_file_a = <span class="kw-2">&amp;</span>patina.files[<span class="number">0</span>];
+        <span class="kw">let </span>patina_file_b = <span class="kw-2">&amp;</span>patina.files[<span class="number">1</span>];
+        <span class="kw">let </span>patina_file_ab = <span class="kw-2">&amp;</span>patina.files[<span class="number">2</span>];
+
+        <span class="kw">let </span>tags = <span class="prelude-val">None</span>;
+        <span class="kw">let </span>filter_none = patina.files_for_tags(tags).collect::&lt;Vec&lt;<span class="kw-2">&amp;</span>PatinaFile&gt;&gt;();
+        <span class="macro">assert_eq!</span>(filter_none.len(), <span class="number">3</span>);
+
+        <span class="kw">let </span>tags = <span class="prelude-val">Some</span>(<span class="macro">vec!</span>[<span class="string">"a"</span>.to_string()]);
+        <span class="kw">let </span>filter_a: Vec&lt;<span class="kw-2">&amp;</span>PatinaFile&gt; = patina.files_for_tags(tags).collect();
+        <span class="macro">assert_eq!</span>(filter_a.len(), <span class="number">2</span>);
+        <span class="macro">assert_eq!</span>(filter_a[<span class="number">0</span>], patina_file_a);
+        <span class="macro">assert_eq!</span>(filter_a[<span class="number">1</span>], patina_file_ab);
+
+        <span class="kw">let </span>tags = <span class="prelude-val">Some</span>(<span class="macro">vec!</span>[<span class="string">"b"</span>.to_string()]);
+        <span class="kw">let </span>filter_b: Vec&lt;<span class="kw-2">&amp;</span>PatinaFile&gt; = patina.files_for_tags(tags).collect();
+        <span class="macro">assert_eq!</span>(filter_b.len(), <span class="number">2</span>);
+        <span class="macro">assert_eq!</span>(filter_b[<span class="number">0</span>], patina_file_b);
+        <span class="macro">assert_eq!</span>(filter_b[<span class="number">1</span>], patina_file_ab);
+
+        <span class="kw">let </span>tags = <span class="prelude-val">Some</span>(<span class="macro">vec!</span>[<span class="string">"a"</span>.to_string(), <span class="string">"b"</span>.to_string()]);
+        <span class="kw">let </span>filter_ab: Vec&lt;<span class="kw-2">&amp;</span>PatinaFile&gt; = patina.files_for_tags(tags).collect();
+        <span class="macro">assert_eq!</span>(filter_ab.len(), <span class="number">3</span>);
+        <span class="macro">assert_eq!</span>(filter_ab[<span class="number">0</span>], patina_file_a);
+        <span class="macro">assert_eq!</span>(filter_ab[<span class="number">1</span>], patina_file_b);
+        <span class="macro">assert_eq!</span>(filter_ab[<span class="number">2</span>], patina_file_ab);
     }
 }
 </code></pre></div></section></main></body></html>

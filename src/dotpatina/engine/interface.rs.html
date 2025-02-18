@@ -116,11 +116,7 @@
 <a href="#115" id="115">115</a>
 <a href="#116" id="116">116</a>
 <a href="#117" id="117">117</a>
-<a href="#118" id="118">118</a>
-<a href="#119" id="119">119</a>
-<a href="#120" id="120">120</a>
-<a href="#121" id="121">121</a>
-<a href="#122" id="122">122</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::path::Path;
+<a href="#118" id="118">118</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::path::Path;
 
 <span class="kw">use </span>colored::Colorize;
 <span class="kw">use </span>similar::{ChangeTag, TextDiff};
@@ -134,18 +130,14 @@
     <span class="kw">where
         </span>S: Into&lt;String&gt;;
 
-    <span class="doccomment">/// Disable confirmation prompt
-    </span><span class="kw">fn </span>disable_confirm(<span class="kw-2">&amp;mut </span><span class="self">self</span>);
+    <span class="doccomment">/// Set whether or not input is enabled
+    </span><span class="kw">fn </span>set_is_input_enabled(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: bool);
 
-    <span class="doccomment">/// Check if confirmation is disabled
-    </span><span class="kw">fn </span>is_confirm_disabled(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool;
+    <span class="doccomment">/// Get whether or not input is enabled
+    </span><span class="kw">fn </span>is_input_enabled(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool;
 
     <span class="doccomment">/// Prompts the user for confirmation to apply the patina
     </span><span class="kw">fn </span>confirm_apply(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;bool&gt; {
-        <span class="kw">if </span><span class="self">self</span>.is_confirm_disabled() {
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="bool-val">true</span>);
-        }
-
         <span class="self">self</span>.output(<span class="string">"Do you want to continue? (y/n): "</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>input = String::new();
         <span class="kw">match </span>std::io::stdin().read_line(<span class="kw-2">&amp;mut </span>input) {
@@ -201,7 +193,7 @@
 
     <span class="kw">pub struct </span>TestPatinaInterface {
         <span class="kw">pub </span>confirm_apply: bool,
-        no_input: bool,
+        is_input_enabled: bool,
         <span class="kw">pub </span>lines: RefCell&lt;Vec&lt;String&gt;&gt;,
     }
 
@@ -211,7 +203,7 @@
 
             TestPatinaInterface {
                 confirm_apply: <span class="bool-val">true</span>,
-                no_input: <span class="bool-val">false</span>,
+                is_input_enabled: <span class="bool-val">true</span>,
                 lines: RefCell::new(<span class="macro">vec!</span>[]),
             }
         }
@@ -233,12 +225,12 @@
             <span class="prelude-val">Ok</span>(<span class="self">self</span>.confirm_apply)
         }
 
-        <span class="kw">fn </span>disable_confirm(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-            <span class="self">self</span>.no_input = <span class="bool-val">true
-        </span>}
+        <span class="kw">fn </span>set_is_input_enabled(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: bool) {
+            <span class="self">self</span>.is_input_enabled = value
+        }
 
-        <span class="kw">fn </span>is_confirm_disabled(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-            <span class="self">self</span>.no_input
+        <span class="kw">fn </span>is_input_enabled(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+            <span class="self">self</span>.is_input_enabled
         }
     }
 }

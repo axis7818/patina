@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["render_patina","render_patina_file"]};
+window.SIDEBAR_ITEMS = {"fn":["render_patina","render_patina_file"],"struct":["PatinaFileRender"]};

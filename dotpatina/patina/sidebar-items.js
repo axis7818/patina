@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["Patina","PatinaFile"]};
+window.SIDEBAR_ITEMS = {"mod":["patina_file"],"struct":["Patina"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["Command"],"struct":["GlobalOptions","PatinaCli","PatinaCommandOptions"]};
+window.SIDEBAR_ITEMS = {"enum":["Command"],"struct":["CliPatinaInterface","GlobalOptions","PatinaCli","PatinaCommandOptions"]};

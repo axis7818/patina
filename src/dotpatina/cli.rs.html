@@ -125,12 +125,31 @@
 <a href="#124" id="124">124</a>
 <a href="#125" id="125">125</a>
 <a href="#126" id="126">126</a>
-<a href="#127" id="127">127</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::io::Write;
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::io::Write;
 <span class="kw">use </span>std::path::PathBuf;
 
-<span class="kw">use </span><span class="kw">crate</span>::engine::interface::PatinaInterface;
-<span class="kw">use </span><span class="kw">crate</span>::engine::{apply_patina_from_file, render_patina_from_file};
+<span class="kw">use </span><span class="kw">crate</span>::engine::{interface::PatinaInterface, PatinaEngine};
 <span class="kw">use </span>clap::{Args, Parser, Subcommand};
+<span class="kw">use </span>log::info;
 
 <span class="doccomment">/// The patina CLI renders files from templates and sets of variables as defined in patina toml files.
 </span><span class="attr">#[derive(Parser, Debug)]
@@ -143,10 +162,6 @@
     <span class="doccomment">/// The specified command to run
     </span><span class="attr">#[clap(subcommand)]
     </span>command: Command,
-
-    <span class="attr">#[clap(skip)]
-    </span><span class="doccomment">/// When true, confirmation is disabled
-    </span>confirm_disabled: bool,
 }
 
 <span class="doccomment">/// Options that apply globally to the CLI
@@ -194,6 +209,10 @@
     <span class="doccomment">/// Disable colors
     </span><span class="attr">#[clap(long = <span class="string">"no-color"</span>)]
     </span>no_color: bool,
+
+    <span class="doccomment">/// The list of tags to filter on
+    </span><span class="attr">#[clap(short = <span class="string">'t'</span>, long = <span class="string">"tags"</span>, help = <span class="string">"A list of tags to filter on"</span>)]
+    </span>tags: Vec&lt;String&gt;,
 }
 
 <span class="kw">impl </span>PatinaCli {
@@ -208,34 +227,35 @@
             .filter_level(<span class="self">self</span>.global_options.verbosity.into())
             .init();
 
-        <span class="kw">if let </span>Command::Apply { no_input, .. } = <span class="kw-2">&amp;</span><span class="self">self</span>.command {
-            <span class="kw">if </span><span class="kw-2">*</span>no_input {
-                <span class="self">self</span>.disable_confirm();
+        <span class="kw">let </span><span class="kw-2">mut </span>pi = CliPatinaInterface::new();
+        <span class="comment">// let engine = PatinaEngine::new(&amp;pi, patina_path, tags)
+        </span><span class="kw">let </span>result = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.command {
+            Command::Render { options } =&gt; options.engine(<span class="kw-2">&amp;</span>pi).render_patina(),
+            Command::Apply { options, no_input } =&gt; {
+                pi.set_is_input_enabled(!<span class="kw-2">*</span>no_input);
+                options.engine(<span class="kw-2">&amp;</span>pi).apply_patina()
             }
         };
 
-        <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.command {
-            Command::Render { options } =&gt; <span class="self">self</span>.render(options),
-            Command::Apply { options, .. } =&gt; <span class="self">self</span>.apply(options),
-        }
-    }
-
-    <span class="kw">fn </span>render(<span class="kw-2">&amp;</span><span class="self">self</span>, options: <span class="kw-2">&amp;</span>PatinaCommandOptions) {
-        colored::control::set_override(!options.no_color);
-        <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = render_patina_from_file(<span class="kw-2">&amp;</span>options.patina_path, <span class="self">self</span>) {
-            <span class="macro">panic!</span>(<span class="string">"{:?}"</span>, e);
-        };
-    }
-
-    <span class="kw">fn </span>apply(<span class="kw-2">&amp;</span><span class="self">self</span>, options: <span class="kw-2">&amp;</span>PatinaCommandOptions) {
-        colored::control::set_override(!options.no_color);
-        <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = apply_patina_from_file(<span class="kw-2">&amp;</span>options.patina_path, <span class="self">self</span>) {
-            <span class="macro">panic!</span>(<span class="string">"{:?}"</span>, e);
+        <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = result {
+            <span class="macro">panic!</span>(<span class="string">"{:?}"</span>, e)
         }
     }
 }
 
-<span class="kw">impl </span>PatinaInterface <span class="kw">for </span>PatinaCli {
+<span class="kw">struct </span>CliPatinaInterface {
+    is_input_enabled: bool,
+}
+
+<span class="kw">impl </span>CliPatinaInterface {
+    <span class="kw">fn </span>new() -&gt; CliPatinaInterface {
+        CliPatinaInterface {
+            is_input_enabled: <span class="bool-val">true</span>,
+        }
+    }
+}
+
+<span class="kw">impl </span>PatinaInterface <span class="kw">for </span>CliPatinaInterface {
     <span class="kw">fn </span>output&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, s: S)
     <span class="kw">where
         </span>S: Into&lt;String&gt;,
@@ -244,12 +264,30 @@
         <span class="kw">let _ </span>= std::io::stdout().flush();
     }
 
-    <span class="kw">fn </span>disable_confirm(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="self">self</span>.confirm_disabled = <span class="bool-val">true
-    </span>}
+    <span class="kw">fn </span>set_is_input_enabled(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: bool) {
+        <span class="self">self</span>.is_input_enabled = value
+    }
 
-    <span class="kw">fn </span>is_confirm_disabled(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.confirm_disabled
+    <span class="kw">fn </span>is_input_enabled(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.is_input_enabled
+    }
+}
+
+<span class="kw">impl </span>PatinaCommandOptions {
+    <span class="kw">fn </span>engine&lt;<span class="lifetime">'a</span>, PI&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, pi: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>PI) -&gt; PatinaEngine&lt;<span class="lifetime">'a</span>, PI&gt;
+    <span class="kw">where
+        </span>PI: PatinaInterface,
+    {
+        <span class="kw">let </span>engine = PatinaEngine::new(pi, <span class="kw-2">&amp;</span><span class="self">self</span>.patina_path, <span class="self">self</span>.tags.clone());
+        <span class="macro">info!</span>(
+            <span class="string">r#"New PatinaEngine
+            path = {}
+            tags = {:?}
+        "#</span>,
+            <span class="self">self</span>.patina_path.display(),
+            <span class="self">self</span>.tags
+        );
+        engine
     }
 }
 </code></pre></div></section></main></body></html>

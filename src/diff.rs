@@ -20,7 +20,8 @@ struct DiffLine {
     change_tag: ChangeTag,
     change_string: String,
     color: Option<Color>,
-    count_from_change: usize,
+    count_from_change: isize,
+    count_to_change: isize,
 }
 
 fn diff_line_to_string(diff_line: &DiffLine, line_number_width: usize) -> std::string::String {
@@ -56,15 +57,17 @@ where
     }
 
     fn to_string(&self) -> String {
-        static DIFF_GAP_BUFFER_SIZE: usize = 4;
+        static DIFF_GAP_BUFFER_SIZE: isize = 4;
 
         let mut old_line_count = 1;
         let mut new_line_count = 1;
-        let mut count_from_change = 0;
+        let mut count_from_change = -1;
+        let mut any_changes = false;
 
         let change_to_diff_line = |change: Change<&O>| match change.tag() {
             ChangeTag::Insert => {
                 count_from_change = 0;
+                any_changes = true;
                 let line = DiffLine {
                     old_line_num: None,
                     new_line_num: Some(new_line_count),
@@ -73,12 +76,15 @@ where
                     change_string: change.to_string(),
                     color: Some(Color::Green),
                     count_from_change,
+                    count_to_change: 0,
                 };
                 new_line_count += 1;
                 line
             }
             ChangeTag::Equal => {
-                count_from_change += 1;
+                if count_from_change >= 0 {
+                    count_from_change += 1;
+                }
                 let line = DiffLine {
                     old_line_num: Some(old_line_count),
                     new_line_num: Some(new_line_count),
@@ -87,6 +93,7 @@ where
                     change_string: change.to_string(),
                     color: None,
                     count_from_change,
+                    count_to_change: 0,
                 };
                 old_line_count += 1;
                 new_line_count += 1;
@@ -94,6 +101,7 @@ where
             }
             ChangeTag::Delete => {
                 count_from_change = 0;
+                any_changes = true;
                 let line = DiffLine {
                     old_line_num: Some(old_line_count),
                     new_line_num: None,
@@ -102,49 +110,62 @@ where
                     change_string: change.to_string(),
                     color: Some(Color::Red),
                     count_from_change,
+                    count_to_change: 0,
                 };
                 old_line_count += 1;
                 line
             }
         };
 
-        let diff_lines = self
+        let mut diff_lines = self
             .iter_all_changes()
             .map(change_to_diff_line)
             .collect::<Vec<DiffLine>>();
+
+        if !any_changes {
+            return format!("{} lines, no changes detected\n", diff_lines.len())
+                .bold()
+                .blue()
+                .to_string();
+        }
 
         let line_number_width = max(
             old_line_count.to_string().len(),
             new_line_count.to_string().len(),
         );
 
-        let mut count_until_changed = 0;
+        let mut count_to_changed = -1;
 
-        let mut check_diff_gap = |diff_line: &DiffLine| {
+        let mut check_diff_gap = |diff_line: &mut DiffLine| {
             match diff_line.change_tag {
                 ChangeTag::Insert => {
-                    count_until_changed = 0;
+                    count_to_changed = 0;
                 }
                 ChangeTag::Equal => {
-                    count_until_changed += 1;
+                    if count_to_changed >= 0 {
+                        count_to_changed += 1;
+                    }
                 }
                 ChangeTag::Delete => {
-                    count_until_changed = 0;
+                    count_to_changed = 0;
                 }
             }
+            diff_line.count_to_change = count_to_changed;
 
-            let far_from_start = diff_line.count_from_change > DIFF_GAP_BUFFER_SIZE;
-            let far_from_end = count_until_changed > DIFF_GAP_BUFFER_SIZE;
+            let far_from_start = diff_line.count_from_change > DIFF_GAP_BUFFER_SIZE
+                || diff_line.count_from_change < 0;
+            let far_from_end = count_to_changed > DIFF_GAP_BUFFER_SIZE || count_to_changed < 0;
             !far_from_start || !far_from_end
         };
 
         let mut result = String::from("");
         let mut skipped_lines = 0;
-        for diff_line in diff_lines.iter().rev() {
+
+        for diff_line in diff_lines.iter_mut().rev() {
             let show_line = check_diff_gap(diff_line);
             if show_line {
                 if skipped_lines > 0 {
-                    result = format!("\n... {} lines ...\n\n", skipped_lines)
+                    result = format!("\n... {} unchanged lines\n\n", skipped_lines)
                         .bold()
                         .blue()
                         .to_string()
@@ -156,6 +177,13 @@ where
             } else {
                 skipped_lines += 1;
             }
+        }
+        if skipped_lines > 0 {
+            result = format!("\n... {} unchanged lines\n\n", skipped_lines)
+                .bold()
+                .blue()
+                .to_string()
+                + &result;
         }
 
         result

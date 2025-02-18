@@ -1,0 +1,27 @@
+name = "tags"
+description = "This is a patina that makes use of tags"
+
+[[files]]
+tags = ["aaa"]
+template = "a.txt"
+target = "../../output/a.txt"
+
+[[files]]
+tags = ["bbb"]
+template = "b.txt"
+target = "../../output/b.txt"
+
+[[files]]
+tags = ["ccc"]
+template = "c.txt"
+target = "../../output/c.txt"
+
+[[files]]
+tags = ["ddd"]
+template = "d.txt"
+target = "../../output/d.txt"
+
+[[files]]
+tags = ["aaa", "bbb", "ccc", "multi"]
+template = "abc.txt"
+target = "../../output/abc.txt"

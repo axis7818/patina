@@ -1,9 +1,9 @@
 use std::io::Write;
 use std::path::PathBuf;
 
-use crate::engine::interface::PatinaInterface;
-use crate::engine::{apply_patina_from_file, render_patina_from_file};
+use crate::engine::{interface::PatinaInterface, PatinaEngine};
 use clap::{Args, Parser, Subcommand};
+use log::info;
 
 /// The patina CLI renders files from templates and sets of variables as defined in patina toml files.
 #[derive(Parser, Debug)]
@@ -16,10 +16,6 @@ pub struct PatinaCli {
     /// The specified command to run
     #[clap(subcommand)]
     command: Command,
-
-    #[clap(skip)]
-    /// When true, confirmation is disabled
-    confirm_disabled: bool,
 }
 
 /// Options that apply globally to the CLI
@@ -67,6 +63,10 @@ struct PatinaCommandOptions {
     /// Disable colors
     #[clap(long = "no-color")]
     no_color: bool,
+
+    /// The list of tags to filter on
+    #[clap(short = 't', long = "tags", help = "A list of tags to filter on")]
+    tags: Vec<String>,
 }
 
 impl PatinaCli {
@@ -81,34 +81,35 @@ impl PatinaCli {
             .filter_level(self.global_options.verbosity.into())
             .init();
 
-        if let Command::Apply { no_input, .. } = &self.command {
-            if *no_input {
-                self.disable_confirm();
+        let mut pi = CliPatinaInterface::new();
+        // let engine = PatinaEngine::new(&pi, patina_path, tags)
+        let result = match &self.command {
+            Command::Render { options } => options.engine(&pi).render_patina(),
+            Command::Apply { options, no_input } => {
+                pi.set_is_input_enabled(!*no_input);
+                options.engine(&pi).apply_patina()
             }
         };
 
-        match &self.command {
-            Command::Render { options } => self.render(options),
-            Command::Apply { options, .. } => self.apply(options),
-        }
-    }
-
-    fn render(&self, options: &PatinaCommandOptions) {
-        colored::control::set_override(!options.no_color);
-        if let Err(e) = render_patina_from_file(&options.patina_path, self) {
-            panic!("{:?}", e);
-        };
-    }
-
-    fn apply(&self, options: &PatinaCommandOptions) {
-        colored::control::set_override(!options.no_color);
-        if let Err(e) = apply_patina_from_file(&options.patina_path, self) {
-            panic!("{:?}", e);
+        if let Err(e) = result {
+            panic!("{:?}", e)
         }
     }
 }
 
-impl PatinaInterface for PatinaCli {
+struct CliPatinaInterface {
+    is_input_enabled: bool,
+}
+
+impl CliPatinaInterface {
+    fn new() -> CliPatinaInterface {
+        CliPatinaInterface {
+            is_input_enabled: true,
+        }
+    }
+}
+
+impl PatinaInterface for CliPatinaInterface {
     fn output<S>(&self, s: S)
     where
         S: Into<String>,
@@ -117,11 +118,29 @@ impl PatinaInterface for PatinaCli {
         let _ = std::io::stdout().flush();
     }
 
-    fn disable_confirm(&mut self) {
-        self.confirm_disabled = true
+    fn set_is_input_enabled(&mut self, value: bool) {
+        self.is_input_enabled = value
     }
 
-    fn is_confirm_disabled(&self) -> bool {
-        self.confirm_disabled
+    fn is_input_enabled(&self) -> bool {
+        self.is_input_enabled
+    }
+}
+
+impl PatinaCommandOptions {
+    fn engine<'a, PI>(&self, pi: &'a PI) -> PatinaEngine<'a, PI>
+    where
+        PI: PatinaInterface,
+    {
+        let engine = PatinaEngine::new(pi, &self.patina_path, self.tags.clone());
+        info!(
+            r#"New PatinaEngine
+            path = {}
+            tags = {:?}
+        "#,
+            self.patina_path.display(),
+            self.tags
+        );
+        engine
     }
 }

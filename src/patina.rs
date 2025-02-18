@@ -1,8 +1,11 @@
 use std::path::{Path, PathBuf};
 
+use patina_file::PatinaFile;
 use serde::{Deserialize, Serialize};
 
 use crate::utils::{normalize_path, Error, Result};
+
+pub mod patina_file;
 
 /// A Patina describes a set of variables and templates that can be rendered to files.
 #[derive(Debug, Default, PartialEq, Serialize, Deserialize)]
@@ -25,16 +28,6 @@ pub struct Patina {
     /// The path to this patina
     #[serde(skip)]
     pub base_path: Option<PathBuf>,
-}
-
-/// A PatinaFile describes a template file and its target output path.
-#[derive(Debug, Default, PartialEq, Serialize, Deserialize)]
-pub struct PatinaFile {
-    /// The path to the template file
-    pub template: PathBuf,
-
-    /// The path to the garget output file
-    pub target: PathBuf,
 }
 
 impl Patina {
@@ -75,6 +68,14 @@ impl Patina {
             Some(result) => result,
             None => result,
         }
+    }
+
+    /// Get an iterator for all PatinaFiles that are tagged with any of the provided tags
+    pub fn files_for_tags(&self, tags: Option<Vec<String>>) -> impl Iterator<Item = &PatinaFile> {
+        self.files.iter().filter(move |f| match &tags {
+            Some(tags) => f.tags.iter().any(|t| tags.contains(t)),
+            None => true,
+        })
     }
 }
 
@@ -289,5 +290,59 @@ mod tests {
 
         let result = patina.get_patina_path(PathBuf::from("fixtures/test.txt"));
         assert_eq!(PathBuf::from("tests/fixtures/test.txt"), result);
+    }
+
+    #[test]
+    fn test_patina_files_for_tags() {
+        let patina = Patina {
+            name: "test".to_string(),
+            description: "".to_string(),
+            base_path: None,
+            vars: None,
+            files: vec![
+                PatinaFile {
+                    template: PathBuf::from("a.hbs"),
+                    target: PathBuf::from("a.txt"),
+                    tags: vec!["a".to_string()],
+                },
+                PatinaFile {
+                    template: PathBuf::from("b.hbs"),
+                    target: PathBuf::from("b.txt"),
+                    tags: vec!["b".to_string()],
+                },
+                PatinaFile {
+                    template: PathBuf::from("ab.hbs"),
+                    target: PathBuf::from("ab.txt"),
+                    tags: vec!["a".to_string(), "b".to_string()],
+                },
+            ],
+        };
+
+        let patina_file_a = &patina.files[0];
+        let patina_file_b = &patina.files[1];
+        let patina_file_ab = &patina.files[2];
+
+        let tags = None;
+        let filter_none = patina.files_for_tags(tags).collect::<Vec<&PatinaFile>>();
+        assert_eq!(filter_none.len(), 3);
+
+        let tags = Some(vec!["a".to_string()]);
+        let filter_a: Vec<&PatinaFile> = patina.files_for_tags(tags).collect();
+        assert_eq!(filter_a.len(), 2);
+        assert_eq!(filter_a[0], patina_file_a);
+        assert_eq!(filter_a[1], patina_file_ab);
+
+        let tags = Some(vec!["b".to_string()]);
+        let filter_b: Vec<&PatinaFile> = patina.files_for_tags(tags).collect();
+        assert_eq!(filter_b.len(), 2);
+        assert_eq!(filter_b[0], patina_file_b);
+        assert_eq!(filter_b[1], patina_file_ab);
+
+        let tags = Some(vec!["a".to_string(), "b".to_string()]);
+        let filter_ab: Vec<&PatinaFile> = patina.files_for_tags(tags).collect();
+        assert_eq!(filter_ab.len(), 3);
+        assert_eq!(filter_ab[0], patina_file_a);
+        assert_eq!(filter_ab[1], patina_file_b);
+        assert_eq!(filter_ab[2], patina_file_ab);
     }
 }

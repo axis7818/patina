@@ -3,17 +3,30 @@ use std::fs;
 use handlebars::Handlebars;
 use log::info;
 
-use crate::patina::{Patina, PatinaFile};
+use crate::patina::patina_file::PatinaFile;
+use crate::patina::Patina;
 use crate::utils::{Error, Result};
 
+#[derive(Debug)]
+pub struct PatinaFileRender<'pf> {
+    pub patina_file: &'pf PatinaFile,
+    pub render_str: String,
+}
+
 /// Renders all of the files in a Patina, each to a string in the result vector.
-pub fn render_patina(patina: &Patina) -> Result<Vec<String>> {
+pub fn render_patina(patina: &Patina, tags: Option<Vec<String>>) -> Result<Vec<PatinaFileRender>> {
     let mut hb = Handlebars::new();
     hb.register_escape_fn(handlebars::no_escape);
+
     patina
-        .files
-        .iter()
-        .map(|pf| render_patina_file(&hb, patina, pf))
+        .files_for_tags(tags)
+        .map(|pf| {
+            let render = render_patina_file(&hb, patina, pf)?;
+            Ok(PatinaFileRender {
+                patina_file: pf,
+                render_str: render,
+            })
+        })
         .collect()
 }
 
@@ -38,8 +51,6 @@ fn render_patina_file(
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
-
     use serde_json::json;
 
     use super::*;
@@ -56,21 +67,23 @@ mod tests {
                     "last": "User"
                 }
             })),
-            files: vec![PatinaFile {
-                template: PathBuf::from("tests/fixtures/template.txt.hbs"),
-                target: PathBuf::from("tests/fixtures/template.txt"),
-            }],
+            files: vec![PatinaFile::new(
+                "tests/fixtures/template.txt.hbs",
+                "tests/fixtures/template.txt",
+            )],
         };
 
-        let render = render_patina(&patina);
+        let render = render_patina(&patina, None);
 
         assert!(render.is_ok());
         let render = render.unwrap();
         assert_eq!(render.len(), 1);
         let render = &render[0];
 
+        assert_eq!(render.patina_file, &patina.files[0]);
+
         assert_eq!(
-            render,
+            render.render_str,
             r#"Hello, Patina User!
 This is an example Patina template file.
 Templates use the Handebars templating language. For more information, see <https://handlebarsjs.com/guide/>.
@@ -90,30 +103,21 @@ Templates use the Handebars templating language. For more information, see <http
                 "C": "template_c",
             })),
             files: vec![
-                PatinaFile {
-                    template: PathBuf::from("tests/fixtures/template_a.txt.hbs"),
-                    target: PathBuf::from("output_a.txt"),
-                },
-                PatinaFile {
-                    template: PathBuf::from("tests/fixtures/template_b.txt.hbs"),
-                    target: PathBuf::from("output_b.txt"),
-                },
-                PatinaFile {
-                    template: PathBuf::from("tests/fixtures/template_c.txt.hbs"),
-                    target: PathBuf::from("output_c.txt"),
-                },
+                PatinaFile::new("tests/fixtures/template_a.txt.hbs", "output_a.txt"),
+                PatinaFile::new("tests/fixtures/template_b.txt.hbs", "output_b.txt"),
+                PatinaFile::new("tests/fixtures/template_c.txt.hbs", "output_c.txt"),
             ],
         };
 
-        let render = render_patina(&patina);
+        let render = render_patina(&patina, None);
 
         assert!(render.is_ok());
         let render = render.unwrap();
 
         assert_eq!(render.len(), 3);
-        assert_eq!(render[0], "This is template_a.\n");
-        assert_eq!(render[1], "This is template_b.\n");
-        assert_eq!(render[2], "This is template_c.\n");
+        assert_eq!(render[0].render_str, "This is template_a.\n");
+        assert_eq!(render[1].render_str, "This is template_b.\n");
+        assert_eq!(render[2].render_str, "This is template_c.\n");
     }
 
     #[test]
@@ -123,13 +127,13 @@ Templates use the Handebars templating language. For more information, see <http
             name: String::from("sample-patina"),
             description: String::from("This is a sample Patina"),
             vars: Some(json!({})),
-            files: vec![PatinaFile {
-                template: PathBuf::from("tests/fixtures/template.txt.hbs"),
-                target: PathBuf::from("tests/fixtures/template.txt"),
-            }],
+            files: vec![PatinaFile::new(
+                "tests/fixtures/template.txt.hbs",
+                "tests/fixtures/template.txt",
+            )],
         };
 
-        let render = render_patina(&patina);
+        let render = render_patina(&patina, None);
 
         assert!(render.is_ok());
         let render = render.unwrap();
@@ -140,7 +144,7 @@ Templates use the Handebars templating language. For more information, see <http
 This is an example Patina template file.
 Templates use the Handebars templating language. For more information, see <https://handlebarsjs.com/guide/>.
 "#;
-        assert_eq!(expected, render);
+        assert_eq!(expected, render.render_str);
     }
 
     #[test]
@@ -150,13 +154,13 @@ Templates use the Handebars templating language. For more information, see <http
             name: String::from("sample-patina"),
             description: String::from("This is a sample Patina"),
             vars: Some(json!({})),
-            files: vec![PatinaFile {
-                template: PathBuf::from("tests/fixtures/invalid_template.txt.hbs"),
-                target: PathBuf::from("tests/fixtures/template.txt"),
-            }],
+            files: vec![PatinaFile::new(
+                "tests/fixtures/invalid_template.txt.hbs",
+                "tests/fixtures/template.txt",
+            )],
         };
 
-        let render = render_patina(&patina);
+        let render = render_patina(&patina, None);
 
         assert!(render.is_err());
         assert!(render.unwrap_err().is_render_template());
@@ -169,16 +173,16 @@ Templates use the Handebars templating language. For more information, see <http
             description: "this patina shows escaping handlebars".to_string(),
             base_path: None,
             vars: None,
-            files: vec![PatinaFile {
-                template: PathBuf::from("tests/fixtures/template_with_escaped_handlebars.hbs"),
-                target: PathBuf::from("tests/fixtures/output.txt"),
-            }],
+            files: vec![PatinaFile::new(
+                "tests/fixtures/template_with_escaped_handlebars.hbs",
+                "tests/fixtures/output.txt",
+            )],
         };
 
-        let render = render_patina(&patina);
+        let render = render_patina(&patina, None);
         assert!(render.is_ok());
         assert_eq!(
-            render.unwrap()[0],
+            render.unwrap()[0].render_str,
             "This file has {{ escaped }} handlebars\n"
         );
     }

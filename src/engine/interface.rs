@@ -12,18 +12,14 @@ pub trait PatinaInterface {
     where
         S: Into<String>;
 
-    /// Disable confirmation prompt
-    fn disable_confirm(&mut self);
+    /// Set whether or not input is enabled
+    fn set_is_input_enabled(&mut self, value: bool);
 
-    /// Check if confirmation is disabled
-    fn is_confirm_disabled(&self) -> bool;
+    /// Get whether or not input is enabled
+    fn is_input_enabled(&self) -> bool;
 
     /// Prompts the user for confirmation to apply the patina
     fn confirm_apply(&self) -> Result<bool> {
-        if self.is_confirm_disabled() {
-            return Ok(true);
-        }
-
         self.output("Do you want to continue? (y/n): ");
         let mut input = String::new();
         match std::io::stdin().read_line(&mut input) {
@@ -79,7 +75,7 @@ pub mod test {
 
     pub struct TestPatinaInterface {
         pub confirm_apply: bool,
-        no_input: bool,
+        is_input_enabled: bool,
         pub lines: RefCell<Vec<String>>,
     }
 
@@ -89,7 +85,7 @@ pub mod test {
 
             TestPatinaInterface {
                 confirm_apply: true,
-                no_input: false,
+                is_input_enabled: true,
                 lines: RefCell::new(vec![]),
             }
         }
@@ -111,12 +107,12 @@ pub mod test {
             Ok(self.confirm_apply)
         }
 
-        fn disable_confirm(&mut self) {
-            self.no_input = true
+        fn set_is_input_enabled(&mut self, value: bool) {
+            self.is_input_enabled = value
         }
 
-        fn is_confirm_disabled(&self) -> bool {
-            self.no_input
+        fn is_input_enabled(&self) -> bool {
+            self.is_input_enabled
         }
     }
 }

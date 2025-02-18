@@ -35,6 +35,21 @@ where
 mod tests {
     use super::*;
 
+    fn build_test_diff() -> TextDiff<'static, 'static, 'static, str> {
+        let old = r#"
+        aaa
+        bbb
+        ccc
+        "#;
+        let new = r#"
+        AAA
+        BBB
+        CCC
+        DDD
+        "#;
+        TextDiff::from_lines(old, new)
+    }
+
     #[test]
     fn test_diff_analysis_any_changes_no_changes() {
         let old = "this is some text";
@@ -62,19 +77,18 @@ mod tests {
 
     #[test]
     fn test_diff_analysis_any_changes_added_line() {
-        let old = r#"
-        AAA
-        BBB
-        CCC
-        "#;
-        let new = r#"
-        AAA
-        BBB
-        CCC
-        DDD
-        "#;
-        let diff = TextDiff::from_lines(old, new);
-
+        let diff = build_test_diff();
         assert!(diff.any_changes())
+    }
+
+    #[test]
+    fn test_to_string() {
+        colored::control::set_override(false);
+        let diff = build_test_diff();
+        let result = diff.to_string();
+        assert_eq!(
+            "| \n-         aaa\n-         bbb\n-         ccc\n+         AAA\n+         BBB\n+         CCC\n+         DDD\n|         \n",
+            result
+        );
     }
 }

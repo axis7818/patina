@@ -209,9 +209,9 @@ Templates use the Handebars templating language. For more information, see <http
             r#"===============================
 > tests/fixtures/template.txt <
 ===============================
-+ Hello, Patina User!
-+ This is an example Patina template file.
-+ Templates use the Handebars templating language. For more information, see <https://handlebarsjs.com/guide/>.
++   1 | Hello, Patina User!
++   2 | This is an example Patina template file.
++   3 | Templates use the Handebars templating language. For more information, see <https://handlebarsjs.com/guide/>.
 
 
 Applying patina files

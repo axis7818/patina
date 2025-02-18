@@ -1,4 +1,6 @@
-use colored::Colorize;
+use std::cmp::max;
+
+use colored::{Color, Colorize};
 use similar::{ChangeTag, TextDiff};
 
 /// DiffAnalysis provides functionality for diffs within dotpatina
@@ -10,6 +12,8 @@ pub trait DiffAnalysis {
     fn to_string(&self) -> String;
 }
 
+type DiffLine = (Option<usize>, Option<usize>, char, String, Option<Color>);
+
 impl<'lines, O: ?Sized> DiffAnalysis for TextDiff<'lines, 'lines, '_, O>
 where
     O: similar::DiffableStr,
@@ -20,13 +24,79 @@ where
     }
 
     fn to_string(&self) -> String {
-        self.iter_all_changes()
+        let mut old_line_count = 1;
+        let mut new_line_count = 1;
+
+        let diff_lines = self
+            .iter_all_changes()
             .map(|change| match change.tag() {
-                ChangeTag::Insert => format!("{} {}", "+".bold(), change).green().to_string(),
-                ChangeTag::Equal => format!("{} {}", "|".bold(), change).to_string(),
-                ChangeTag::Delete => format!("{} {}", "-".bold(), change).red().to_string(),
+                ChangeTag::Insert => {
+                    let line: DiffLine = (
+                        None,
+                        Some(new_line_count),
+                        '+',
+                        change.to_string(),
+                        Some(Color::Green),
+                    );
+                    new_line_count += 1;
+                    line
+                }
+                ChangeTag::Equal => {
+                    let line: DiffLine = (
+                        Some(old_line_count),
+                        Some(new_line_count),
+                        ' ',
+                        change.to_string(),
+                        None,
+                    );
+                    old_line_count += 1;
+                    new_line_count += 1;
+                    line
+                }
+                ChangeTag::Delete => {
+                    let line: DiffLine = (
+                        Some(old_line_count),
+                        None,
+                        '-',
+                        change.to_string(),
+                        Some(Color::Red),
+                    );
+                    old_line_count += 1;
+                    line
+                }
             })
-            .reduce(|result, change| result + &change)
+            .collect::<Vec<DiffLine>>();
+
+        let line_number_width = max(
+            old_line_count.to_string().len(),
+            new_line_count.to_string().len(),
+        );
+
+        diff_lines
+            .iter()
+            .map(|diff_line| {
+                let old_line_num = match diff_line.0 {
+                    Some(l) => l.to_string(),
+                    None => "".to_string(),
+                };
+                let new_line_num = match diff_line.1 {
+                    Some(l) => l.to_string(),
+                    None => "".to_string(),
+                };
+                let line = format!(
+                    "{} {: >num_width$} {: >num_width$} | {}",
+                    diff_line.2,
+                    old_line_num,
+                    new_line_num,
+                    diff_line.3,
+                    num_width = line_number_width
+                );
+                match diff_line.4 {
+                    Some(color) => line.color(color).to_string(),
+                    None => line,
+                }
+            })
+            .reduce(|result, line| result + &line)
             .unwrap_or_default()
     }
 }
@@ -37,13 +107,12 @@ mod tests {
 
     fn build_test_diff() -> TextDiff<'static, 'static, 'static, str> {
         let old = r#"
-        aaa
-        bbb
-        ccc
+        AAA
+        BBB
+        CCC
         "#;
         let new = r#"
         AAA
-        BBB
         CCC
         DDD
         "#;
@@ -86,9 +155,16 @@ mod tests {
         colored::control::set_override(false);
         let diff = build_test_diff();
         let result = diff.to_string();
-        assert_eq!(
-            "| \n-         aaa\n-         bbb\n-         ccc\n+         AAA\n+         BBB\n+         CCC\n+         DDD\n|         \n",
-            result
-        );
+
+        let expected_lines = [
+            "  1 1 | ",
+            "  2 2 |         AAA",
+            "- 3   |         BBB",
+            "  4 3 |         CCC",
+            "+   4 |         DDD",
+            "  5 5 |         ",
+            "",
+        ];
+        assert_eq!(result, expected_lines.join("\n"));
     }
 }

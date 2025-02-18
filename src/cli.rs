@@ -65,7 +65,7 @@ struct PatinaCommandOptions {
     no_color: bool,
 
     /// The list of tags to filter on
-    #[clap(short = 't', long = "A list of tags to filter on")]
+    #[clap(short = 't', long = "tags", help = "A list of tags to filter on")]
     tags: Vec<String>,
 }
 

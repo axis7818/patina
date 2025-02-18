@@ -1,7 +1,13 @@
+use colored::Colorize;
 use similar::{ChangeTag, TextDiff};
 
+/// DiffAnalysis provides functionality for diffs within dotpatina
 pub trait DiffAnalysis {
+    /// Determine if there are any changes in the diff
     fn any_changes(&self) -> bool;
+
+    /// Get a String representation of the diff for display
+    fn to_string(&self) -> String;
 }
 
 impl<'lines, O: ?Sized> DiffAnalysis for TextDiff<'lines, 'lines, '_, O>
@@ -11,6 +17,17 @@ where
     fn any_changes(&self) -> bool {
         self.iter_all_changes()
             .any(|change| change.tag() != ChangeTag::Equal)
+    }
+
+    fn to_string(&self) -> String {
+        self.iter_all_changes()
+            .map(|change| match change.tag() {
+                ChangeTag::Insert => format!("{} {}", "+".bold(), change).green().to_string(),
+                ChangeTag::Equal => format!("{} {}", "|".bold(), change).to_string(),
+                ChangeTag::Delete => format!("{} {}", "-".bold(), change).red().to_string(),
+            })
+            .reduce(|result, change| result + &change)
+            .unwrap_or_default()
     }
 }
 

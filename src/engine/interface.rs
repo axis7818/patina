@@ -1,9 +1,12 @@
 use std::path::Path;
 
 use colored::Colorize;
-use similar::{ChangeTag, TextDiff};
+use similar::TextDiff;
 
-use crate::utils::{Error, Result};
+use crate::{
+    diff::DiffAnalysis,
+    utils::{Error, Result},
+};
 
 /// PatinaOutput specifies operations for interfacing with user operations
 pub trait PatinaInterface {
@@ -53,17 +56,7 @@ pub trait PatinaInterface {
 
     /// Output a diff view
     fn output_diff<'a>(&self, diff: &TextDiff<'a, 'a, 'a, str>) {
-        for change in diff.iter_all_changes() {
-            match change.tag() {
-                ChangeTag::Insert => {
-                    self.output(format!("{} {}", "+".bold(), change).green().to_string())
-                }
-                ChangeTag::Equal => self.output(format!("{} {}", "|".bold(), change).to_string()),
-                ChangeTag::Delete => {
-                    self.output(format!("{} {}", "-".bold(), change).red().to_string())
-                }
-            }
-        }
+        self.output(diff.to_string());
     }
 }
 

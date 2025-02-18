@@ -141,6 +141,11 @@ impl PatinaCommandOptions {
             self.patina_path.display(),
             self.tags
         );
+
+        if self.no_color {
+            colored::control::set_override(false);
+        }
+
         engine
     }
 }

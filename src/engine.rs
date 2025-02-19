@@ -148,6 +148,7 @@ mod tests {
 
     #[test]
     fn test_render_patina() {
+        colored::control::set_override(false);
         let patina_path = PathBuf::from("tests/fixtures/template_patina.toml");
         let pi = TestPatinaInterface::new();
         let engine = PatinaEngine::new(&pi, &patina_path, vec![]);
@@ -160,9 +161,8 @@ mod tests {
             pi.get_all_output(),
             r#"Rendered 1 files
 
-====================
-> template.txt.hbs <
-====================
+
+template.txt.hbs
 Hello, Patina User!
 This is an example Patina template file.
 Templates use the Handebars templating language. For more information, see <https://handlebarsjs.com/guide/>.
@@ -206,9 +206,8 @@ Templates use the Handebars templating language. For more information, see <http
 
         assert_eq!(
             pi.get_all_output(),
-            r#"===============================
-> tests/fixtures/template.txt <
-===============================
+            r#"
+tests/fixtures/template.txt
 +   1 | Hello, Patina User!
 +   2 | This is an example Patina template file.
 +   3 | Templates use the Handebars templating language. For more information, see <https://handlebarsjs.com/guide/>.

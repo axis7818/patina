@@ -40,18 +40,13 @@ pub trait PatinaInterface {
     /// Output a patina render
     fn output_file_header(&self, template_path: &Path) {
         let template_path = template_path.display().to_string();
-        let banner = format!("{}\n", "=".repeat(template_path.len() + 4))
-            .yellow()
-            .bold()
-            .to_string();
-        self.output(&banner);
         self.output(
-            format!("> {} <\n", template_path)
+            format!("\n{}\n", template_path)
                 .yellow()
                 .bold()
+                .underline()
                 .to_string(),
         );
-        self.output(&banner);
     }
 
     /// Output a diff view

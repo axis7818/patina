@@ -1,0 +1,9 @@
+name = "separate-vars"
+description = "This is a patina that demonstrates separate variable files"
+
+[vars]
+shared_variable = "SHARED"
+
+[[files]]
+template = "file.txt.hbs"
+target = "../../output/file.txt"

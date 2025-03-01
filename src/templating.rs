@@ -142,9 +142,10 @@ Templates use the Handebars templating language. For more information, see <http
         let render = render.unwrap_err();
         assert!(render.is_render_template());
         let err = render.as_render_template().unwrap();
-
-        // TODO: finish test
-        unimplemented!()
+        assert_eq!(
+            err.reason().to_string(),
+            "Failed to access variable in strict mode Some(\"name.first\")"
+        );
     }
 
     #[test]

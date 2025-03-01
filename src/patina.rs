@@ -404,19 +404,53 @@ mod tests {
 
     #[test]
     fn test_load_vars_files() {
-        // TODO: test load vars overlays variables correctly
-        unimplemented!()
+        let path = PathBuf::from("tests/fixtures/patina-vars.toml");
+
+        let patina = Patina::from_toml_file(&path);
+        assert!(patina.is_ok());
+        let mut patina = patina.unwrap();
+
+        let load_vars = patina.load_vars_files(vec![
+            PathBuf::from("tests/fixtures/vars-a.toml"),
+            PathBuf::from("tests/fixtures/vars-b.toml"),
+        ]);
+        assert!(load_vars.is_ok());
+
+        assert_eq!(
+            patina.vars,
+            Some(
+                serde_json::json!({"name": "Patina", "a_var": "aaa", "b_var": "bbb", "example_var": "bbb"})
+            )
+        );
     }
 
     #[test]
     fn test_load_vars_files_file_does_not_exist() {
-        // TODO: test load vars file does not exist
-        unimplemented!()
+        let path = PathBuf::from("tests/fixtures/patina-vars.toml");
+
+        let patina = Patina::from_toml_file(&path);
+        assert!(patina.is_ok());
+        let mut patina = patina.unwrap();
+
+        let load_vars =
+            patina.load_vars_files(vec![PathBuf::from("this/path/does/not/exist.toml")]);
+        assert!(load_vars.is_err());
+        let err = load_vars.unwrap_err();
+        assert!(err.is_file_read())
     }
 
     #[test]
     fn test_load_vars_files_invalid_file_contents() {
-        // TODO: test load vars invalid file contents
-        unimplemented!()
+        let path = PathBuf::from("tests/fixtures/patina-vars.toml");
+
+        let patina = Patina::from_toml_file(&path);
+        assert!(patina.is_ok());
+        let mut patina = patina.unwrap();
+
+        let load_vars =
+            patina.load_vars_files(vec![PathBuf::from("tests/fixtures/invalid_vars.toml")]);
+        assert!(load_vars.is_err());
+        let err = load_vars.unwrap_err();
+        assert!(err.is_toml_parse())
     }
 }

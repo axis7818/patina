@@ -1,0 +1,9 @@
+name = "patina-vars"
+description = "This is a patina with variables"
+
+[vars]
+name = "Patina"
+
+[[files]]
+template = "hello-vars.txt.hbs"
+target = "./output/vars.txt"

@@ -1,5 +1,6 @@
 use std::path::{Path, PathBuf};
 
+use log::debug;
 use patina_file::PatinaFile;
 use serde::{Deserialize, Serialize};
 
@@ -46,6 +47,61 @@ impl Patina {
         patina.base_path = Some(toml_file_path.parent().unwrap().to_path_buf());
 
         Ok(patina)
+    }
+
+    /// Load vars files from disk and overlay them onto the current vars in order
+    pub fn load_vars_files(&mut self, vars_files: Vec<PathBuf>) -> Result<()> {
+        vars_files
+            .iter()
+            .try_for_each(|f| self.overlay_vars_from_file(f))
+    }
+
+    /// Overlay the contents of vars_file onto the current vars
+    fn overlay_vars_from_file(&mut self, vars_file: &PathBuf) -> Result<()> {
+        let vars_str = match std::fs::read_to_string(vars_file) {
+            Ok(vars_str) => vars_str,
+            Err(e) => return Err(Error::FileRead(vars_file.clone(), e)),
+        };
+
+        let vars: serde_json::Value = match toml::from_str(&vars_str) {
+            Ok(vars) => vars,
+            Err(e) => return Err(Error::TomlParse(e)),
+        };
+
+        debug!("overlaying vars from file: {:?}, \n{:#?}", vars_file, vars);
+
+        self.overlay_vars(Some(vars))?;
+        Ok(())
+    }
+
+    /// Overlay the contents of vars onto the current vars
+    fn overlay_vars(&mut self, vars: Option<serde_json::Value>) -> Result<()> {
+        let vars = match vars {
+            Some(vars) => vars,
+            None => return Ok(()),
+        };
+
+        // overlay the contents of vars onto self.vars
+        self.vars = match &self.vars {
+            Some(current_vars) => {
+                let mut current_vars_clone = current_vars.clone();
+                let new_vars = match current_vars_clone.as_object_mut() {
+                    Some(new_vars) => new_vars,
+                    None => return Err(Error::InvalidVars()),
+                };
+
+                let vars = match vars.as_object() {
+                    Some(vars) => vars,
+                    None => return Err(Error::InvalidVars()),
+                };
+
+                new_vars.extend(vars.clone());
+                Some(serde_json::Value::Object(new_vars.clone()))
+            }
+            None => Some(vars),
+        };
+
+        Ok(())
     }
 
     /// Get a path within the context of this Patina
@@ -344,5 +400,23 @@ mod tests {
         assert_eq!(filter_ab[0], patina_file_a);
         assert_eq!(filter_ab[1], patina_file_b);
         assert_eq!(filter_ab[2], patina_file_ab);
+    }
+
+    #[test]
+    fn test_load_vars_files() {
+        // TODO: test load vars overlays variables correctly
+        unimplemented!()
+    }
+
+    #[test]
+    fn test_load_vars_files_file_does_not_exist() {
+        // TODO: test load vars file does not exist
+        unimplemented!()
+    }
+
+    #[test]
+    fn test_load_vars_files_invalid_file_contents() {
+        // TODO: test load vars invalid file contents
+        unimplemented!()
     }
 }

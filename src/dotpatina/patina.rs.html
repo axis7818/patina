@@ -346,8 +346,117 @@
 <a href="#345" id="345">345</a>
 <a href="#346" id="346">346</a>
 <a href="#347" id="347">347</a>
-<a href="#348" id="348">348</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::path::{Path, PathBuf};
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a>
+<a href="#353" id="353">353</a>
+<a href="#354" id="354">354</a>
+<a href="#355" id="355">355</a>
+<a href="#356" id="356">356</a>
+<a href="#357" id="357">357</a>
+<a href="#358" id="358">358</a>
+<a href="#359" id="359">359</a>
+<a href="#360" id="360">360</a>
+<a href="#361" id="361">361</a>
+<a href="#362" id="362">362</a>
+<a href="#363" id="363">363</a>
+<a href="#364" id="364">364</a>
+<a href="#365" id="365">365</a>
+<a href="#366" id="366">366</a>
+<a href="#367" id="367">367</a>
+<a href="#368" id="368">368</a>
+<a href="#369" id="369">369</a>
+<a href="#370" id="370">370</a>
+<a href="#371" id="371">371</a>
+<a href="#372" id="372">372</a>
+<a href="#373" id="373">373</a>
+<a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
+<a href="#392" id="392">392</a>
+<a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a>
+<a href="#410" id="410">410</a>
+<a href="#411" id="411">411</a>
+<a href="#412" id="412">412</a>
+<a href="#413" id="413">413</a>
+<a href="#414" id="414">414</a>
+<a href="#415" id="415">415</a>
+<a href="#416" id="416">416</a>
+<a href="#417" id="417">417</a>
+<a href="#418" id="418">418</a>
+<a href="#419" id="419">419</a>
+<a href="#420" id="420">420</a>
+<a href="#421" id="421">421</a>
+<a href="#422" id="422">422</a>
+<a href="#423" id="423">423</a>
+<a href="#424" id="424">424</a>
+<a href="#425" id="425">425</a>
+<a href="#426" id="426">426</a>
+<a href="#427" id="427">427</a>
+<a href="#428" id="428">428</a>
+<a href="#429" id="429">429</a>
+<a href="#430" id="430">430</a>
+<a href="#431" id="431">431</a>
+<a href="#432" id="432">432</a>
+<a href="#433" id="433">433</a>
+<a href="#434" id="434">434</a>
+<a href="#435" id="435">435</a>
+<a href="#436" id="436">436</a>
+<a href="#437" id="437">437</a>
+<a href="#438" id="438">438</a>
+<a href="#439" id="439">439</a>
+<a href="#440" id="440">440</a>
+<a href="#441" id="441">441</a>
+<a href="#442" id="442">442</a>
+<a href="#443" id="443">443</a>
+<a href="#444" id="444">444</a>
+<a href="#445" id="445">445</a>
+<a href="#446" id="446">446</a>
+<a href="#447" id="447">447</a>
+<a href="#448" id="448">448</a>
+<a href="#449" id="449">449</a>
+<a href="#450" id="450">450</a>
+<a href="#451" id="451">451</a>
+<a href="#452" id="452">452</a>
+<a href="#453" id="453">453</a>
+<a href="#454" id="454">454</a>
+<a href="#455" id="455">455</a>
+<a href="#456" id="456">456</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::path::{Path, PathBuf};
 
+<span class="kw">use </span>log::debug;
 <span class="kw">use </span>patina_file::PatinaFile;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 
@@ -394,6 +503,61 @@
         patina.base_path = <span class="prelude-val">Some</span>(toml_file_path.parent().unwrap().to_path_buf());
 
         <span class="prelude-val">Ok</span>(patina)
+    }
+
+    <span class="doccomment">/// Load vars files from disk and overlay them onto the current vars in order
+    </span><span class="kw">pub fn </span>load_vars_files(<span class="kw-2">&amp;mut </span><span class="self">self</span>, vars_files: Vec&lt;PathBuf&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        vars_files
+            .iter()
+            .try_for_each(|f| <span class="self">self</span>.overlay_vars_from_file(f))
+    }
+
+    <span class="doccomment">/// Overlay the contents of vars_file onto the current vars
+    </span><span class="kw">fn </span>overlay_vars_from_file(<span class="kw-2">&amp;mut </span><span class="self">self</span>, vars_file: <span class="kw-2">&amp;</span>PathBuf) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>vars_str = <span class="kw">match </span>std::fs::read_to_string(vars_file) {
+            <span class="prelude-val">Ok</span>(vars_str) =&gt; vars_str,
+            <span class="prelude-val">Err</span>(e) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::FileRead(vars_file.clone(), e)),
+        };
+
+        <span class="kw">let </span>vars: serde_json::Value = <span class="kw">match </span>toml::from_str(<span class="kw-2">&amp;</span>vars_str) {
+            <span class="prelude-val">Ok</span>(vars) =&gt; vars,
+            <span class="prelude-val">Err</span>(e) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::TomlParse(e)),
+        };
+
+        <span class="macro">debug!</span>(<span class="string">"overlaying vars from file: {:?}, \n{:#?}"</span>, vars_file, vars);
+
+        <span class="self">self</span>.overlay_vars(<span class="prelude-val">Some</span>(vars))<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="doccomment">/// Overlay the contents of vars onto the current vars
+    </span><span class="kw">fn </span>overlay_vars(<span class="kw-2">&amp;mut </span><span class="self">self</span>, vars: <span class="prelude-ty">Option</span>&lt;serde_json::Value&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>vars = <span class="kw">match </span>vars {
+            <span class="prelude-val">Some</span>(vars) =&gt; vars,
+            <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(()),
+        };
+
+        <span class="comment">// overlay the contents of vars onto self.vars
+        </span><span class="self">self</span>.vars = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.vars {
+            <span class="prelude-val">Some</span>(current_vars) =&gt; {
+                <span class="kw">let </span><span class="kw-2">mut </span>current_vars_clone = current_vars.clone();
+                <span class="kw">let </span>new_vars = <span class="kw">match </span>current_vars_clone.as_object_mut() {
+                    <span class="prelude-val">Some</span>(new_vars) =&gt; new_vars,
+                    <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidVars()),
+                };
+
+                <span class="kw">let </span>vars = <span class="kw">match </span>vars.as_object() {
+                    <span class="prelude-val">Some</span>(vars) =&gt; vars,
+                    <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidVars()),
+                };
+
+                new_vars.extend(vars.clone());
+                <span class="prelude-val">Some</span>(serde_json::Value::Object(new_vars.clone()))
+            }
+            <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Some</span>(vars),
+        };
+
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="doccomment">/// Get a path within the context of this Patina
@@ -692,6 +856,58 @@
         <span class="macro">assert_eq!</span>(filter_ab[<span class="number">0</span>], patina_file_a);
         <span class="macro">assert_eq!</span>(filter_ab[<span class="number">1</span>], patina_file_b);
         <span class="macro">assert_eq!</span>(filter_ab[<span class="number">2</span>], patina_file_ab);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_load_vars_files() {
+        <span class="kw">let </span>path = PathBuf::from(<span class="string">"tests/fixtures/patina-vars.toml"</span>);
+
+        <span class="kw">let </span>patina = Patina::from_toml_file(<span class="kw-2">&amp;</span>path);
+        <span class="macro">assert!</span>(patina.is_ok());
+        <span class="kw">let </span><span class="kw-2">mut </span>patina = patina.unwrap();
+
+        <span class="kw">let </span>load_vars = patina.load_vars_files(<span class="macro">vec!</span>[
+            PathBuf::from(<span class="string">"tests/fixtures/vars-a.toml"</span>),
+            PathBuf::from(<span class="string">"tests/fixtures/vars-b.toml"</span>),
+        ]);
+        <span class="macro">assert!</span>(load_vars.is_ok());
+
+        <span class="macro">assert_eq!</span>(
+            patina.vars,
+            <span class="prelude-val">Some</span>(
+                <span class="macro">serde_json::json!</span>({<span class="string">"name"</span>: <span class="string">"Patina"</span>, <span class="string">"a_var"</span>: <span class="string">"aaa"</span>, <span class="string">"b_var"</span>: <span class="string">"bbb"</span>, <span class="string">"example_var"</span>: <span class="string">"bbb"</span>})
+            )
+        );
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_load_vars_files_file_does_not_exist() {
+        <span class="kw">let </span>path = PathBuf::from(<span class="string">"tests/fixtures/patina-vars.toml"</span>);
+
+        <span class="kw">let </span>patina = Patina::from_toml_file(<span class="kw-2">&amp;</span>path);
+        <span class="macro">assert!</span>(patina.is_ok());
+        <span class="kw">let </span><span class="kw-2">mut </span>patina = patina.unwrap();
+
+        <span class="kw">let </span>load_vars =
+            patina.load_vars_files(<span class="macro">vec!</span>[PathBuf::from(<span class="string">"this/path/does/not/exist.toml"</span>)]);
+        <span class="macro">assert!</span>(load_vars.is_err());
+        <span class="kw">let </span>err = load_vars.unwrap_err();
+        <span class="macro">assert!</span>(err.is_file_read())
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_load_vars_files_invalid_file_contents() {
+        <span class="kw">let </span>path = PathBuf::from(<span class="string">"tests/fixtures/patina-vars.toml"</span>);
+
+        <span class="kw">let </span>patina = Patina::from_toml_file(<span class="kw-2">&amp;</span>path);
+        <span class="macro">assert!</span>(patina.is_ok());
+        <span class="kw">let </span><span class="kw-2">mut </span>patina = patina.unwrap();
+
+        <span class="kw">let </span>load_vars =
+            patina.load_vars_files(<span class="macro">vec!</span>[PathBuf::from(<span class="string">"tests/fixtures/invalid_vars.toml"</span>)]);
+        <span class="macro">assert!</span>(load_vars.is_err());
+        <span class="kw">let </span>err = load_vars.unwrap_err();
+        <span class="macro">assert!</span>(err.is_toml_parse())
     }
 }
 </code></pre></div></section></main></body></html>

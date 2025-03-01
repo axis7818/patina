@@ -149,7 +149,16 @@
 <a href="#148" id="148">148</a>
 <a href="#149" id="149">149</a>
 <a href="#150" id="150">150</a>
-<a href="#151" id="151">151</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::io::Write;
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::io::Write;
 <span class="kw">use </span>std::path::PathBuf;
 
 <span class="kw">use </span><span class="kw">crate</span>::engine::{interface::PatinaInterface, PatinaEngine};
@@ -216,8 +225,12 @@
     </span>no_color: bool,
 
     <span class="doccomment">/// The list of tags to filter on
-    </span><span class="attr">#[clap(short = <span class="string">'t'</span>, long = <span class="string">"tags"</span>, help = <span class="string">"A list of tags to filter on"</span>)]
+    </span><span class="attr">#[clap(short = <span class="string">'t'</span>, long = <span class="string">"tags"</span>, help = <span class="string">"A set of tags to filter on"</span>)]
     </span>tags: Vec&lt;String&gt;,
+
+    <span class="doccomment">/// A list of variables files
+    </span><span class="attr">#[clap(short = <span class="string">'f'</span>, long = <span class="string">"vars"</span>, help = <span class="string">"A set of variables files"</span>)]
+    </span>variables_files: Vec&lt;PathBuf&gt;,
 }
 
 <span class="kw">impl </span>PatinaCli {
@@ -283,7 +296,12 @@
     <span class="kw">where
         </span>PI: PatinaInterface,
     {
-        <span class="kw">let </span>engine = PatinaEngine::new(pi, <span class="kw-2">&amp;</span><span class="self">self</span>.patina_path, <span class="self">self</span>.tags.clone());
+        <span class="kw">let </span>engine = PatinaEngine::new(
+            pi,
+            <span class="kw-2">&amp;</span><span class="self">self</span>.patina_path,
+            <span class="self">self</span>.tags.clone(),
+            <span class="self">self</span>.variables_files.clone(),
+        );
         <span class="macro">info!</span>(
             <span class="string">r#"New PatinaEngine
             path = {}

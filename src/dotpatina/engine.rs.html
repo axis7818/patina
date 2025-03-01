@@ -256,7 +256,18 @@
 <a href="#255" id="255">255</a>
 <a href="#256" id="256">256</a>
 <a href="#257" id="257">257</a>
-<a href="#258" id="258">258</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::{
+<a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::{
     fs,
     path::{Path, PathBuf},
 };
@@ -288,6 +299,9 @@
 
     <span class="doccomment">/// The set of tags to filter on
     </span>tags: <span class="prelude-ty">Option</span>&lt;Vec&lt;String&gt;&gt;,
+
+    <span class="doccomment">/// A lsit of variables path files
+    </span>variables_files: Vec&lt;PathBuf&gt;,
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, PI&gt; PatinaEngine&lt;<span class="lifetime">'a</span>, PI&gt;
@@ -295,7 +309,12 @@
     </span>PI: PatinaInterface,
 {
     <span class="doccomment">/// Create a new PatinaEngine
-    </span><span class="kw">pub fn </span>new(pi: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>PI, patina_path: <span class="kw-2">&amp;</span>Path, tags: Vec&lt;String&gt;) -&gt; PatinaEngine&lt;<span class="lifetime">'a</span>, PI&gt; {
+    </span><span class="kw">pub fn </span>new(
+        pi: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>PI,
+        patina_path: <span class="kw-2">&amp;</span>Path,
+        tags: Vec&lt;String&gt;,
+        variables_files: Vec&lt;PathBuf&gt;,
+    ) -&gt; PatinaEngine&lt;<span class="lifetime">'a</span>, PI&gt; {
         <span class="kw">let </span>tags = <span class="kw">match </span><span class="kw-2">&amp;*</span>tags {
             [] =&gt; <span class="prelude-val">None</span>,
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Some</span>(tags),
@@ -304,12 +323,14 @@
             pi,
             patina_path: patina_path.to_path_buf(),
             tags,
+            variables_files,
         }
     }
 
     <span class="doccomment">/// Renders a Patina
     </span><span class="kw">pub fn </span>render_patina(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>patina = Patina::from_toml_file(<span class="kw-2">&amp;</span><span class="self">self</span>.patina_path)<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>patina = Patina::from_toml_file(<span class="kw-2">&amp;</span><span class="self">self</span>.patina_path)<span class="question-mark">?</span>;
+        patina.load_vars_files(<span class="self">self</span>.variables_files.clone())<span class="question-mark">?</span>;
         <span class="macro">info!</span>(<span class="string">"got patina: {:#?}"</span>, patina);
         <span class="kw">let </span>render = templating::render_patina(<span class="kw-2">&amp;</span>patina, <span class="self">self</span>.tags.clone())<span class="question-mark">?</span>;
 
@@ -325,7 +346,8 @@
 
     <span class="doccomment">/// Applies all of the Patina files
     </span><span class="kw">pub fn </span>apply_patina(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>patina = Patina::from_toml_file(<span class="kw-2">&amp;</span><span class="self">self</span>.patina_path)<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>patina = Patina::from_toml_file(<span class="kw-2">&amp;</span><span class="self">self</span>.patina_path)<span class="question-mark">?</span>;
+        patina.load_vars_files(<span class="self">self</span>.variables_files.clone())<span class="question-mark">?</span>;
         <span class="macro">info!</span>(<span class="string">"got patina: {:#?}"</span>, patina);
         <span class="kw">let </span>render = templating::render_patina(<span class="kw-2">&amp;</span>patina, <span class="self">self</span>.tags.clone())<span class="question-mark">?</span>;
 
@@ -409,7 +431,7 @@
         colored::control::set_override(<span class="bool-val">false</span>);
         <span class="kw">let </span>patina_path = PathBuf::from(<span class="string">"tests/fixtures/template_patina.toml"</span>);
         <span class="kw">let </span>pi = TestPatinaInterface::new();
-        <span class="kw">let </span>engine = PatinaEngine::new(<span class="kw-2">&amp;</span>pi, <span class="kw-2">&amp;</span>patina_path, <span class="macro">vec!</span>[]);
+        <span class="kw">let </span>engine = PatinaEngine::new(<span class="kw-2">&amp;</span>pi, <span class="kw-2">&amp;</span>patina_path, <span class="macro">vec!</span>[], <span class="macro">vec!</span>[]);
 
         <span class="kw">let </span>render = engine.render_patina();
 
@@ -433,7 +455,7 @@ Templates use the Handebars templating language. For more information, see &lt;h
     </span><span class="kw">fn </span>test_render_patina_failed_file_load() {
         <span class="kw">let </span>patina_path = PathBuf::from(<span class="string">"this/path/does/not/exist.toml"</span>);
         <span class="kw">let </span>pi = TestPatinaInterface::new();
-        <span class="kw">let </span>engine = PatinaEngine::new(<span class="kw-2">&amp;</span>pi, <span class="kw-2">&amp;</span>patina_path, <span class="macro">vec!</span>[]);
+        <span class="kw">let </span>engine = PatinaEngine::new(<span class="kw-2">&amp;</span>pi, <span class="kw-2">&amp;</span>patina_path, <span class="macro">vec!</span>[], <span class="macro">vec!</span>[]);
 
         <span class="kw">let </span>render = engine.render_patina();
         <span class="macro">assert!</span>(render.is_err());
@@ -444,7 +466,7 @@ Templates use the Handebars templating language. For more information, see &lt;h
     </span><span class="kw">fn </span>test_render_patina_render_fails() {
         <span class="kw">let </span>patina_path = PathBuf::from(<span class="string">"tests/fixtures/missing_template_patina.toml"</span>);
         <span class="kw">let </span>pi = TestPatinaInterface::new();
-        <span class="kw">let </span>engine = PatinaEngine::new(<span class="kw-2">&amp;</span>pi, <span class="kw-2">&amp;</span>patina_path, <span class="macro">vec!</span>[]);
+        <span class="kw">let </span>engine = PatinaEngine::new(<span class="kw-2">&amp;</span>pi, <span class="kw-2">&amp;</span>patina_path, <span class="macro">vec!</span>[], <span class="macro">vec!</span>[]);
 
         <span class="kw">let </span>render = engine.render_patina();
         <span class="macro">assert!</span>(render.is_err());
@@ -456,7 +478,7 @@ Templates use the Handebars templating language. For more information, see &lt;h
         <span class="kw">let </span>patina_path = PathBuf::from(<span class="string">"tests/fixtures/template_patina.toml"</span>);
         <span class="kw">let </span>applied_file_path = TestTargetFile::new(<span class="string">"tests/fixtures/template.txt"</span>);
         <span class="kw">let </span>pi = TestPatinaInterface::new();
-        <span class="kw">let </span>engine = PatinaEngine::new(<span class="kw-2">&amp;</span>pi, <span class="kw-2">&amp;</span>patina_path, <span class="macro">vec!</span>[]);
+        <span class="kw">let </span>engine = PatinaEngine::new(<span class="kw-2">&amp;</span>pi, <span class="kw-2">&amp;</span>patina_path, <span class="macro">vec!</span>[], <span class="macro">vec!</span>[]);
 
         <span class="kw">let </span>apply = engine.apply_patina();
 
@@ -493,7 +515,7 @@ Templates use the Handebars templating language. For more information, see &lt;h
         <span class="kw">let </span>patina_path = PathBuf::from(<span class="string">"tests/fixtures/template_patina.toml"</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>pi = TestPatinaInterface::new();
         pi.confirm_apply = <span class="bool-val">false</span>;
-        <span class="kw">let </span>engine = PatinaEngine::new(<span class="kw-2">&amp;</span>pi, <span class="kw-2">&amp;</span>patina_path, <span class="macro">vec!</span>[]);
+        <span class="kw">let </span>engine = PatinaEngine::new(<span class="kw-2">&amp;</span>pi, <span class="kw-2">&amp;</span>patina_path, <span class="macro">vec!</span>[], <span class="macro">vec!</span>[]);
 
         <span class="kw">let </span>apply = engine.apply_patina();
 
@@ -505,7 +527,7 @@ Templates use the Handebars templating language. For more information, see &lt;h
     </span><span class="kw">fn </span>test_apply_patina_does_nothing_if_there_are_no_changes() {
         <span class="kw">let </span>patina_path = PathBuf::from(<span class="string">"tests/fixtures/no_files_patina.toml"</span>);
         <span class="kw">let </span>pi = TestPatinaInterface::new();
-        <span class="kw">let </span>engine = PatinaEngine::new(<span class="kw-2">&amp;</span>pi, <span class="kw-2">&amp;</span>patina_path, <span class="macro">vec!</span>[]);
+        <span class="kw">let </span>engine = PatinaEngine::new(<span class="kw-2">&amp;</span>pi, <span class="kw-2">&amp;</span>patina_path, <span class="macro">vec!</span>[], <span class="macro">vec!</span>[]);
         <span class="kw">let </span>apply = engine.apply_patina();
 
         <span class="macro">assert!</span>(apply.is_ok());

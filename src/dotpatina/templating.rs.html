@@ -187,7 +187,8 @@
 <a href="#186" id="186">186</a>
 <a href="#187" id="187">187</a>
 <a href="#188" id="188">188</a>
-<a href="#189" id="189">189</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::fs;
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::fs;
 
 <span class="kw">use </span>handlebars::Handlebars;
 <span class="kw">use </span>log::info;
@@ -206,6 +207,7 @@
 </span><span class="kw">pub fn </span>render_patina(patina: <span class="kw-2">&amp;</span>Patina, tags: <span class="prelude-ty">Option</span>&lt;Vec&lt;String&gt;&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;PatinaFileRender&gt;&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>hb = Handlebars::new();
     hb.register_escape_fn(handlebars::no_escape);
+    hb.set_strict_mode(<span class="bool-val">true</span>);
 
     patina
         .files_for_tags(tags)
@@ -234,7 +236,10 @@
 
     <span class="kw">match </span>hb.render_template(<span class="kw-2">&amp;</span>template_str, <span class="kw-2">&amp;</span>patina.vars) {
         <span class="prelude-val">Ok</span>(render) =&gt; <span class="prelude-val">Ok</span>(render),
-        <span class="prelude-val">Err</span>(e) =&gt; <span class="prelude-val">Err</span>(Error::RenderTemplate(e)),
+        <span class="prelude-val">Err</span>(<span class="kw-2">mut </span>e) =&gt; {
+            e.template_name = <span class="prelude-val">Some</span>(patina_file.template.display().to_string());
+            <span class="prelude-val">Err</span>(Error::RenderTemplate(e))
+        }
     }
 }
 
@@ -323,17 +328,14 @@ Templates use the Handebars templating language. For more information, see &lt;h
         };
 
         <span class="kw">let </span>render = render_patina(<span class="kw-2">&amp;</span>patina, <span class="prelude-val">None</span>);
-
-        <span class="macro">assert!</span>(render.is_ok());
-        <span class="kw">let </span>render = render.unwrap();
-        <span class="macro">assert_eq!</span>(render.len(), <span class="number">1</span>);
-        <span class="kw">let </span>render = <span class="kw-2">&amp;</span>render[<span class="number">0</span>];
-
-        <span class="kw">let </span>expected = <span class="string">r#"Hello,  !
-This is an example Patina template file.
-Templates use the Handebars templating language. For more information, see &lt;https://handlebarsjs.com/guide/&gt;.
-"#</span>;
-        <span class="macro">assert_eq!</span>(expected, render.render_str);
+        <span class="macro">assert!</span>(render.is_err());
+        <span class="kw">let </span>render = render.unwrap_err();
+        <span class="macro">assert!</span>(render.is_render_template());
+        <span class="kw">let </span>err = render.as_render_template().unwrap();
+        <span class="macro">assert_eq!</span>(
+            err.reason().to_string(),
+            <span class="string">"Failed to access variable in strict mode Some(\"name.first\")"
+        </span>);
     }
 
     <span class="attr">#[test]

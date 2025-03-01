@@ -65,8 +65,12 @@ struct PatinaCommandOptions {
     no_color: bool,
 
     /// The list of tags to filter on
-    #[clap(short = 't', long = "tags", help = "A list of tags to filter on")]
+    #[clap(short = 't', long = "tags", help = "A set of tags to filter on")]
     tags: Vec<String>,
+
+    /// A list of variables files
+    #[clap(short = 'f', long = "vars", help = "A set of variables files")]
+    variables_files: Vec<PathBuf>,
 }
 
 impl PatinaCli {
@@ -132,7 +136,12 @@ impl PatinaCommandOptions {
     where
         PI: PatinaInterface,
     {
-        let engine = PatinaEngine::new(pi, &self.patina_path, self.tags.clone());
+        let engine = PatinaEngine::new(
+            pi,
+            &self.patina_path,
+            self.tags.clone(),
+            self.variables_files.clone(),
+        );
         info!(
             r#"New PatinaEngine
             path = {}

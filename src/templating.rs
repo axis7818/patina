@@ -17,6 +17,7 @@ pub struct PatinaFileRender<'pf> {
 pub fn render_patina(patina: &Patina, tags: Option<Vec<String>>) -> Result<Vec<PatinaFileRender>> {
     let mut hb = Handlebars::new();
     hb.register_escape_fn(handlebars::no_escape);
+    hb.set_strict_mode(true);
 
     patina
         .files_for_tags(tags)
@@ -45,7 +46,10 @@ fn render_patina_file(
 
     match hb.render_template(&template_str, &patina.vars) {
         Ok(render) => Ok(render),
-        Err(e) => Err(Error::RenderTemplate(e)),
+        Err(mut e) => {
+            e.template_name = Some(patina_file.template.display().to_string());
+            Err(Error::RenderTemplate(e))
+        }
     }
 }
 
@@ -134,17 +138,14 @@ Templates use the Handebars templating language. For more information, see <http
         };
 
         let render = render_patina(&patina, None);
-
-        assert!(render.is_ok());
-        let render = render.unwrap();
-        assert_eq!(render.len(), 1);
-        let render = &render[0];
-
-        let expected = r#"Hello,  !
-This is an example Patina template file.
-Templates use the Handebars templating language. For more information, see <https://handlebarsjs.com/guide/>.
-"#;
-        assert_eq!(expected, render.render_str);
+        assert!(render.is_err());
+        let render = render.unwrap_err();
+        assert!(render.is_render_template());
+        let err = render.as_render_template().unwrap();
+        assert_eq!(
+            err.reason().to_string(),
+            "Failed to access variable in strict mode Some(\"name.first\")"
+        );
     }
 
     #[test]

@@ -26,6 +26,9 @@ pub enum Error {
 
     /// An error that occurs when rendering a handlebars template
     RenderTemplate(handlebars::RenderError),
+
+    /// A vars object is invalid
+    InvalidVars(),
 }
 
 /// A Result type that uses the [`Error`] enum

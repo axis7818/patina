@@ -30,6 +30,9 @@ where
 
     /// The set of tags to filter on
     tags: Option<Vec<String>>,
+
+    /// A lsit of variables path files
+    variables_files: Vec<PathBuf>,
 }
 
 impl<'a, PI> PatinaEngine<'a, PI>
@@ -37,7 +40,12 @@ where
     PI: PatinaInterface,
 {
     /// Create a new PatinaEngine
-    pub fn new(pi: &'a PI, patina_path: &Path, tags: Vec<String>) -> PatinaEngine<'a, PI> {
+    pub fn new(
+        pi: &'a PI,
+        patina_path: &Path,
+        tags: Vec<String>,
+        variables_files: Vec<PathBuf>,
+    ) -> PatinaEngine<'a, PI> {
         let tags = match &*tags {
             [] => None,
             _ => Some(tags),
@@ -46,12 +54,14 @@ where
             pi,
             patina_path: patina_path.to_path_buf(),
             tags,
+            variables_files,
         }
     }
 
     /// Renders a Patina
     pub fn render_patina(&self) -> Result<()> {
-        let patina = Patina::from_toml_file(&self.patina_path)?;
+        let mut patina = Patina::from_toml_file(&self.patina_path)?;
+        patina.load_vars_files(self.variables_files.clone())?;
         info!("got patina: {:#?}", patina);
         let render = templating::render_patina(&patina, self.tags.clone())?;
 
@@ -67,7 +77,8 @@ where
 
     /// Applies all of the Patina files
     pub fn apply_patina(&self) -> Result<()> {
-        let patina = Patina::from_toml_file(&self.patina_path)?;
+        let mut patina = Patina::from_toml_file(&self.patina_path)?;
+        patina.load_vars_files(self.variables_files.clone())?;
         info!("got patina: {:#?}", patina);
         let render = templating::render_patina(&patina, self.tags.clone())?;
 
@@ -151,7 +162,7 @@ mod tests {
         colored::control::set_override(false);
         let patina_path = PathBuf::from("tests/fixtures/template_patina.toml");
         let pi = TestPatinaInterface::new();
-        let engine = PatinaEngine::new(&pi, &patina_path, vec![]);
+        let engine = PatinaEngine::new(&pi, &patina_path, vec![], vec![]);
 
         let render = engine.render_patina();
 
@@ -175,7 +186,7 @@ Templates use the Handebars templating language. For more information, see <http
     fn test_render_patina_failed_file_load() {
         let patina_path = PathBuf::from("this/path/does/not/exist.toml");
         let pi = TestPatinaInterface::new();
-        let engine = PatinaEngine::new(&pi, &patina_path, vec![]);
+        let engine = PatinaEngine::new(&pi, &patina_path, vec![], vec![]);
 
         let render = engine.render_patina();
         assert!(render.is_err());
@@ -186,7 +197,7 @@ Templates use the Handebars templating language. For more information, see <http
     fn test_render_patina_render_fails() {
         let patina_path = PathBuf::from("tests/fixtures/missing_template_patina.toml");
         let pi = TestPatinaInterface::new();
-        let engine = PatinaEngine::new(&pi, &patina_path, vec![]);
+        let engine = PatinaEngine::new(&pi, &patina_path, vec![], vec![]);
 
         let render = engine.render_patina();
         assert!(render.is_err());
@@ -198,7 +209,7 @@ Templates use the Handebars templating language. For more information, see <http
         let patina_path = PathBuf::from("tests/fixtures/template_patina.toml");
         let applied_file_path = TestTargetFile::new("tests/fixtures/template.txt");
         let pi = TestPatinaInterface::new();
-        let engine = PatinaEngine::new(&pi, &patina_path, vec![]);
+        let engine = PatinaEngine::new(&pi, &patina_path, vec![], vec![]);
 
         let apply = engine.apply_patina();
 
@@ -235,7 +246,7 @@ Templates use the Handebars templating language. For more information, see <http
         let patina_path = PathBuf::from("tests/fixtures/template_patina.toml");
         let mut pi = TestPatinaInterface::new();
         pi.confirm_apply = false;
-        let engine = PatinaEngine::new(&pi, &patina_path, vec![]);
+        let engine = PatinaEngine::new(&pi, &patina_path, vec![], vec![]);
 
         let apply = engine.apply_patina();
 
@@ -247,7 +258,7 @@ Templates use the Handebars templating language. For more information, see <http
     fn test_apply_patina_does_nothing_if_there_are_no_changes() {
         let patina_path = PathBuf::from("tests/fixtures/no_files_patina.toml");
         let pi = TestPatinaInterface::new();
-        let engine = PatinaEngine::new(&pi, &patina_path, vec![]);
+        let engine = PatinaEngine::new(&pi, &patina_path, vec![], vec![]);
         let apply = engine.apply_patina();
 
         assert!(apply.is_ok());

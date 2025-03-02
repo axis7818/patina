@@ -137,8 +137,10 @@ impl Patina {
 
 #[cfg(test)]
 mod tests {
+    use std::fs;
+
     use super::*;
-    use crate::utils::tests::get_home_dir;
+    use crate::{tests::test_utils::TmpTestDir, utils::tests::get_home_dir};
 
     #[test]
     fn test_patina_deserialize() {
@@ -267,7 +269,21 @@ mod tests {
 
     #[test]
     fn test_patina_from_toml_file() {
-        let path = PathBuf::from("tests/fixtures/patina.toml");
+        let tmp_dir = TmpTestDir::new();
+        let path = tmp_dir.write_file(
+            "patina.toml",
+            r#"
+                name = "simple-patina"
+                description = "This is a simple Patina example"
+
+                [vars]
+                name = "Patina"
+
+                [[files]]
+                template = "../../examples/simple/templates/hello.txt"
+                target = "./output/hello.txt"
+            "#,
+        );
 
         let patina = Patina::from_toml_file(&path);
         assert!(patina.is_ok());
@@ -295,7 +311,20 @@ mod tests {
 
     #[test]
     fn test_patina_from_toml_file_invalid_format() {
-        let path = PathBuf::from("tests/fixtures/invalid_patina.toml");
+        let tmp_dir = TmpTestDir::new();
+        let path = tmp_dir.write_file(
+            "invalid_patina.toml",
+            r#"
+                description = "This is a simple Patina example"
+
+                [vars]
+                name = "Patina"
+
+                [[files]]
+                template = "examples/simple/templates/hello.txt"
+                target = "./output/hello.txt"
+            "#,
+        );
 
         let patina = Patina::from_toml_file(&path);
         assert!(patina.is_err());
@@ -344,8 +373,8 @@ mod tests {
             files: vec![],
         };
 
-        let result = patina.get_patina_path(PathBuf::from("fixtures/test.txt"));
-        assert_eq!(PathBuf::from("tests/fixtures/test.txt"), result);
+        let result = patina.get_patina_path(PathBuf::from("some-dir/test.txt"));
+        assert_eq!(PathBuf::from("tests/some-dir/test.txt"), result);
     }
 
     #[test]
@@ -404,16 +433,41 @@ mod tests {
 
     #[test]
     fn test_load_vars_files() {
-        let path = PathBuf::from("tests/fixtures/patina-vars.toml");
+        let tmp_dir = TmpTestDir::new();
+        let path = tmp_dir.write_file(
+            "patina-vars.toml",
+            r#"
+                name = "patina-vars"
+                description = "This is a patina with variables"
+
+                [vars]
+                name = "Patina"
+
+                [[files]]
+                template = "hello-vars.txt.hbs"
+                target = "./output/vars.txt"
+            "#,
+        );
+        let vars_a_path = tmp_dir.write_file(
+            "vars-a.toml",
+            r#"
+                a_var = "aaa"
+                example_var = "aaa"
+            "#,
+        );
+        let vars_b_path = tmp_dir.write_file(
+            "vars-b.toml",
+            r#"
+                b_var = "bbb"
+                example_var = "bbb"
+            "#,
+        );
 
         let patina = Patina::from_toml_file(&path);
         assert!(patina.is_ok());
         let mut patina = patina.unwrap();
 
-        let load_vars = patina.load_vars_files(vec![
-            PathBuf::from("tests/fixtures/vars-a.toml"),
-            PathBuf::from("tests/fixtures/vars-b.toml"),
-        ]);
+        let load_vars = patina.load_vars_files(vec![vars_a_path, vars_b_path]);
         assert!(load_vars.is_ok());
 
         assert_eq!(
@@ -426,7 +480,21 @@ mod tests {
 
     #[test]
     fn test_load_vars_files_file_does_not_exist() {
-        let path = PathBuf::from("tests/fixtures/patina-vars.toml");
+        let tmp_dir = TmpTestDir::new();
+        let path = tmp_dir.write_file(
+            "patina-vars.toml",
+            r#"
+                name = "patina-vars"
+                description = "This is a patina with variables"
+
+                [vars]
+                name = "Patina"
+
+                [[files]]
+                template = "hello-vars.txt.hbs"
+                target = "./output/vars.txt"
+            "#,
+        );
 
         let patina = Patina::from_toml_file(&path);
         assert!(patina.is_ok());
@@ -441,14 +509,33 @@ mod tests {
 
     #[test]
     fn test_load_vars_files_invalid_file_contents() {
-        let path = PathBuf::from("tests/fixtures/patina-vars.toml");
+        let tmp_dir = TmpTestDir::new();
+        let path = tmp_dir.write_file(
+            "patina-vars.toml",
+            r#"
+                name = "patina-vars"
+                description = "This is a patina with variables"
+
+                [vars]
+                name = "Patina"
+
+                [[files]]
+                template = "hello-vars.txt.hbs"
+                target = "./output/vars.txt"
+            "#,
+        );
+        let invalid_vars_path = tmp_dir.write_file(
+            "invalid_vars.toml",
+            r#"
+                [[]]1]1[1[1]]1
+            "#,
+        );
 
         let patina = Patina::from_toml_file(&path);
         assert!(patina.is_ok());
         let mut patina = patina.unwrap();
 
-        let load_vars =
-            patina.load_vars_files(vec![PathBuf::from("tests/fixtures/invalid_vars.toml")]);
+        let load_vars = patina.load_vars_files(vec![invalid_vars_path]);
         assert!(load_vars.is_err());
         let err = load_vars.unwrap_err();
         assert!(err.is_toml_parse())

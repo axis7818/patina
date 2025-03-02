@@ -20,62 +20,115 @@ cargo install dotpatina
 
 ## Usage
 
-### Render
+`dotpatina` takes templated configuration files (using handlebars templating), rendering configuration files, and applying them to target locations on the file system.
+
+### Applying a Patina
+
+`dotpatina` accepts a path to a Patina toml file that defines files and variables used for rendering. Separate variables toml files can be provided to overlay variable customizations.
+
+![gif of applying a new patina](./examples/gitconfig/apply-new-patina.gif)
+
+A diff view is presented with each `apply` command to show only lines that will change.
+
+<details>
+<summary>apply change</summary>
 
 ```sh
-dotpatina render --help
+❱ dotpatina apply patina.toml --vars other-vars.toml
+
+/Users/cameron/Repos/github.com/axis7818/dotpatina/output/.gitconfig
+   1  1 | [user]
+-  2    |     email = <user@email.com>
+-  3    |     name = <User Name>
++     2 |     email = <different@email.com>
++     3 |     name = <Different User>
+   4  4 | [alias]
+   5  5 |     lg = !git lg1
+   6  6 |     lg1 = !git lg1-specific --all
+   7  7 |     lg2 = !git lg2-specific --all
+
+... 11 unchanged lines
+
+
+
+/Users/cameron/Repos/github.com/axis7818/dotpatina/output/lazygit.config
+13 lines, no changes detected
+
+Do you want to continue? (y/n): y
+
+Applying patina files
+   /Users/cameron/Repos/github.com/axis7818/dotpatina/output/.gitconfig ✓
+   /Users/cameron/Repos/github.com/axis7818/dotpatina/output/lazygit.config ✓
+Done
 ```
 
+</details>
+
+Files are only written when there are changes.
+
+<details>
+<summary>apply no changes</summary>
+
 ```sh
-Render a patina to stdout
+❱ dotpatina apply patina.toml --vars other-vars.toml
 
-Usage: patina render [OPTIONS] <PATINA_PATH>
+/Users/cameron/Repos/github.com/axis7818/dotpatina/output/.gitconfig
+18 lines, no changes detected
 
-Arguments:
-  <PATINA_PATH>  The file path to the patina toml file
 
-Options:
-  -v, --verbose...  Increase logging verbosity
-  -q, --quiet...    Decrease logging verbosity
-      --no-color    Disable colors
-  -h, --help        Print help
+/Users/cameron/Repos/github.com/axis7818/dotpatina/output/lazygit.config
+13 lines, no changes detected
+
+No file changes detected in the patina%
 ```
 
-### Apply
+</details>
+
+### Render a Patina
+
+`dotpatina` also supports rendering Patina files without writing to the target locations.
 
 ```sh
-dotpatina apply --help
-```
+❱ cd examples/gitconfig
 
-```sh
-Render and apply a patina
+❱ dotpatina render patina.toml --vars vars.toml
+Rendered 2 files
 
-Usage: patina apply [OPTIONS] <PATINA_PATH>
 
-Arguments:
-  <PATINA_PATH>  The file path to the patina toml file
+gitconfig.hbs
+[user]
+    email = <user@email.com>
+    name = <User Name>
+[alias]
+    lg = !git lg1
+    lg1 = !git lg1-specific --all
+    lg2 = !git lg2-specific --all
+    lg3 = !git lg3-specific --all
+[pager]
+    branch = false
+[core]
+        editor = vim
+[pull]
+        rebase = false
+[init]
+        defaultBranch = main
+[fetch]
+        prune = true
 
-Options:
-  -v, --verbose...  Increase logging verbosity
-  -q, --quiet...    Decrease logging verbosity
-      --no-color    Disable colors
-      --no-input    Don't ask for user input
-  -h, --help        Print help
-```
 
-## Examples
+lazygit.config.yml
+gui:
+  showBottomLine: false
+  showCommandLog: false
+  showPanelJumps: false
+  border: rounded
+  showNumstatInFilesView: true
 
-```sh
-# Help
-dotpatina --help
-dotpatina render --help
-dotpatina apply --help
+customCommands:
+  - key: "U"
+    command: "git submodule update --init --recursive"
+    context: "files, localBranches, status"
+    description: "Update submodules"
+    stream: true
 
-# Render
-dotpatina render examples/simple/patina.toml -vvv
-dotpatina render examples/gitconfig/patina.toml -vvv
-
-# Apply
-dotpatina apply examples/simple/patina.toml -vvv
-dotpatina apply examples/gitconfig/patina.toml -vvv
 ```

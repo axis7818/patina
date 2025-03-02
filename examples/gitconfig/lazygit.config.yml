@@ -1,0 +1,13 @@
+gui:
+  showBottomLine: false
+  showCommandLog: false
+  showPanelJumps: false
+  border: rounded
+  showNumstatInFilesView: true
+
+customCommands:
+  - key: "U"
+    command: "git submodule update --init --recursive"
+    context: "files, localBranches, status"
+    description: "Update submodules"
+    stream: true

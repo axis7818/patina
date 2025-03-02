@@ -86,7 +86,9 @@ email = "user@email.com"
 
 Patina templates are defined using handlebars templates. Or, they can be raw files if no templating is required.
 
-#### Handlebar Template (gitconfig.hbs)
+#### Handlebar Template
+
+`gitconfig.hbs`
 
 ```hbs
 [user]
@@ -104,7 +106,9 @@ Patina templates are defined using handlebars templates. Or, they can be raw fil
 	prune = true
 ```
 
-#### Raw File (lazygit.config.yml)
+#### Raw File
+
+`lazygit.config.yml`
 
 ```yml
 gui:

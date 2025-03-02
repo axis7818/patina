@@ -139,24 +139,6 @@ mod tests {
 
     use super::*;
 
-    struct TestTargetFile {
-        target: PathBuf,
-    }
-
-    impl TestTargetFile {
-        fn new(target_file_path: &str) -> TestTargetFile {
-            let target = PathBuf::from(target_file_path);
-            let _ = fs::remove_file(&target);
-            TestTargetFile { target }
-        }
-    }
-
-    impl Drop for TestTargetFile {
-        fn drop(&mut self) {
-            let _ = fs::remove_file(self.target.clone());
-        }
-    }
-
     #[test]
     fn test_render_patina() {
         let tmp_dir = TmpTestDir::new();

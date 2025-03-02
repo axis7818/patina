@@ -137,8 +137,6 @@ impl Patina {
 
 #[cfg(test)]
 mod tests {
-    use std::fs;
-
     use super::*;
     use crate::{tests::test_utils::TmpTestDir, utils::tests::get_home_dir};
 

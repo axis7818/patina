@@ -23,6 +23,10 @@ impl TmpTestDir {
         fs::write(&full_path, contents).unwrap();
         full_path
     }
+
+    pub fn get_file_path(&self, file_name: &str) -> PathBuf {
+        self.path.join(file_name)
+    }
 }
 
 impl Drop for TmpTestDir {

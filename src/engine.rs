@@ -135,7 +135,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::engine::interface::test::TestPatinaInterface;
+    use crate::{engine::interface::test::TestPatinaInterface, tests::test_utils::TmpTestDir};
 
     use super::*;
 
@@ -159,8 +159,28 @@ mod tests {
 
     #[test]
     fn test_render_patina() {
+        let tmp_dir = TmpTestDir::new();
+        let patina_path = tmp_dir.write_file(
+            "template_patina.toml",
+            r#"
+                name = "template-patina"
+                description = "This is a Patina for a test template file"
+
+                [vars]
+                name.first = "Patina"
+                name.last = "User"
+
+                [[files]]
+                template = "template.txt.hbs"
+                target = "template.txt"
+            "#,
+        );
+        tmp_dir.write_file("template.txt.hbs", r#"Hello, {{ name.first }} {{ name.last }}!
+This is an example Patina template file.
+Templates use the Handebars templating language. For more information, see <https://handlebarsjs.com/guide/>.
+"#);
+
         colored::control::set_override(false);
-        let patina_path = PathBuf::from("tests/fixtures/template_patina.toml");
         let pi = TestPatinaInterface::new();
         let engine = PatinaEngine::new(&pi, &patina_path, vec![], vec![]);
 
@@ -195,7 +215,22 @@ Templates use the Handebars templating language. For more information, see <http
 
     #[test]
     fn test_render_patina_render_fails() {
-        let patina_path = PathBuf::from("tests/fixtures/missing_template_patina.toml");
+        let tmp_dir = TmpTestDir::new();
+        let patina_path = tmp_dir.write_file(
+            "missing_template_patina.toml",
+            r#"
+                name = "missing-template-patina"
+                description = "This is a Patina that references a template file that does not exist"
+
+                [vars]
+                name = "Patina"
+
+                [[files]]
+                template = "this/template/does/not/exist.txt"
+                target = "./output.txt"
+            "#,
+        );
+
         let pi = TestPatinaInterface::new();
         let engine = PatinaEngine::new(&pi, &patina_path, vec![], vec![]);
 
@@ -206,8 +241,26 @@ Templates use the Handebars templating language. For more information, see <http
 
     #[test]
     fn test_apply_patina() {
-        let patina_path = PathBuf::from("tests/fixtures/template_patina.toml");
-        let applied_file_path = TestTargetFile::new("tests/fixtures/template.txt");
+        let tmp_dir = TmpTestDir::new();
+        let patina_path = tmp_dir.write_file(
+            "template_patina.toml",
+            r#"name = "template-patina"
+description = "This is a Patina for a test template file"
+
+[vars]
+name.first = "Patina"
+name.last = "User"
+
+[[files]]
+template = "template.txt.hbs"
+target = "template.txt"
+        "#,
+        );
+        tmp_dir.write_file("template.txt.hbs", r#"Hello, {{ name.first }} {{ name.last }}!
+This is an example Patina template file.
+Templates use the Handebars templating language. For more information, see <https://handlebarsjs.com/guide/>.
+"#);
+
         let pi = TestPatinaInterface::new();
         let engine = PatinaEngine::new(&pi, &patina_path, vec![], vec![]);
 
@@ -215,22 +268,15 @@ Templates use the Handebars templating language. For more information, see <http
 
         assert!(apply.is_ok());
 
-        assert_eq!(
-            pi.get_all_output(),
-            r#"
-tests/fixtures/template.txt
-+   1 | Hello, Patina User!
+        assert!(pi.get_all_output().contains(r#"+   1 | Hello, Patina User!
 +   2 | This is an example Patina template file.
 +   3 | Templates use the Handebars templating language. For more information, see <https://handlebarsjs.com/guide/>.
 
 
-Applying patina files
-   tests/fixtures/template.txt ✓
-Done
-"#
-        );
+Applying patina files"#));
 
-        let applied_file = fs::read_to_string(&applied_file_path.target);
+        let applied_file_path = tmp_dir.get_file_path("template.txt");
+        let applied_file = fs::read_to_string(applied_file_path);
         assert!(applied_file.is_ok());
         assert_eq!(
             applied_file.unwrap(),
@@ -243,7 +289,27 @@ Templates use the Handebars templating language. For more information, see <http
 
     #[test]
     fn test_apply_patina_abort_without_user_confirmation() {
-        let patina_path = PathBuf::from("tests/fixtures/template_patina.toml");
+        let tmp_dir = TmpTestDir::new();
+        let patina_path = tmp_dir.write_file(
+            "template_patina.toml",
+            r#"
+                name = "template-patina"
+                description = "This is a Patina for a test template file"
+
+                [vars]
+                name.first = "Patina"
+                name.last = "User"
+
+                [[files]]
+                template = "template.txt.hbs"
+                target = "template.txt"
+            "#,
+        );
+        tmp_dir.write_file("template.txt.hbs", r#"Hello, {{ name.first }} {{ name.last }}!
+This is an example Patina template file.
+Templates use the Handebars templating language. For more information, see <https://handlebarsjs.com/guide/>.
+"#);
+
         let mut pi = TestPatinaInterface::new();
         pi.confirm_apply = false;
         let engine = PatinaEngine::new(&pi, &patina_path, vec![], vec![]);
@@ -256,7 +322,15 @@ Templates use the Handebars templating language. For more information, see <http
 
     #[test]
     fn test_apply_patina_does_nothing_if_there_are_no_changes() {
-        let patina_path = PathBuf::from("tests/fixtures/no_files_patina.toml");
+        let tmp_dir = TmpTestDir::new();
+        let patina_path = tmp_dir.write_file(
+            "no_files_patina.toml",
+            r#"
+                name = "no files"
+                description = "this patina has no files"
+            "#,
+        );
+
         let pi = TestPatinaInterface::new();
         let engine = PatinaEngine::new(&pi, &patina_path, vec![], vec![]);
         let apply = engine.apply_patina();

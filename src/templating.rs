@@ -55,12 +55,25 @@ fn render_patina_file(
 
 #[cfg(test)]
 mod tests {
+    use std::path::PathBuf;
+
     use serde_json::json;
+
+    use crate::tests::test_utils::TmpTestDir;
 
     use super::*;
 
     #[test]
     fn test_render_patina() {
+        let tmp_dir = TmpTestDir::new();
+        let template_path = tmp_dir.write_file(
+            "template.txt.hbs",
+            r#"Hello, {{ name.first }} {{ name.last }}!
+This is an example Patina template file.
+Templates use the Handebars templating language. For more information, see <https://handlebarsjs.com/guide/>.
+"#,
+        );
+
         let patina = Patina {
             base_path: None,
             name: String::from("sample-patina"),
@@ -72,8 +85,8 @@ mod tests {
                 }
             })),
             files: vec![PatinaFile::new(
-                "tests/fixtures/template.txt.hbs",
-                "tests/fixtures/template.txt",
+                template_path,
+                PathBuf::from("tests/fixtures/template.txt"),
             )],
         };
 
@@ -97,6 +110,11 @@ Templates use the Handebars templating language. For more information, see <http
 
     #[test]
     fn test_render_patina_multiple_templates() {
+        let tmp_dir = TmpTestDir::new();
+        let template_a_path = tmp_dir.write_file("template_a.txt.hbs", "This is {{ A }}.");
+        let template_b_path = tmp_dir.write_file("template_b.txt.hbs", "This is {{ B }}.");
+        let template_c_path = tmp_dir.write_file("template_c.txt.hbs", "This is {{ C }}.");
+
         let patina = Patina {
             base_path: None,
             name: String::from("multi-template-patina"),
@@ -107,9 +125,9 @@ Templates use the Handebars templating language. For more information, see <http
                 "C": "template_c",
             })),
             files: vec![
-                PatinaFile::new("tests/fixtures/template_a.txt.hbs", "output_a.txt"),
-                PatinaFile::new("tests/fixtures/template_b.txt.hbs", "output_b.txt"),
-                PatinaFile::new("tests/fixtures/template_c.txt.hbs", "output_c.txt"),
+                PatinaFile::new(template_a_path, PathBuf::from("output_a.txt")),
+                PatinaFile::new(template_b_path, PathBuf::from("output_b.txt")),
+                PatinaFile::new(template_c_path, PathBuf::from("output_c.txt")),
             ],
         };
 
@@ -119,21 +137,27 @@ Templates use the Handebars templating language. For more information, see <http
         let render = render.unwrap();
 
         assert_eq!(render.len(), 3);
-        assert_eq!(render[0].render_str, "This is template_a.\n");
-        assert_eq!(render[1].render_str, "This is template_b.\n");
-        assert_eq!(render[2].render_str, "This is template_c.\n");
+        assert_eq!(render[0].render_str, "This is template_a.");
+        assert_eq!(render[1].render_str, "This is template_b.");
+        assert_eq!(render[2].render_str, "This is template_c.");
     }
 
     #[test]
     fn test_render_patina_missing_variable() {
+        let tmp_dir = TmpTestDir::new();
+        let template_path = tmp_dir.write_file("template.txt.hbs", r#"Hello, {{ name.first }} {{ name.last }}!
+This is an example Patina template file.
+Templates use the Handebars templating language. For more information, see <https://handlebarsjs.com/guide/>.
+"#);
+
         let patina = Patina {
             base_path: None,
             name: String::from("sample-patina"),
             description: String::from("This is a sample Patina"),
             vars: Some(json!({})),
             files: vec![PatinaFile::new(
-                "tests/fixtures/template.txt.hbs",
-                "tests/fixtures/template.txt",
+                template_path,
+                PathBuf::from("tests/fixtures/template.txt"),
             )],
         };
 
@@ -150,14 +174,23 @@ Templates use the Handebars templating language. For more information, see <http
 
     #[test]
     fn test_render_patina_invalid_template() {
+        let tmp_dir = TmpTestDir::new();
+        let invalid_template_path = tmp_dir.write_file("invalid_template.txt.hbs", r#"
+            Hello, {{ name }!
+
+            This is an example Patina template file.
+
+            Templates use the Handebars templating language. For more information, see <https://handlebarsjs.com/guide/>.
+        "#);
+
         let patina = Patina {
             base_path: None,
             name: String::from("sample-patina"),
             description: String::from("This is a sample Patina"),
             vars: Some(json!({})),
             files: vec![PatinaFile::new(
-                "tests/fixtures/invalid_template.txt.hbs",
-                "tests/fixtures/template.txt",
+                invalid_template_path,
+                PathBuf::from("tests/fixtures/template.txt"),
             )],
         };
 
@@ -169,14 +202,21 @@ Templates use the Handebars templating language. For more information, see <http
 
     #[test]
     fn test_render_patina_escaped_handlebars() {
+        let tmp_dir = TmpTestDir::new();
+        let template_path = tmp_dir.write_file(
+            "template_with_escaped_handlebars.hbs",
+            r#"This file has \{{ escaped }} handlebars
+"#,
+        );
+
         let patina = Patina {
             name: "escaped_handlebars".to_string(),
             description: "this patina shows escaping handlebars".to_string(),
             base_path: None,
             vars: None,
             files: vec![PatinaFile::new(
-                "tests/fixtures/template_with_escaped_handlebars.hbs",
-                "tests/fixtures/output.txt",
+                template_path,
+                PathBuf::from("tests/fixtures/output.txt"),
             )],
         };
 

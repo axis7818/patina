@@ -267,7 +267,63 @@
 <a href="#266" id="266">266</a>
 <a href="#267" id="267">267</a>
 <a href="#268" id="268">268</a>
-<a href="#269" id="269">269</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::{
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::{
     fs,
     path::{Path, PathBuf},
 };
@@ -404,32 +460,34 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use </span><span class="kw">crate</span>::engine::interface::test::TestPatinaInterface;
+    <span class="kw">use crate</span>::{engine::interface::test::TestPatinaInterface, tests::test_utils::TmpTestDir};
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
-    <span class="kw">struct </span>TestTargetFile {
-        target: PathBuf,
-    }
-
-    <span class="kw">impl </span>TestTargetFile {
-        <span class="kw">fn </span>new(target_file_path: <span class="kw-2">&amp;</span>str) -&gt; TestTargetFile {
-            <span class="kw">let </span>target = PathBuf::from(target_file_path);
-            <span class="kw">let _ </span>= fs::remove_file(<span class="kw-2">&amp;</span>target);
-            TestTargetFile { target }
-        }
-    }
-
-    <span class="kw">impl </span>Drop <span class="kw">for </span>TestTargetFile {
-        <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-            <span class="kw">let _ </span>= fs::remove_file(<span class="self">self</span>.target.clone());
-        }
-    }
-
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_render_patina() {
+        <span class="kw">let </span>tmp_dir = TmpTestDir::new();
+        <span class="kw">let </span>patina_path = tmp_dir.write_file(
+            <span class="string">"template_patina.toml"</span>,
+            <span class="string">r#"
+                name = "template-patina"
+                description = "This is a Patina for a test template file"
+
+                [vars]
+                name.first = "Patina"
+                name.last = "User"
+
+                [[files]]
+                template = "template.txt.hbs"
+                target = "template.txt"
+            "#</span>,
+        );
+        tmp_dir.write_file(<span class="string">"template.txt.hbs"</span>, <span class="string">r#"Hello, {{ name.first }} {{ name.last }}!
+This is an example Patina template file.
+Templates use the Handebars templating language. For more information, see &lt;https://handlebarsjs.com/guide/&gt;.
+"#</span>);
+
         colored::control::set_override(<span class="bool-val">false</span>);
-        <span class="kw">let </span>patina_path = PathBuf::from(<span class="string">"tests/fixtures/template_patina.toml"</span>);
         <span class="kw">let </span>pi = TestPatinaInterface::new();
         <span class="kw">let </span>engine = PatinaEngine::new(<span class="kw-2">&amp;</span>pi, <span class="kw-2">&amp;</span>patina_path, <span class="macro">vec!</span>[], <span class="macro">vec!</span>[]);
 
@@ -464,7 +522,22 @@ Templates use the Handebars templating language. For more information, see &lt;h
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_render_patina_render_fails() {
-        <span class="kw">let </span>patina_path = PathBuf::from(<span class="string">"tests/fixtures/missing_template_patina.toml"</span>);
+        <span class="kw">let </span>tmp_dir = TmpTestDir::new();
+        <span class="kw">let </span>patina_path = tmp_dir.write_file(
+            <span class="string">"missing_template_patina.toml"</span>,
+            <span class="string">r#"
+                name = "missing-template-patina"
+                description = "This is a Patina that references a template file that does not exist"
+
+                [vars]
+                name = "Patina"
+
+                [[files]]
+                template = "this/template/does/not/exist.txt"
+                target = "./output.txt"
+            "#</span>,
+        );
+
         <span class="kw">let </span>pi = TestPatinaInterface::new();
         <span class="kw">let </span>engine = PatinaEngine::new(<span class="kw-2">&amp;</span>pi, <span class="kw-2">&amp;</span>patina_path, <span class="macro">vec!</span>[], <span class="macro">vec!</span>[]);
 
@@ -475,8 +548,26 @@ Templates use the Handebars templating language. For more information, see &lt;h
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_apply_patina() {
-        <span class="kw">let </span>patina_path = PathBuf::from(<span class="string">"tests/fixtures/template_patina.toml"</span>);
-        <span class="kw">let </span>applied_file_path = TestTargetFile::new(<span class="string">"tests/fixtures/template.txt"</span>);
+        <span class="kw">let </span>tmp_dir = TmpTestDir::new();
+        <span class="kw">let </span>patina_path = tmp_dir.write_file(
+            <span class="string">"template_patina.toml"</span>,
+            <span class="string">r#"name = "template-patina"
+description = "This is a Patina for a test template file"
+
+[vars]
+name.first = "Patina"
+name.last = "User"
+
+[[files]]
+template = "template.txt.hbs"
+target = "template.txt"
+        "#</span>,
+        );
+        tmp_dir.write_file(<span class="string">"template.txt.hbs"</span>, <span class="string">r#"Hello, {{ name.first }} {{ name.last }}!
+This is an example Patina template file.
+Templates use the Handebars templating language. For more information, see &lt;https://handlebarsjs.com/guide/&gt;.
+"#</span>);
+
         <span class="kw">let </span>pi = TestPatinaInterface::new();
         <span class="kw">let </span>engine = PatinaEngine::new(<span class="kw-2">&amp;</span>pi, <span class="kw-2">&amp;</span>patina_path, <span class="macro">vec!</span>[], <span class="macro">vec!</span>[]);
 
@@ -484,22 +575,15 @@ Templates use the Handebars templating language. For more information, see &lt;h
 
         <span class="macro">assert!</span>(apply.is_ok());
 
-        <span class="macro">assert_eq!</span>(
-            pi.get_all_output(),
-            <span class="string">r#"
-tests/fixtures/template.txt
-+   1 | Hello, Patina User!
+        <span class="macro">assert!</span>(pi.get_all_output().contains(<span class="string">r#"+   1 | Hello, Patina User!
 +   2 | This is an example Patina template file.
 +   3 | Templates use the Handebars templating language. For more information, see &lt;https://handlebarsjs.com/guide/&gt;.
 
 
-Applying patina files
-   tests/fixtures/template.txt ✓
-Done
-"#
-        </span>);
+Applying patina files"#</span>));
 
-        <span class="kw">let </span>applied_file = fs::read_to_string(<span class="kw-2">&amp;</span>applied_file_path.target);
+        <span class="kw">let </span>applied_file_path = tmp_dir.get_file_path(<span class="string">"template.txt"</span>);
+        <span class="kw">let </span>applied_file = fs::read_to_string(applied_file_path);
         <span class="macro">assert!</span>(applied_file.is_ok());
         <span class="macro">assert_eq!</span>(
             applied_file.unwrap(),
@@ -512,7 +596,27 @@ Templates use the Handebars templating language. For more information, see &lt;h
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_apply_patina_abort_without_user_confirmation() {
-        <span class="kw">let </span>patina_path = PathBuf::from(<span class="string">"tests/fixtures/template_patina.toml"</span>);
+        <span class="kw">let </span>tmp_dir = TmpTestDir::new();
+        <span class="kw">let </span>patina_path = tmp_dir.write_file(
+            <span class="string">"template_patina.toml"</span>,
+            <span class="string">r#"
+                name = "template-patina"
+                description = "This is a Patina for a test template file"
+
+                [vars]
+                name.first = "Patina"
+                name.last = "User"
+
+                [[files]]
+                template = "template.txt.hbs"
+                target = "template.txt"
+            "#</span>,
+        );
+        tmp_dir.write_file(<span class="string">"template.txt.hbs"</span>, <span class="string">r#"Hello, {{ name.first }} {{ name.last }}!
+This is an example Patina template file.
+Templates use the Handebars templating language. For more information, see &lt;https://handlebarsjs.com/guide/&gt;.
+"#</span>);
+
         <span class="kw">let </span><span class="kw-2">mut </span>pi = TestPatinaInterface::new();
         pi.confirm_apply = <span class="bool-val">false</span>;
         <span class="kw">let </span>engine = PatinaEngine::new(<span class="kw-2">&amp;</span>pi, <span class="kw-2">&amp;</span>patina_path, <span class="macro">vec!</span>[], <span class="macro">vec!</span>[]);
@@ -525,7 +629,15 @@ Templates use the Handebars templating language. For more information, see &lt;h
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_apply_patina_does_nothing_if_there_are_no_changes() {
-        <span class="kw">let </span>patina_path = PathBuf::from(<span class="string">"tests/fixtures/no_files_patina.toml"</span>);
+        <span class="kw">let </span>tmp_dir = TmpTestDir::new();
+        <span class="kw">let </span>patina_path = tmp_dir.write_file(
+            <span class="string">"no_files_patina.toml"</span>,
+            <span class="string">r#"
+                name = "no files"
+                description = "this patina has no files"
+            "#</span>,
+        );
+
         <span class="kw">let </span>pi = TestPatinaInterface::new();
         <span class="kw">let </span>engine = PatinaEngine::new(<span class="kw-2">&amp;</span>pi, <span class="kw-2">&amp;</span>patina_path, <span class="macro">vec!</span>[], <span class="macro">vec!</span>[]);
         <span class="kw">let </span>apply = engine.apply_patina();

@@ -128,14 +128,14 @@ customCommands:
 
 Provide a path to a Patina toml file that defines files and variables used for rendering. Separate variables toml files can be provided to overlay variable customizations.
 
-![gif of rendering a patina](./examples/gitconfig/render-patina.gif)
+![gif of rendering a patina](./examples/gitconfig/demo/render-patina.gif)
 
 ### Applying a Patina
 
 Applying a Patina is how rendered files get written to the file system.
 
-![gif of applying a new patina](./examples/gitconfig/apply-new-patina.gif)
+![gif of applying a new patina](./examples/gitconfig/demo/apply-new-patina.gif)
 
 A diff view is presented with each `apply` command to show only lines that will change. This could be due to changing the template, or using a different set of variables.
 
-![gif of applying a patina with other variables](./examples/gitconfig/apply-other-vars-patina.gif)
+![gif of applying a patina with other variables](./examples/gitconfig/demo/apply-other-vars-patina.gif)

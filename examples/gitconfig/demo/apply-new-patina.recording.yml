@@ -1,0 +1,215 @@
+# The configurations that used for the recording, feel free to edit them
+config:
+  # Specify a command to be executed
+  # like `/bin/bash -l`, `ls`, or any other commands
+  # the default is bash for Linux
+  # or powershell.exe for Windows
+  command: zsh
+
+  # Specify the current working directory path
+  # the default is the current working directory path
+  cwd: /Users/cameron/Repos/github.com/axis7818/dotpatina
+
+  # Export additional ENV variables
+  env:
+    recording: true
+
+  # Explicitly set the number of columns
+  # or use `auto` to take the current
+  # number of columns of your shell
+  cols: 100
+
+  # Explicitly set the number of rows
+  # or use `auto` to take the current
+  # number of rows of your shell
+  rows: 36
+
+  # Amount of times to repeat GIF
+  # If value is -1, play once
+  # If value is 0, loop indefinitely
+  # If value is a positive number, loop n times
+  repeat: 0
+
+  # Quality
+  # 1 - 100
+  # Default to lower quality, final renders use higher qualities as needed
+  quality: 100
+
+  # Delay between frames in ms
+  # If the value is `auto` use the actual recording delays
+  frameDelay: auto
+
+  # Maximum delay between frames in ms
+  # Ignored if the `frameDelay` isn't set to `auto`
+  # Set to `auto` to prevent limiting the max idle time
+  maxIdleTime: 2000
+
+  # The surrounding frame box
+  # The `type` can be null, window, floating, or solid`
+  # To hide the title use the value null
+  # Don't forget to add a backgroundColor style with a null as type
+  frameBox:
+    type: solid
+    title: null
+    style:
+      backgroundColor: rgb(36, 39, 58)
+      border: 0px rgb(36, 39, 58) solid
+      borderRadius: 0px
+      boxShadow: none
+      margin: 0px
+
+  # Add a watermark image to the rendered gif
+  # You need to specify an absolute path for
+  # the image on your machine or a URL, and you can also
+  # add your own CSS styles
+  watermark:
+    imagePath: null
+    style:
+      position: absolute
+      right: 15px
+      bottom: 15px
+      width: 100px
+      opacity: 0.9
+
+  # Cursor style can be one of
+  # `block`, `underline`, or `bar`
+  cursorStyle: block
+
+  # Font family
+  # You can use any font that is installed on your machine
+  # in CSS-like syntax
+  fontFamily: "Hack Nerd Font, Monaco, Lucida Console, Ubuntu Mono, Monospace"
+
+  # The size of the font
+  fontSize: 12
+
+  # The height of lines
+  lineHeight: 1
+
+  # The spacing between letters
+  letterSpacing: 0
+
+  # Theme
+  theme:
+    background: "#24273a"
+    foreground: "#cad3f5"
+    cursor: "#cad3f5"
+    black: "#181926"
+    red: "#ed8796"
+    green: "#a6da95"
+    yellow: "#eed49f"
+    blue: "#8aadf4"
+    magenta: "#c6a0f6"
+    cyan: "#91d7e3"
+    white: "#cad3f5"
+    brightBlack: "#494d64"
+    brightRed: "#ee99a0"
+    brightGreen: "#8bd5ca"
+    brightYellow: "#eed49f"
+    brightBlue: "#7dc4e4"
+    brightMagenta: "#f5bde6"
+    brightCyan: "#91d7e3"
+    brightWhite: "#cad3f5"
+
+# Records, feel free to edit them
+records:
+  - delay: 472
+    content: "\e[1m\e[7m%\e[27m\e[1m\e[0m                                                                                                   \r \r"
+  - delay: 109
+    content: "\e]2;cameron@Slartibartfast:~/Repos/github.com/axis7818/dotpatina\a\e]1;..818/dotpatina\a"
+  - delay: 124
+    content: "\r\e[0m\e[27m\e[24m\e[J\e[01;31m\e[00m\r\n\e[32m~/Repos/github.com/axis7818/dotpatina\e[00m \e[01;33m\e[01;35maxis7818/docs\e[01;33m∼\e[00m\e[00m\e[01;34m✱\e[00m\r\n\e[01;35m❱\e[00m \e[K\e[?1h\e=\e[?2004h"
+  - delay: 509
+    content: c
+  - delay: 197
+    content: "\bcd"
+  - delay: 79
+    content: " "
+  - delay: 176
+    content: e
+  - delay: 269
+    content: x
+  - delay: 190
+    content: "amples\e[1m/\e[0m"
+  - delay: 275
+    content: "\b\e[0m/g"
+  - delay: 115
+    content: i
+  - delay: 176
+    content: "tconfig\e[1m/\e[0m"
+  - delay: 512
+    content: "\b\e[0m \b\e[?1l\e>\e[?2004l\r\r\n\e]2;cd examples/gitconfig\a\e]1;cd\a\e[1m\e[7m%\e[27m\e[1m\e[0m                                                                                                   \r \r"
+  - delay: 137
+    content: "\e]2;cameron@Slartibartfast:~/Repos/github.com/axis7818/dotpatina/examples/gitconfig\a\e]1;..les/gitconfig\a"
+  - delay: 120
+    content: "\r\e[0m\e[27m\e[24m\e[J\e[01;31m\e[00m\r\n\e[32m~/Repos/github.com/axis7818/dotpatina/examples/gitconfig\e[00m \e[01;33m\e[01;35maxis7818/docs\e[01;33m∼\e[00m\e[00m\e[01;34m✱\e[00m\r\n\e[01;35m❱\e[00m \e[K\e[?1h\e=\e[?2004h"
+  - delay: 646
+    content: d
+  - delay: 83
+    content: "\bdo"
+  - delay: 77
+    content: t
+  - delay: 178
+    content: p
+  - delay: 93
+    content: a
+  - delay: 106
+    content: t
+  - delay: 97
+    content: i
+  - delay: 78
+    content: "n"
+  - delay: 178
+    content: a
+  - delay: 611
+    content: " "
+  - delay: 507
+    content: a
+  - delay: 91
+    content: p
+  - delay: 142
+    content: p
+  - delay: 170
+    content: l
+  - delay: 112
+    content: "y"
+  - delay: 139
+    content: " "
+  - delay: 484
+    content: p
+  - delay: 57
+    content: a
+  - delay: 218
+    content: "tina.toml\e[1m \e[0m"
+  - delay: 600
+    content: "\b\e[0m -"
+  - delay: 129
+    content: "-"
+  - delay: 140
+    content: v
+  - delay: 127
+    content: a
+  - delay: 76
+    content: r
+  - delay: 174
+    content: s
+  - delay: 86
+    content: " "
+  - delay: 255
+    content: v
+  - delay: 87
+    content: a
+  - delay: 353
+    content: "rs.toml\e[1m \e[0m"
+  - delay: 1039
+    content: "\b\e[0m \b\e[?1l\e>\e[?2004l\r\r\n\e]2;dotpatina apply patina.toml --vars vars.toml\a\e]1;dotpatina\a\e[1;4;33m\r\n../../output/.gitconfig\r\n\e[0m\e[32m+     1 | [user]\r\n\e[0m\e[32m+     2 |     email = <user@email.com>\r\n\e[0m\e[32m+     3 |     name = <User Name>\r\n\e[0m\e[32m+     4 | [pager]\r\n\e[0m\e[32m+     5 |     branch = false\r\n\e[0m\e[32m+     6 | [core]\r\n\e[0m\e[32m+     7 | \teditor = vim\r\n\e[0m\e[32m+     8 | [pull]\r\n\e[0m\e[32m+     9 | \trebase = false\r\n\e[0m\e[32m+    10 | [init]\r\n\e[0m\e[32m+    11 | \tdefaultBranch = main\r\n\e[0m\e[32m+    12 | [fetch]\r\n\e[0m\e[32m+    13 | \tprune = true\r\n\e[0m\r\n\e[1;4;33m\r\n../../output/lazygit.config\r\n\e[0m\e[32m+     1 | gui:\r\n\e[0m\e[32m+     2 |   showBottomLine: false\r\n\e[0m\e[32m+     3 |   showCommandLog: false\r\n\e[0m\e[32m+     4 |   showPanelJumps: false\r\n\e[0m\e[32m+     5 |   border: rounded\r\n\e[0m\e[32m+     6 |   showNumstatInFilesView: true\r\n\e[0m\e[32m+     7 | \r\n\e[0m\e[32m+     8 | customCommands:\r\n\e[0m\e[32m+     9 |   - key: \"U\"\r\n\e[0m\e[32m+    10 |     command: \"git submodule update --init --recursive\"\r\n\e[0m\e[32m+    11 |     context: \"files, localBranches, status\"\r\n\e[0m\e[32m+    12 |     description: \"Update submodules\"\r\n\e[0m\e[32m+    13 |     stream: true\r\n\e[0m\r\nDo you want to continue? (y/n): "
+  - delay: 1800
+    content: "y"
+  - delay: 1953
+    content: "\r\n\r\nApplying patina files\r\n   ../../output/.gitconfig\e[32m ✓\r\n\e[0m   ../../output/lazygit.config\e[32m ✓\r\n\e[0mDone\r\n\e[1m\e[7m%\e[27m\e[1m\e[0m                                                                                                   \r \r"
+  - delay: 122
+    content: "\e]2;cameron@Slartibartfast:~/Repos/github.com/axis7818/dotpatina/examples/gitconfig\a\e]1;..les/gitconfig\a"
+  - delay: 118
+    content: "\r\e[0m\e[27m\e[24m\e[J\e[01;31m\e[00m\r\n\e[32m~/Repos/github.com/axis7818/dotpatina/examples/gitconfig\e[00m \e[01;33m\e[01;35maxis7818/docs\e[01;33m∼\e[00m\e[00m\e[01;34m✱\e[00m\r\n\e[01;35m❱\e[00m \e[K\e[?1h\e=\e[?2004h"
+  - delay: 4000
+    content: "\e[?2004l\r\r\n"

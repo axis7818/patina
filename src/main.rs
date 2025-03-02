@@ -15,3 +15,8 @@ fn main() {
     let mut patina_cli = PatinaCli::parse_args();
     patina_cli.run();
 }
+
+#[cfg(test)]
+mod tests {
+    pub mod test_utils;
+}

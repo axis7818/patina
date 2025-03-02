@@ -1,9 +1,0 @@
-name = "missing-template-patina"
-description = "This is a Patina that references a template file that does not exist"
-
-[vars]
-name = "Patina"
-
-[[files]]
-template = "this/template/does/not/exist.txt"
-target = "./output.txt"

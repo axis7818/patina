@@ -1,3 +1,5 @@
+//! The engine module contains the core logic for dotpatina operations.
+
 use std::{
     fs,
     path::{Path, PathBuf},

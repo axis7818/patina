@@ -1,3 +1,5 @@
+//! Miscellaneous utilities used throughout the crate
+
 use std::{
     fs,
     path::{Path, PathBuf},

@@ -1,3 +1,5 @@
+//! Core [Patina] data structure and functions.
+
 use std::path::{Path, PathBuf};
 
 use log::debug;
@@ -8,7 +10,7 @@ use crate::utils::{normalize_path, Error, Result};
 
 pub mod patina_file;
 
-/// A Patina describes a set of variables and templates that can be rendered to files.
+/// A [Patina] describes a set of variables and templates that can be rendered to files.
 #[derive(Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct Patina {
     /// The name of the Patina

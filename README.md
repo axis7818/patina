@@ -88,6 +88,8 @@ Patina templates are defined using handlebars templates. Or, they can be raw fil
 
 #### Handlebar Template
 
+Templating uses the [Handlebars](https://handlebarsjs.com/guide/) templating language.
+
 Templates are rendered using the variables provided directly in the Patina file and passed as separate variables files. In this example, `editor` is provided in the Patina file but `user.email` and `user.name` are provided in a separate variables file.
 
 `gitconfig.hbs`

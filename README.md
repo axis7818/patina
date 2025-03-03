@@ -21,9 +21,7 @@ cargo install dotpatina
 ```sh
 # View dotpatina version
 ❱ dotpatina --version
-```
 
-```sh
 # View dotpatina usage info
 ❱ dotpatina --help
 The patina CLI renders files from templates and sets of variables as defined in patina toml files
@@ -44,9 +42,11 @@ Options:
 
 ## Usage
 
-`dotpatina` takes templated configuration files (using handlebars templating), rendering configuration files, and applying them to target locations on the file system.
+`dotpatina` takes templated configuration files (using handlebars templating), rendering configuration files, and applying them to target locations on the file system. This information is provided by a Patina toml file.
 
 ### Patina File
+
+This is an example Patina file for git tooling.
 
 ```toml
 # Metadata fields describe the Patina
@@ -88,6 +88,8 @@ Patina templates are defined using handlebars templates. Or, they can be raw fil
 
 #### Handlebar Template
 
+Templates are rendered using the variables provided directly in the Patina file and passed as separate variables files. In this example, `editor` is provided in the Patina file but `user.email` and `user.name` are provided in a separate variables file.
+
 `gitconfig.hbs`
 
 ```hbs
@@ -107,6 +109,8 @@ Patina templates are defined using handlebars templates. Or, they can be raw fil
 ```
 
 #### Raw File
+
+Raw files without templating work as well.
 
 `lazygit.config.yml`
 
@@ -132,14 +136,26 @@ customCommands:
 
 Provide a path to a Patina toml file that defines files and variables used for rendering. Separate variables toml files can be provided to overlay variable customizations.
 
+```sh
+dotpatina render patina.toml --vars vars.toml
+```
+
 ![gif of rendering a patina](./examples/gitconfig/demo/render-patina.gif)
 
 ### Applying a Patina
 
 Applying a Patina is how rendered files get written to the file system.
 
+```sh
+dotpatina apply patina.toml --vars vars.toml
+```
+
 ![gif of applying a new patina](./examples/gitconfig/demo/apply-new-patina.gif)
 
 A diff view is presented with each `apply` command to show only lines that will change. This could be due to changing the template, or using a different set of variables.
+
+```sh
+dotpatina apply patina.toml --vars other-vars.toml
+```
 
 ![gif of applying a patina with other variables](./examples/gitconfig/demo/apply-other-vars-patina.gif)

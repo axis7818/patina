@@ -1,8 +1,10 @@
+//! [PatinaFile] and related functionality
+
 use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
-/// A PatinaFile describes a template file and its target output path.
+/// A [PatinaFile] describes a template file and its target output path.
 #[derive(Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct PatinaFile {
     /// An optional list of tags for this patina file. This allows subsets of files to be specified from the command line

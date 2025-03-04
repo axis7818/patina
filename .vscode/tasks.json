@@ -3,7 +3,7 @@
     "tasks": [
         {
             "label": "rust: cargo doc",
-            "command": "cargo doc --no-deps --open",
+            "command": "cargo doc --no-deps",
             "type": "shell",
         },
         {

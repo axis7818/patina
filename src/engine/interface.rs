@@ -1,3 +1,5 @@
+//! This module contains definitions for interfacing with [super::PatinaEngine]
+
 use std::path::Path;
 
 use colored::Colorize;
@@ -8,7 +10,7 @@ use crate::{
     utils::{Error, Result},
 };
 
-/// PatinaOutput specifies operations for interfacing with user operations
+/// Specifies operations for interfacing with [super::PatinaEngine]
 pub trait PatinaInterface {
     /// Output a single string
     fn output<S>(&self, s: S)

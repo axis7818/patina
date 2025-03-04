@@ -8,3 +8,7 @@ user.name = "First Last"
 [[files]]
 template = "gitconfig.hbs"
 target = "../../output/.gitconfig"
+
+[[files]]
+template = "lazygit.config.yml"
+target = "../../output/lazygit.config"

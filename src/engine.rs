@@ -1,3 +1,5 @@
+//! The engine module contains the core logic for dotpatina operations.
+
 use std::{
     fs,
     path::{Path, PathBuf},
@@ -101,7 +103,7 @@ where
 
         // If there are not changes, quit
         if !any_changes {
-            self.pi.output("No file changes detected in the patina");
+            self.pi.output("No file changes detected in the patina\n");
             return Ok(());
         }
 

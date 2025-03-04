@@ -1,9 +1,12 @@
+//! The diff module provides diffing behavior for files. This includes diff analysis and utilities
+//! for displaying diff results.
+
 use std::cmp::max;
 
 use colored::{Color, Colorize};
 use similar::{Change, ChangeTag, TextDiff};
 
-/// DiffAnalysis provides functionality for diffs within dotpatina
+/// [DiffAnalysis] provides functionality for diffs within dotpatina
 pub trait DiffAnalysis {
     /// Determine if there are any changes in the diff
     fn any_changes(&self) -> bool;
@@ -14,35 +17,50 @@ pub trait DiffAnalysis {
 
 /// Details for a line output for a diff
 struct DiffLine {
+    /// The line number in the old file
     old_line_num: Option<usize>,
+
+    /// The line number in the new file
     new_line_num: Option<usize>,
+
+    /// A character indicating the type of change
     diff_char: char,
+
+    /// The change tag for the line
     change_tag: ChangeTag,
+
+    /// The string representation of the change
     change_string: String,
+
+    /// The color to use for the line
     color: Option<Color>,
+
+    /// The number of lines since the [DiffLine] that was a change
     count_from_change: isize,
 }
 
-fn diff_line_to_string(diff_line: &DiffLine, line_number_width: usize) -> std::string::String {
-    let old_line_num = match diff_line.old_line_num {
-        Some(l) => l.to_string(),
-        None => "".to_string(),
-    };
-    let new_line_num = match diff_line.new_line_num {
-        Some(l) => l.to_string(),
-        None => "".to_string(),
-    };
-    let line = format!(
-        "{} {: >num_width$} {: >num_width$} | {}",
-        diff_line.diff_char,
-        old_line_num,
-        new_line_num,
-        diff_line.change_string,
-        num_width = line_number_width
-    );
-    match diff_line.color {
-        Some(color) => line.color(color).to_string(),
-        None => line,
+impl DiffLine {
+    fn to_string(&self, line_number_width: usize) -> std::string::String {
+        let old_line_num = match self.old_line_num {
+            Some(l) => l.to_string(),
+            None => "".to_string(),
+        };
+        let new_line_num = match self.new_line_num {
+            Some(l) => l.to_string(),
+            None => "".to_string(),
+        };
+        let line = format!(
+            "{} {: >num_width$} {: >num_width$} | {}",
+            self.diff_char,
+            old_line_num,
+            new_line_num,
+            self.change_string,
+            num_width = line_number_width
+        );
+        match self.color {
+            Some(color) => line.color(color).to_string(),
+            None => line,
+        }
     }
 }
 
@@ -206,7 +224,7 @@ where
 
                 // Add the currnet line string to beginning the result.
                 // This reverses the reverse iteration.
-                let line = diff_line_to_string(diff_line, line_number_width);
+                let line = diff_line.to_string(line_number_width);
                 result = line + &result;
             } else {
                 skipped_lines += 1;

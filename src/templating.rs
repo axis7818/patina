@@ -1,3 +1,6 @@
+//! Structures and functions for processing Patina templates.
+//! Templating uses the [Handlebars](https://handlebarsjs.com/guide/) templating language.
+
 use std::fs;
 
 use handlebars::Handlebars;
@@ -7,13 +10,15 @@ use crate::patina::patina_file::PatinaFile;
 use crate::patina::Patina;
 use crate::utils::{Error, Result};
 
+/// [PatinaFileRender] is an object that holds a reference to a [PatinaFile] and a
+/// [String] of the final render.
 #[derive(Debug)]
 pub struct PatinaFileRender<'pf> {
     pub patina_file: &'pf PatinaFile,
     pub render_str: String,
 }
 
-/// Renders all of the files in a Patina, each to a string in the result vector.
+/// Renders all of the [PatinaFile] objects in a [Patina], each to a string in the result vector.
 pub fn render_patina(patina: &Patina, tags: Option<Vec<String>>) -> Result<Vec<PatinaFileRender>> {
     let mut hb = Handlebars::new();
     hb.register_escape_fn(handlebars::no_escape);
@@ -31,6 +36,7 @@ pub fn render_patina(patina: &Patina, tags: Option<Vec<String>>) -> Result<Vec<P
         .collect()
 }
 
+/// Render a single [PatinaFile] to a string.
 fn render_patina_file(
     hb: &Handlebars,
     patina: &Patina,

@@ -1,3 +1,10 @@
+//! The cli module defines the clap CLI interface for dotpatina.
+//! For detailed usage info, run
+//!
+//!    ```
+//!     dotpatina --help
+//!    ```
+
 use std::io::Write;
 use std::path::PathBuf;
 
@@ -5,7 +12,7 @@ use crate::engine::{interface::PatinaInterface, PatinaEngine};
 use clap::{Args, Parser, Subcommand};
 use log::info;
 
-/// The patina CLI renders files from templates and sets of variables as defined in patina toml files.
+/// [PatinaCli] renders files from templates and sets of variables as defined in patina toml files.
 #[derive(Parser, Debug)]
 #[clap(name = "dotpatina", version)]
 pub struct PatinaCli {
@@ -101,7 +108,10 @@ impl PatinaCli {
     }
 }
 
+/// A struct for defining PatinaInterface behavior for the CLI.
 struct CliPatinaInterface {
+    /// Whether or not input is enabled. When `false`, the CLI will not prompt for user confirmation
+    /// and the CLI will continue until the action has completed or failed.
     is_input_enabled: bool,
 }
 

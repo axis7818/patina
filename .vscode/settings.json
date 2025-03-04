@@ -5,6 +5,8 @@
         "clippy",
         "dotpatina",
         "Handebars",
+        "lazygit",
+        "Numstat",
         "serde",
         "shellexpand"
     ]

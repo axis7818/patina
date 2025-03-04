@@ -468,12 +468,33 @@
 <a href="#467" id="467">467</a>
 <a href="#468" id="468">468</a>
 <a href="#469" id="469">469</a>
-<a href="#470" id="470">470</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::cmp::max;
+<a href="#470" id="470">470</a>
+<a href="#471" id="471">471</a>
+<a href="#472" id="472">472</a>
+<a href="#473" id="473">473</a>
+<a href="#474" id="474">474</a>
+<a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
+<a href="#478" id="478">478</a>
+<a href="#479" id="479">479</a>
+<a href="#480" id="480">480</a>
+<a href="#481" id="481">481</a>
+<a href="#482" id="482">482</a>
+<a href="#483" id="483">483</a>
+<a href="#484" id="484">484</a>
+<a href="#485" id="485">485</a>
+<a href="#486" id="486">486</a>
+<a href="#487" id="487">487</a>
+<a href="#488" id="488">488</a></pre></div><pre class="rust"><code><span class="doccomment">//! The diff module provides diffing behavior for files. This includes diff analysis and utilities
+//! for displaying diff results.
+
+</span><span class="kw">use </span>std::cmp::max;
 
 <span class="kw">use </span>colored::{Color, Colorize};
 <span class="kw">use </span>similar::{Change, ChangeTag, TextDiff};
 
-<span class="doccomment">/// DiffAnalysis provides functionality for diffs within dotpatina
+<span class="doccomment">/// [DiffAnalysis] provides functionality for diffs within dotpatina
 </span><span class="kw">pub trait </span>DiffAnalysis {
     <span class="doccomment">/// Determine if there are any changes in the diff
     </span><span class="kw">fn </span>any_changes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool;
@@ -484,35 +505,50 @@
 
 <span class="doccomment">/// Details for a line output for a diff
 </span><span class="kw">struct </span>DiffLine {
-    old_line_num: <span class="prelude-ty">Option</span>&lt;usize&gt;,
-    new_line_num: <span class="prelude-ty">Option</span>&lt;usize&gt;,
-    diff_char: char,
-    change_tag: ChangeTag,
-    change_string: String,
-    color: <span class="prelude-ty">Option</span>&lt;Color&gt;,
-    count_from_change: isize,
+    <span class="doccomment">/// The line number in the old file
+    </span>old_line_num: <span class="prelude-ty">Option</span>&lt;usize&gt;,
+
+    <span class="doccomment">/// The line number in the new file
+    </span>new_line_num: <span class="prelude-ty">Option</span>&lt;usize&gt;,
+
+    <span class="doccomment">/// A character indicating the type of change
+    </span>diff_char: char,
+
+    <span class="doccomment">/// The change tag for the line
+    </span>change_tag: ChangeTag,
+
+    <span class="doccomment">/// The string representation of the change
+    </span>change_string: String,
+
+    <span class="doccomment">/// The color to use for the line
+    </span>color: <span class="prelude-ty">Option</span>&lt;Color&gt;,
+
+    <span class="doccomment">/// The number of lines since the [DiffLine] that was a change
+    </span>count_from_change: isize,
 }
 
-<span class="kw">fn </span>diff_line_to_string(diff_line: <span class="kw-2">&amp;</span>DiffLine, line_number_width: usize) -&gt; std::string::String {
-    <span class="kw">let </span>old_line_num = <span class="kw">match </span>diff_line.old_line_num {
-        <span class="prelude-val">Some</span>(l) =&gt; l.to_string(),
-        <span class="prelude-val">None </span>=&gt; <span class="string">""</span>.to_string(),
-    };
-    <span class="kw">let </span>new_line_num = <span class="kw">match </span>diff_line.new_line_num {
-        <span class="prelude-val">Some</span>(l) =&gt; l.to_string(),
-        <span class="prelude-val">None </span>=&gt; <span class="string">""</span>.to_string(),
-    };
-    <span class="kw">let </span>line = <span class="macro">format!</span>(
-        <span class="string">"{} {: &gt;num_width$} {: &gt;num_width$} | {}"</span>,
-        diff_line.diff_char,
-        old_line_num,
-        new_line_num,
-        diff_line.change_string,
-        num_width = line_number_width
-    );
-    <span class="kw">match </span>diff_line.color {
-        <span class="prelude-val">Some</span>(color) =&gt; line.color(color).to_string(),
-        <span class="prelude-val">None </span>=&gt; line,
+<span class="kw">impl </span>DiffLine {
+    <span class="kw">fn </span>to_string(<span class="kw-2">&amp;</span><span class="self">self</span>, line_number_width: usize) -&gt; std::string::String {
+        <span class="kw">let </span>old_line_num = <span class="kw">match </span><span class="self">self</span>.old_line_num {
+            <span class="prelude-val">Some</span>(l) =&gt; l.to_string(),
+            <span class="prelude-val">None </span>=&gt; <span class="string">""</span>.to_string(),
+        };
+        <span class="kw">let </span>new_line_num = <span class="kw">match </span><span class="self">self</span>.new_line_num {
+            <span class="prelude-val">Some</span>(l) =&gt; l.to_string(),
+            <span class="prelude-val">None </span>=&gt; <span class="string">""</span>.to_string(),
+        };
+        <span class="kw">let </span>line = <span class="macro">format!</span>(
+            <span class="string">"{} {: &gt;num_width$} {: &gt;num_width$} | {}"</span>,
+            <span class="self">self</span>.diff_char,
+            old_line_num,
+            new_line_num,
+            <span class="self">self</span>.change_string,
+            num_width = line_number_width
+        );
+        <span class="kw">match </span><span class="self">self</span>.color {
+            <span class="prelude-val">Some</span>(color) =&gt; line.color(color).to_string(),
+            <span class="prelude-val">None </span>=&gt; line,
+        }
     }
 }
 
@@ -676,7 +712,7 @@
 
                 <span class="comment">// Add the currnet line string to beginning the result.
                 // This reverses the reverse iteration.
-                </span><span class="kw">let </span>line = diff_line_to_string(diff_line, line_number_width);
+                </span><span class="kw">let </span>line = diff_line.to_string(line_number_width);
                 result = line + <span class="kw-2">&amp;</span>result;
             } <span class="kw">else </span>{
                 skipped_lines += <span class="number">1</span>;

@@ -158,14 +158,31 @@
 <a href="#157" id="157">157</a>
 <a href="#158" id="158">158</a>
 <a href="#159" id="159">159</a>
-<a href="#160" id="160">160</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::io::Write;
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a></pre></div><pre class="rust"><code><span class="doccomment">//! The cli module defines the clap CLI interface for dotpatina.
+//! For detailed usage info, run
+//!
+//!    ```
+//!     dotpatina --help
+//!    ```
+
+</span><span class="kw">use </span>std::io::Write;
 <span class="kw">use </span>std::path::PathBuf;
 
 <span class="kw">use </span><span class="kw">crate</span>::engine::{interface::PatinaInterface, PatinaEngine};
 <span class="kw">use </span>clap::{Args, Parser, Subcommand};
 <span class="kw">use </span>log::info;
 
-<span class="doccomment">/// The patina CLI renders files from templates and sets of variables as defined in patina toml files.
+<span class="doccomment">/// [PatinaCli] renders files from templates and sets of variables as defined in patina toml files.
 </span><span class="attr">#[derive(Parser, Debug)]
 #[clap(name = <span class="string">"dotpatina"</span>, version)]
 </span><span class="kw">pub struct </span>PatinaCli {
@@ -261,8 +278,11 @@
     }
 }
 
-<span class="kw">struct </span>CliPatinaInterface {
-    is_input_enabled: bool,
+<span class="doccomment">/// A struct for defining PatinaInterface behavior for the CLI.
+</span><span class="kw">struct </span>CliPatinaInterface {
+    <span class="doccomment">/// Whether or not input is enabled. When `false`, the CLI will not prompt for user confirmation
+    /// and the CLI will continue until the action has completed or failed.
+    </span>is_input_enabled: bool,
 }
 
 <span class="kw">impl </span>CliPatinaInterface {

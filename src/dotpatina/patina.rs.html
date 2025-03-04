@@ -539,7 +539,11 @@
 <a href="#538" id="538">538</a>
 <a href="#539" id="539">539</a>
 <a href="#540" id="540">540</a>
-<a href="#541" id="541">541</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::path::{Path, PathBuf};
+<a href="#541" id="541">541</a>
+<a href="#542" id="542">542</a>
+<a href="#543" id="543">543</a></pre></div><pre class="rust"><code><span class="doccomment">//! Core [Patina] data structure and functions.
+
+</span><span class="kw">use </span>std::path::{Path, PathBuf};
 
 <span class="kw">use </span>log::debug;
 <span class="kw">use </span>patina_file::PatinaFile;
@@ -549,7 +553,7 @@
 
 <span class="kw">pub mod </span>patina_file;
 
-<span class="doccomment">/// A Patina describes a set of variables and templates that can be rendered to files.
+<span class="doccomment">/// A [Patina] describes a set of variables and templates that can be rendered to files.
 </span><span class="attr">#[derive(Debug, Default, PartialEq, Serialize, Deserialize)]
 </span><span class="kw">pub struct </span>Patina {
     <span class="doccomment">/// The name of the Patina

@@ -228,7 +228,16 @@
 <a href="#227" id="227">227</a>
 <a href="#228" id="228">228</a>
 <a href="#229" id="229">229</a>
-<a href="#230" id="230">230</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::fs;
+<a href="#230" id="230">230</a>
+<a href="#231" id="231">231</a>
+<a href="#232" id="232">232</a>
+<a href="#233" id="233">233</a>
+<a href="#234" id="234">234</a>
+<a href="#235" id="235">235</a>
+<a href="#236" id="236">236</a></pre></div><pre class="rust"><code><span class="doccomment">//! Structures and functions for processing Patina templates.
+//! Templating uses the [Handlebars](https://handlebarsjs.com/guide/) templating language.
+
+</span><span class="kw">use </span>std::fs;
 
 <span class="kw">use </span>handlebars::Handlebars;
 <span class="kw">use </span>log::info;
@@ -237,13 +246,15 @@
 <span class="kw">use </span><span class="kw">crate</span>::patina::Patina;
 <span class="kw">use </span><span class="kw">crate</span>::utils::{Error, <span class="prelude-ty">Result</span>};
 
-<span class="attr">#[derive(Debug)]
+<span class="doccomment">/// [PatinaFileRender] is an object that holds a reference to a [PatinaFile] and a
+/// [String] of the final render.
+</span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub struct </span>PatinaFileRender&lt;<span class="lifetime">'pf</span>&gt; {
     <span class="kw">pub </span>patina_file: <span class="kw-2">&amp;</span><span class="lifetime">'pf </span>PatinaFile,
     <span class="kw">pub </span>render_str: String,
 }
 
-<span class="doccomment">/// Renders all of the files in a Patina, each to a string in the result vector.
+<span class="doccomment">/// Renders all of the [PatinaFile] objects in a [Patina], each to a string in the result vector.
 </span><span class="kw">pub fn </span>render_patina(patina: <span class="kw-2">&amp;</span>Patina, tags: <span class="prelude-ty">Option</span>&lt;Vec&lt;String&gt;&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;PatinaFileRender&gt;&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>hb = Handlebars::new();
     hb.register_escape_fn(handlebars::no_escape);
@@ -261,7 +272,8 @@
         .collect()
 }
 
-<span class="kw">fn </span>render_patina_file(
+<span class="doccomment">/// Render a single [PatinaFile] to a string.
+</span><span class="kw">fn </span>render_patina_file(
     hb: <span class="kw-2">&amp;</span>Handlebars,
     patina: <span class="kw-2">&amp;</span>Patina,
     patina_file: <span class="kw-2">&amp;</span>PatinaFile,

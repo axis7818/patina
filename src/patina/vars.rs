@@ -1,10 +1,10 @@
 //! [Patina] utilities for managing variables.
 
-use std::path::PathBuf;
-use log::debug;
-use serde_json::Value;
 use crate::patina::Patina;
 use crate::utils::{Error, Result};
+use log::debug;
+use serde_json::Value;
+use std::path::PathBuf;
 
 /// Overlay the contents of source onto target as json maps recursively
 fn merge_values(a: &mut Value, b: Value) {
@@ -56,11 +56,11 @@ impl Patina {
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
-    use serde_json::json;
-    use crate::patina::Patina;
     use crate::patina::vars::merge_values;
+    use crate::patina::Patina;
     use crate::tests::test_utils::TmpTestDir;
+    use serde_json::json;
+    use std::path::PathBuf;
 
     #[test]
     fn test_merge_values() {

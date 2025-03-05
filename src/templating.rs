@@ -14,11 +14,20 @@ use crate::utils::{Error, Result};
 /// [String] of the final render.
 #[derive(Debug)]
 pub struct PatinaFileRender<'pf> {
+    /// A reference to the [PatinaFile]
     pub patina_file: &'pf PatinaFile,
+
+    /// Whether or not the file has changes.
+    /// - [None]: if the file has not been diffed with the target yet
+    /// - [true]: if the diff detected any changes
+    /// - [false]: if the diff did not detect any changes
+    pub any_changes: Option<bool>,
+
+    /// The full render string for this file
     pub render_str: String,
 }
 
-/// Renders all of the [PatinaFile] objects in a [Patina], each to a string in the result vector.
+/// Renders all the [PatinaFile]s in a [Patina].
 pub fn render_patina(patina: &Patina, tags: Option<Vec<String>>) -> Result<Vec<PatinaFileRender>> {
     let mut hb = Handlebars::new();
     hb.register_escape_fn(handlebars::no_escape);
@@ -31,6 +40,7 @@ pub fn render_patina(patina: &Patina, tags: Option<Vec<String>>) -> Result<Vec<P
             Ok(PatinaFileRender {
                 patina_file: pf,
                 render_str: render,
+                any_changes: None,
             })
         })
         .collect()

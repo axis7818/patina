@@ -54,6 +54,10 @@ enum Command {
         /// Don't ask for user input
         #[clap(long = "no-input")]
         no_input: bool,
+
+        /// Don't keep a copy of previous files in the trash folder
+        #[clap(long = "no-trash")]
+        no_trash: bool,
     },
 }
 
@@ -93,12 +97,15 @@ impl PatinaCli {
             .init();
 
         let mut pi = CliPatinaInterface::new();
-        // let engine = PatinaEngine::new(&pi, patina_path, tags)
         let result = match &self.command {
             Command::Render { options } => options.engine(&pi).render_patina(),
-            Command::Apply { options, no_input } => {
+            Command::Apply {
+                options,
+                no_input,
+                no_trash,
+            } => {
                 pi.set_is_input_enabled(!*no_input);
-                options.engine(&pi).apply_patina()
+                options.engine(&pi).apply_patina(!*no_trash)
             }
         };
 
@@ -110,7 +117,7 @@ impl PatinaCli {
 
 /// A struct for defining PatinaInterface behavior for the CLI.
 struct CliPatinaInterface {
-    /// Whether or not input is enabled. When `false`, the CLI will not prompt for user confirmation
+    /// Whether input is enabled. When `false`, the CLI will not prompt for user confirmation
     /// and the CLI will continue until the action has completed or failed.
     is_input_enabled: bool,
 }

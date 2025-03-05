@@ -2,13 +2,13 @@
 
 use std::path::{Path, PathBuf};
 
-use log::debug;
 use patina_file::PatinaFile;
 use serde::{Deserialize, Serialize};
 
 use crate::utils::{normalize_path, Error, Result};
 
 pub mod patina_file;
+mod vars;
 
 /// A [Patina] describes a set of variables and templates that can be rendered to files.
 #[derive(Debug, Default, PartialEq, Serialize, Deserialize)]
@@ -51,61 +51,6 @@ impl Patina {
         Ok(patina)
     }
 
-    /// Load vars files from disk and overlay them onto the current vars in order
-    pub fn load_vars_files(&mut self, vars_files: Vec<PathBuf>) -> Result<()> {
-        vars_files
-            .iter()
-            .try_for_each(|f| self.overlay_vars_from_file(f))
-    }
-
-    /// Overlay the contents of vars_file onto the current vars
-    fn overlay_vars_from_file(&mut self, vars_file: &PathBuf) -> Result<()> {
-        let vars_str = match std::fs::read_to_string(vars_file) {
-            Ok(vars_str) => vars_str,
-            Err(e) => return Err(Error::FileRead(vars_file.clone(), e)),
-        };
-
-        let vars: serde_json::Value = match toml::from_str(&vars_str) {
-            Ok(vars) => vars,
-            Err(e) => return Err(Error::TomlParse(e)),
-        };
-
-        debug!("overlaying vars from file: {:?}, \n{:#?}", vars_file, vars);
-
-        self.overlay_vars(Some(vars))?;
-        Ok(())
-    }
-
-    /// Overlay the contents of vars onto the current vars
-    fn overlay_vars(&mut self, vars: Option<serde_json::Value>) -> Result<()> {
-        let vars = match vars {
-            Some(vars) => vars,
-            None => return Ok(()),
-        };
-
-        // overlay the contents of vars onto self.vars
-        self.vars = match &self.vars {
-            Some(current_vars) => {
-                let mut current_vars_clone = current_vars.clone();
-                let new_vars = match current_vars_clone.as_object_mut() {
-                    Some(new_vars) => new_vars,
-                    None => return Err(Error::InvalidVars()),
-                };
-
-                let vars = match vars.as_object() {
-                    Some(vars) => vars,
-                    None => return Err(Error::InvalidVars()),
-                };
-
-                new_vars.extend(vars.clone());
-                Some(serde_json::Value::Object(new_vars.clone()))
-            }
-            None => Some(vars),
-        };
-
-        Ok(())
-    }
-
     /// Get a path within the context of this Patina
     pub fn get_patina_path<P: AsRef<Path>>(&self, path: P) -> PathBuf {
         let path = path.as_ref();
@@ -122,10 +67,7 @@ impl Patina {
             .clone();
         result.push(path);
 
-        match normalize_path(&result) {
-            Some(result) => result,
-            None => result,
-        }
+        normalize_path(&result).unwrap_or(result)
     }
 
     /// Get an iterator for all PatinaFiles that are tagged with any of the provided tags
@@ -429,115 +371,5 @@ mod tests {
         assert_eq!(filter_ab[0], patina_file_a);
         assert_eq!(filter_ab[1], patina_file_b);
         assert_eq!(filter_ab[2], patina_file_ab);
-    }
-
-    #[test]
-    fn test_load_vars_files() {
-        let tmp_dir = TmpTestDir::new();
-        let path = tmp_dir.write_file(
-            "patina-vars.toml",
-            r#"
-                name = "patina-vars"
-                description = "This is a patina with variables"
-
-                [vars]
-                name = "Patina"
-
-                [[files]]
-                template = "hello-vars.txt.hbs"
-                target = "./output/vars.txt"
-            "#,
-        );
-        let vars_a_path = tmp_dir.write_file(
-            "vars-a.toml",
-            r#"
-                a_var = "aaa"
-                example_var = "aaa"
-            "#,
-        );
-        let vars_b_path = tmp_dir.write_file(
-            "vars-b.toml",
-            r#"
-                b_var = "bbb"
-                example_var = "bbb"
-            "#,
-        );
-
-        let patina = Patina::from_toml_file(&path);
-        assert!(patina.is_ok());
-        let mut patina = patina.unwrap();
-
-        let load_vars = patina.load_vars_files(vec![vars_a_path, vars_b_path]);
-        assert!(load_vars.is_ok());
-
-        assert_eq!(
-            patina.vars,
-            Some(
-                serde_json::json!({"name": "Patina", "a_var": "aaa", "b_var": "bbb", "example_var": "bbb"})
-            )
-        );
-    }
-
-    #[test]
-    fn test_load_vars_files_file_does_not_exist() {
-        let tmp_dir = TmpTestDir::new();
-        let path = tmp_dir.write_file(
-            "patina-vars.toml",
-            r#"
-                name = "patina-vars"
-                description = "This is a patina with variables"
-
-                [vars]
-                name = "Patina"
-
-                [[files]]
-                template = "hello-vars.txt.hbs"
-                target = "./output/vars.txt"
-            "#,
-        );
-
-        let patina = Patina::from_toml_file(&path);
-        assert!(patina.is_ok());
-        let mut patina = patina.unwrap();
-
-        let load_vars =
-            patina.load_vars_files(vec![PathBuf::from("this/path/does/not/exist.toml")]);
-        assert!(load_vars.is_err());
-        let err = load_vars.unwrap_err();
-        assert!(err.is_file_read())
-    }
-
-    #[test]
-    fn test_load_vars_files_invalid_file_contents() {
-        let tmp_dir = TmpTestDir::new();
-        let path = tmp_dir.write_file(
-            "patina-vars.toml",
-            r#"
-                name = "patina-vars"
-                description = "This is a patina with variables"
-
-                [vars]
-                name = "Patina"
-
-                [[files]]
-                template = "hello-vars.txt.hbs"
-                target = "./output/vars.txt"
-            "#,
-        );
-        let invalid_vars_path = tmp_dir.write_file(
-            "invalid_vars.toml",
-            r#"
-                [[]]1]1[1[1]]1
-            "#,
-        );
-
-        let patina = Patina::from_toml_file(&path);
-        assert!(patina.is_ok());
-        let mut patina = patina.unwrap();
-
-        let load_vars = patina.load_vars_files(vec![invalid_vars_path]);
-        assert!(load_vars.is_err());
-        let err = load_vars.unwrap_err();
-        assert!(err.is_toml_parse())
     }
 }

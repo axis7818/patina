@@ -234,7 +234,17 @@
 <a href="#233" id="233">233</a>
 <a href="#234" id="234">234</a>
 <a href="#235" id="235">235</a>
-<a href="#236" id="236">236</a></pre></div><pre class="rust"><code><span class="doccomment">//! Structures and functions for processing Patina templates.
+<a href="#236" id="236">236</a>
+<a href="#237" id="237">237</a>
+<a href="#238" id="238">238</a>
+<a href="#239" id="239">239</a>
+<a href="#240" id="240">240</a>
+<a href="#241" id="241">241</a>
+<a href="#242" id="242">242</a>
+<a href="#243" id="243">243</a>
+<a href="#244" id="244">244</a>
+<a href="#245" id="245">245</a>
+<a href="#246" id="246">246</a></pre></div><pre class="rust"><code><span class="doccomment">//! Structures and functions for processing Patina templates.
 //! Templating uses the [Handlebars](https://handlebarsjs.com/guide/) templating language.
 
 </span><span class="kw">use </span>std::fs;
@@ -250,11 +260,20 @@
 /// [String] of the final render.
 </span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub struct </span>PatinaFileRender&lt;<span class="lifetime">'pf</span>&gt; {
-    <span class="kw">pub </span>patina_file: <span class="kw-2">&amp;</span><span class="lifetime">'pf </span>PatinaFile,
-    <span class="kw">pub </span>render_str: String,
+    <span class="doccomment">/// A reference to the [PatinaFile]
+    </span><span class="kw">pub </span>patina_file: <span class="kw-2">&amp;</span><span class="lifetime">'pf </span>PatinaFile,
+
+    <span class="doccomment">/// Whether or not the file has changes.
+    /// - [None]: if the file has not been diffed with the target yet
+    /// - [true]: if the diff detected any changes
+    /// - [false]: if the diff did not detect any changes
+    </span><span class="kw">pub </span>any_changes: <span class="prelude-ty">Option</span>&lt;bool&gt;,
+
+    <span class="doccomment">/// The full render string for this file
+    </span><span class="kw">pub </span>render_str: String,
 }
 
-<span class="doccomment">/// Renders all of the [PatinaFile] objects in a [Patina], each to a string in the result vector.
+<span class="doccomment">/// Renders all the [PatinaFile]s in a [Patina].
 </span><span class="kw">pub fn </span>render_patina(patina: <span class="kw-2">&amp;</span>Patina, tags: <span class="prelude-ty">Option</span>&lt;Vec&lt;String&gt;&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;PatinaFileRender&gt;&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>hb = Handlebars::new();
     hb.register_escape_fn(handlebars::no_escape);
@@ -267,6 +286,7 @@
             <span class="prelude-val">Ok</span>(PatinaFileRender {
                 patina_file: pf,
                 render_str: render,
+                any_changes: <span class="prelude-val">None</span>,
             })
         })
         .collect()

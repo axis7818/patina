@@ -168,7 +168,14 @@
 <a href="#167" id="167">167</a>
 <a href="#168" id="168">168</a>
 <a href="#169" id="169">169</a>
-<a href="#170" id="170">170</a></pre></div><pre class="rust"><code><span class="doccomment">//! The cli module defines the clap CLI interface for dotpatina.
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a></pre></div><pre class="rust"><code><span class="doccomment">//! The cli module defines the clap CLI interface for dotpatina.
 //! For detailed usage info, run
 //!
 //!    ```
@@ -224,6 +231,10 @@
         <span class="doccomment">/// Don't ask for user input
         </span><span class="attr">#[clap(long = <span class="string">"no-input"</span>)]
         </span>no_input: bool,
+
+        <span class="doccomment">/// Don't keep a copy of previous files in the trash folder
+        </span><span class="attr">#[clap(long = <span class="string">"no-trash"</span>)]
+        </span>no_trash: bool,
     },
 }
 
@@ -263,12 +274,15 @@
             .init();
 
         <span class="kw">let </span><span class="kw-2">mut </span>pi = CliPatinaInterface::new();
-        <span class="comment">// let engine = PatinaEngine::new(&amp;pi, patina_path, tags)
-        </span><span class="kw">let </span>result = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.command {
+        <span class="kw">let </span>result = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.command {
             Command::Render { options } =&gt; options.engine(<span class="kw-2">&amp;</span>pi).render_patina(),
-            Command::Apply { options, no_input } =&gt; {
+            Command::Apply {
+                options,
+                no_input,
+                no_trash,
+            } =&gt; {
                 pi.set_is_input_enabled(!<span class="kw-2">*</span>no_input);
-                options.engine(<span class="kw-2">&amp;</span>pi).apply_patina()
+                options.engine(<span class="kw-2">&amp;</span>pi).apply_patina(!<span class="kw-2">*</span>no_trash)
             }
         };
 
@@ -280,7 +294,7 @@
 
 <span class="doccomment">/// A struct for defining PatinaInterface behavior for the CLI.
 </span><span class="kw">struct </span>CliPatinaInterface {
-    <span class="doccomment">/// Whether or not input is enabled. When `false`, the CLI will not prompt for user confirmation
+    <span class="doccomment">/// Whether input is enabled. When `false`, the CLI will not prompt for user confirmation
     /// and the CLI will continue until the action has completed or failed.
     </span>is_input_enabled: bool,
 }

@@ -222,7 +222,7 @@ where
                 }
                 skipped_lines = 0;
 
-                // Add the currnet line string to beginning the result.
+                // Add the current line string to beginning the result.
                 // This reverses the reverse iteration.
                 let line = diff_line.to_string(line_number_width);
                 result = line + &result;

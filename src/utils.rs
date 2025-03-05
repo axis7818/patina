@@ -31,6 +31,9 @@ pub enum Error {
 
     /// A vars object is invalid
     InvalidVars(),
+
+    /// Failed to trash a file
+    TrashError(trash::Error),
 }
 
 /// A Result type that uses the [`Error`] enum

@@ -12,6 +12,7 @@ use similar::TextDiff;
 
 pub mod interface;
 
+use crate::templating::PatinaFileRender;
 use crate::{
     diff::DiffAnalysis,
     patina::Patina,
@@ -33,7 +34,7 @@ where
     /// The set of tags to filter on
     tags: Option<Vec<String>>,
 
-    /// A lsit of variables path files
+    /// A list of variables path files
     variables_files: Vec<PathBuf>,
 }
 
@@ -64,6 +65,7 @@ where
     pub fn render_patina(&self) -> Result<()> {
         let mut patina = Patina::from_toml_file(&self.patina_path)?;
         patina.load_vars_files(self.variables_files.clone())?;
+
         info!("got patina: {:#?}", patina);
         let render = templating::render_patina(&patina, self.tags.clone())?;
 
@@ -77,31 +79,17 @@ where
         Ok(())
     }
 
-    /// Applies all of the Patina files
-    pub fn apply_patina(&self) -> Result<()> {
+    /// Applies all the Patina files
+    pub fn apply_patina(&self, use_trash: bool) -> Result<()> {
         let mut patina = Patina::from_toml_file(&self.patina_path)?;
         patina.load_vars_files(self.variables_files.clone())?;
+
         info!("got patina: {:#?}", patina);
-        let render = templating::render_patina(&patina, self.tags.clone())?;
+        let mut render = templating::render_patina(&patina, self.tags.clone())?;
 
-        let mut any_changes = false;
+        let any_changes = self.generate_and_display_diffs(&patina, &mut render);
 
-        // Generate and display diffs
-        for r in render.iter() {
-            let target_path = patina.get_patina_path(&r.patina_file.target);
-
-            let target_file_str = fs::read_to_string(&target_path).unwrap_or_default();
-            let diff = TextDiff::from_lines(&target_file_str, &r.render_str);
-            if diff.any_changes() {
-                any_changes = true
-            }
-
-            self.pi.output_file_header(&target_path);
-            self.pi.output_diff(&diff);
-            self.pi.output("\n");
-        }
-
-        // If there are not changes, quit
+        // If there are no changes, quit
         if !any_changes {
             self.pi.output("No file changes detected in the patina\n");
             return Ok(());
@@ -115,10 +103,75 @@ where
 
         // Write out all files
         self.pi.output("\nApplying patina files\n");
-        for r in render.iter() {
+        let num_trashed = self.apply_renders(&patina, render, use_trash)?;
+
+        self.pi.output("Done");
+        if num_trashed > 0 {
+            self.pi.output(
+                " (original files moved to trash)"
+                    .bright_black()
+                    .to_string(),
+            );
+        }
+        self.pi.output("\n");
+        Ok(())
+    }
+
+    fn generate_and_display_diffs(
+        &self,
+        patina: &Patina,
+        render: &mut Vec<PatinaFileRender>,
+    ) -> bool {
+        let mut any_changes = false;
+
+        // Generate and display diffs
+        for r in render.iter_mut() {
             let target_path = patina.get_patina_path(&r.patina_file.target);
 
+            let target_file_str = fs::read_to_string(&target_path).unwrap_or_default();
+            let diff = TextDiff::from_lines(&target_file_str, &r.render_str);
+
+            r.any_changes = Some(diff.any_changes());
+            if r.any_changes.unwrap() {
+                any_changes = true
+            }
+
+            self.pi.output_file_header(&target_path);
+            self.pi.output_diff(&diff);
+            self.pi.output("\n");
+        }
+        any_changes
+    }
+
+    fn apply_renders(
+        &self,
+        patina: &Patina,
+        render: Vec<PatinaFileRender>,
+        use_trash: bool,
+    ) -> Result<usize> {
+        let mut num_trashed = 0;
+        for r in render.iter() {
+            let target_path = patina.get_patina_path(&r.patina_file.target);
             self.pi.output(format!("   {}", target_path.display()));
+
+            if r.any_changes == Some(false) {
+                self.pi.output(format!(
+                    " {} {}\n",
+                    "✓".green(),
+                    "(no change)".bright_black()
+                ));
+                continue;
+            }
+
+            // If the target file exists and there are changes, trash it
+            if use_trash && target_path.is_file() && r.any_changes == Some(true) {
+                if let Err(e) = trash::delete(&target_path) {
+                    return Err(Error::TrashError(e));
+                }
+                num_trashed += 1;
+            }
+
+            // Create parent directories and write file
             if let Some(target_parent) = target_path.parent() {
                 if let Err(e) = fs::create_dir_all(target_parent) {
                     return Err(Error::FileWrite(target_path, e));
@@ -127,11 +180,11 @@ where
             if let Err(e) = fs::write(&target_path, &r.render_str) {
                 return Err(Error::FileWrite(target_path.clone(), e));
             }
+
             self.pi.output(" ✓\n".green().to_string());
         }
 
-        self.pi.output("Done\n");
-        Ok(())
+        Ok(num_trashed)
     }
 }
 
@@ -248,7 +301,7 @@ Templates use the Handebars templating language. For more information, see <http
         let pi = TestPatinaInterface::new();
         let engine = PatinaEngine::new(&pi, &patina_path, vec![], vec![]);
 
-        let apply = engine.apply_patina();
+        let apply = engine.apply_patina(false);
 
         assert!(apply.is_ok());
 
@@ -298,7 +351,7 @@ Templates use the Handebars templating language. For more information, see <http
         pi.confirm_apply = false;
         let engine = PatinaEngine::new(&pi, &patina_path, vec![], vec![]);
 
-        let apply = engine.apply_patina();
+        let apply = engine.apply_patina(false);
 
         assert!(apply.is_ok());
         assert!(pi.get_all_output().contains("Not applying patina."))
@@ -317,7 +370,7 @@ Templates use the Handebars templating language. For more information, see <http
 
         let pi = TestPatinaInterface::new();
         let engine = PatinaEngine::new(&pi, &patina_path, vec![], vec![]);
-        let apply = engine.apply_patina();
+        let apply = engine.apply_patina(false);
 
         assert!(apply.is_ok());
         assert!(pi

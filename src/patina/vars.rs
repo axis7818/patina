@@ -57,8 +57,56 @@ impl Patina {
 #[cfg(test)]
 mod tests {
     use std::path::PathBuf;
+    use serde_json::json;
     use crate::patina::Patina;
+    use crate::patina::vars::merge_values;
     use crate::tests::test_utils::TmpTestDir;
+
+    #[test]
+    fn test_merge_values() {
+        let mut a = json!({ "a": "a" });
+        let b = json!({ "b": "b" });
+
+        merge_values(&mut a, b);
+
+        assert_eq!(
+            a,
+            json!({
+                "a": "a",
+                "b": "b",
+            })
+        );
+    }
+
+    #[test]
+    fn test_merge_values_nested() {
+        let mut a = json!({
+            "a": "a",
+            "me": {
+                "name": "Patina User"
+            }
+        });
+        let b = json!({
+            "b": "b",
+            "me": {
+                "email": "patina@mail.com"
+            }
+        });
+
+        merge_values(&mut a, b);
+
+        assert_eq!(
+            a,
+            json!({
+                "a": "a",
+                "b": "b",
+                "me": {
+                    "name": "Patina User",
+                    "email": "patina@mail.com"
+                }
+            })
+        );
+    }
 
     #[test]
     fn test_load_vars_files() {
@@ -103,7 +151,7 @@ mod tests {
 
         assert_eq!(
             patina.vars,
-            Some(serde_json::json!({
+            Some(json!({
                 "me": {
                     "name": "Patina",
                     "email": "bbb@mail.com"

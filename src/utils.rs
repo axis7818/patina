@@ -33,7 +33,7 @@ pub enum Error {
     InvalidVars(),
 
     /// Failed to trash a file
-    TrashError(trash::Error),
+    MoveFileToTrash(trash::Error),
 }
 
 /// A Result type that uses the [`Error`] enum

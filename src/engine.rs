@@ -166,7 +166,7 @@ where
             // If the target file exists and there are changes, trash it
             if use_trash && target_path.is_file() && r.any_changes == Some(true) {
                 if let Err(e) = trash::delete(&target_path) {
-                    return Err(Error::TrashError(e));
+                    return Err(Error::MoveFileToTrash(e));
                 }
                 num_trashed += 1;
             }

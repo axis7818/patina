@@ -146,7 +146,8 @@ where
             }
         }
 
-        if !files_without_changes.is_empty() {
+        let any_unchanged_files = !files_without_changes.is_empty();
+        if any_unchanged_files {
             self.pi.output("\nFiles without changes:\n");
             for (target_path, diff_str) in files_without_changes {
                 self.pi.output(format!(
@@ -159,11 +160,14 @@ where
         }
 
         if !files_with_changes.is_empty() {
+            if !any_unchanged_files {
+                self.pi.output("\n");
+            }
             for (target_path, diff_str) in files_with_changes {
                 self.pi.output_file_header(&target_path);
                 self.pi.output(diff_str);
+                self.pi.output("\n");
             }
-            self.pi.output("\n");
         }
 
         any_changes

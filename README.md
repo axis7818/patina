@@ -10,7 +10,7 @@ dotpatina is a rust application for managing system dotfiles and configuration.
 
 ## Installation
 
-`dotpatina` can be installed from its crate at crates.io.
+`dotpatina` can be installed from its [crate at crates.io](https://crates.io/crates/dotpatina).
 
 ```sh
 cargo install dotpatina
@@ -24,50 +24,76 @@ cargo install dotpatina
 
 # View dotpatina usage info
 ❱ dotpatina --help
-The patina CLI renders files from templates and sets of variables as defined in patina toml files
-
-Usage: dotpatina [OPTIONS] <COMMAND>
-
-Commands:
-  render  Render a patina to stdout
-  apply   Render and apply a patina
-  help    Print this message or the help of the given subcommand(s)
-
-Options:
-  -v, --verbose...  Increase logging verbosity
-  -q, --quiet...    Decrease logging verbosity
-  -h, --help        Print help
-  -V, --version     Print version
 ```
 
 ## Usage
 
-`dotpatina` takes templated configuration files (using handlebars templating), rendering configuration files, and applying them to target locations on the file system. This information is provided by a Patina toml file.
+`dotpatina` takes templated configuration files (using [handlebars templating](https://handlebarsjs.com/guide/)),
+rendering configuration files, and applying them to target locations on the file system. This information is provided by
+a Patina toml file.
 
 ### Patina File
 
-This is an example Patina file for git tooling.
+This is an example Patina file for mac development. The full example can be found
+at <https://github.com/axis7818/dotfiles>.
 
 ```toml
 # Metadata fields describe the Patina
-name = "git-patina"
-description = "A Patina for git tooling"
+name = "axis7818 mac dotfiles"
+description = "axis7818 dotfiles for mac"
 
 # Variables are free-form and can be defined for the whole Patina.
 # Or, variables can be loaded from separate files from the command line.
 [vars]
-editor = "vim"
+me.first_name = "Cameron"
+me.last_name = "Taylor"
 
-# A list of files define a template and target file.
+# Finally, A list of files define a template and target file.
 # The template is a handlebar template (or plain file) that is processed.
 # The target is the system location to store the rendered template.
-[[files]]
-template = "gitconfig.hbs"
-target = "../../output/.gitconfig"
+# Files can also be tagged for filtering when using dotpatina cli commands.
 
+# ZSH
 [[files]]
-template = "lazygit.config.yml"
-target = "../../output/lazygit.config"
+template = "zsh/zshrc"
+target = "~/.zshrc"
+tags = ["shell"]
+[[files]]
+template = "zsh/custom/themes/axis7818.zsh-theme"
+target = "~/.oh-my-zsh/custom/themes/axis7818.zsh-theme"
+tags = ["shell"]
+
+# Tmux
+[[files]]
+template = "tmux/tmux.conf"
+target = "~/.tmux.conf"
+tags = ["shell"]
+
+# iTerm
+[[files]]
+template = "iterm/switch_automatic.py"
+target = "~/Library/Application Support/iTerm2/Scripts/AutoLaunch/switch_automatic.py"
+tags = ["terminal"]
+
+# Git
+[[files]]
+template = "git/gitconfig"
+target = "~/.gitconfig"
+tags = ["git"]
+[[files]]
+template = "lazygit/config.yml"
+target = "~/Library/Application Support/lazygit/config.yml"
+tags = ["git"]
+
+# Vim
+[[files]]
+template = "vim/vimrc"
+target = "~/.vimrc"
+tags = ["vim"]
+[[files]]
+template = "jetbrains/ideavimrc"
+target = "~/.ideavimrc"
+tags = ["vim"]
 ```
 
 ### Variables Files
@@ -77,9 +103,7 @@ Variables can be stored in separate toml files. Variables are free-form and over
 This is useful when variables need to change based on the machine Patinas are being applied to.
 
 ```toml
-[user]
-name = "User Name"
-email = "user@email.com"
+me.email = "axis7818@gmail.com"
 ```
 
 ### Template Files
@@ -88,26 +112,29 @@ Patina templates are defined using handlebars templates. Or, they can be raw fil
 
 #### Handlebar Template
 
-Templating uses the [Handlebars](https://handlebarsjs.com/guide/) templating language.
+Templating uses the [Handlebars](https://handlebarsjs.com/guide/) templating language. Templates are rendered using the
+variables provided directly in the Patina file and passed as separate variables files.
 
-Templates are rendered using the variables provided directly in the Patina file and passed as separate variables files. In this example, `editor` is provided in the Patina file but `user.email` and `user.name` are provided in a separate variables file.
+In this example, `me.email` is pulled from the separate variables file while `me.first_name` and `me.last_name` are
+pulled from the Patina file.
 
-`gitconfig.hbs`
+`gitconfig`
 
 ```hbs
 [user]
-    email = <{{ user.email }}>
-    name = <{{ user.name }}>
+    email = <{{ me.email }}>
+    name = <{{ me.first_name }} {{ me.last_name }}>
 [pager]
     branch = false
 [core]
-	editor = {{ editor }}
+    editor = vim
 [pull]
-	rebase = false
+    rebase = false
 [init]
-	defaultBranch = main
+    defaultBranch = main
 [fetch]
-	prune = true
+    prune = true
+
 ```
 
 #### Raw File
@@ -136,28 +163,31 @@ customCommands:
 
 `dotpatina` supports rendering Patina files to stdout for previewing.
 
-Provide a path to a Patina toml file that defines files and variables used for rendering. Separate variables toml files can be provided to overlay variable customizations.
+Provide a path to a Patina toml file that defines files and variables used for rendering. Separate variables toml files
+can be provided to overlay variable customizations. Tags can optionally be provided to filter to a subset of files
+managed by the Patina.
 
 ```sh
-dotpatina render patina.toml --vars vars.toml
+dotpatina render <PATINA_TOML_FILE> --vars <VARIABLES_TOML_FILE> [--tags <TAG>]
 ```
 
-![gif of rendering a patina](./examples/gitconfig/demo/render-patina.gif)
+![gif of rendering a patina](./examples/demo/render-patina.gif)
 
 ### Applying a Patina
 
 Applying a Patina is how rendered files get written to the file system.
 
 ```sh
-dotpatina apply patina.toml --vars vars.toml
+dotpatina apply <PATINA_TOML_FILE> --vars <VARIABLES_TOML_FILE> [--tags <TAG>]
 ```
 
-![gif of applying a new patina](./examples/gitconfig/demo/apply-new-patina.gif)
+![gif of applying a patina](./examples/demo/apply-patina.gif)
 
-A diff view is presented with each `apply` command to show only lines that will change. This could be due to changing the template, or using a different set of variables.
+A diff view is presented with each `apply` command to show only lines that will change. This could be due to changing
+the template, or using a different set of variables.
 
 ```sh
 dotpatina apply patina.toml --vars other-vars.toml
 ```
 
-![gif of applying a patina with other variables](./examples/gitconfig/demo/apply-other-vars-patina.gif)
+![gif of updating a patina](./examples/demo/update-patina.gif)

@@ -1,0 +1,217 @@
+# The configurations that used for the recording, feel free to edit them
+config:
+  # Specify a command to be executed
+  # like `/bin/bash -l`, `ls`, or any other commands
+  # the default is bash for Linux
+  # or powershell.exe for Windows
+  command: zsh
+
+  # Specify the current working directory path
+  # the default is the current working directory path
+  cwd: /Users/cameron/Repos/github.com/axis7818/dotfiles
+
+  # Export additional ENV variables
+  env:
+    recording: true
+
+  # Explicitly set the number of columns
+  # or use `auto` to take the current
+  # number of columns of your shell
+  cols: 100
+
+  # Explicitly set the number of rows
+  # or use `auto` to take the current
+  # number of rows of your shell
+  rows: 32
+
+  # Amount of times to repeat GIF
+  # If value is -1, play once
+  # If value is 0, loop indefinitely
+  # If value is a positive number, loop n times
+  repeat: 0
+
+  # Quality
+  # 1 - 100
+  # Default to lower quality, final renders use higher qualities as needed
+  quality: 100
+
+  # Delay between frames in ms
+  # If the value is `auto` use the actual recording delays
+  frameDelay: auto
+
+  # Maximum delay between frames in ms
+  # Ignored if the `frameDelay` isn't set to `auto`
+  # Set to `auto` to prevent limiting the max idle time
+  maxIdleTime: 2000
+
+  # The surrounding frame box
+  # The `type` can be null, window, floating, or solid`
+  # To hide the title use the value null
+  # Don't forget to add a backgroundColor style with a null as type
+  frameBox:
+    type: solid
+    title: null
+    style:
+      backgroundColor: rgb(36, 39, 58)
+      border: 0px rgb(36, 39, 58) solid
+      borderRadius: 0px
+      boxShadow: none
+      margin: 0px
+
+  # Add a watermark image to the rendered gif
+  # You need to specify an absolute path for
+  # the image on your machine or a URL, and you can also
+  # add your own CSS styles
+  watermark:
+    imagePath: null
+    style:
+      position: absolute
+      right: 15px
+      bottom: 15px
+      width: 100px
+      opacity: 0.9
+
+  # Cursor style can be one of
+  # `block`, `underline`, or `bar`
+  cursorStyle: block
+
+  # Font family
+  # You can use any font that is installed on your machine
+  # in CSS-like syntax
+  fontFamily: "Hack Nerd Font, Monaco, Lucida Console, Ubuntu Mono, Monospace"
+
+  # The size of the font
+  fontSize: 12
+
+  # The height of lines
+  lineHeight: 1
+
+  # The spacing between letters
+  letterSpacing: 0
+
+  # Theme
+  theme:
+    background: "#24273a"
+    foreground: "#cad3f5"
+    cursor: "#cad3f5"
+    black: "#181926"
+    red: "#ed8796"
+    green: "#a6da95"
+    yellow: "#eed49f"
+    blue: "#8aadf4"
+    magenta: "#c6a0f6"
+    cyan: "#91d7e3"
+    white: "#cad3f5"
+    brightBlack: "#494d64"
+    brightRed: "#ee99a0"
+    brightGreen: "#8bd5ca"
+    brightYellow: "#eed49f"
+    brightBlue: "#7dc4e4"
+    brightMagenta: "#f5bde6"
+    brightCyan: "#91d7e3"
+    brightWhite: "#cad3f5"
+
+# Records, feel free to edit them
+records:
+  - delay: 466
+    content: "\e[1m\e[7m%\e[27m\e[1m\e[0m                                                                                                   \r \r"
+  - delay: 110
+    content: "\e]2;cameron@Slartibartfast:~/Repos/github.com/axis7818/dotfiles\a\e]1;..7818/dotfiles\a"
+  - delay: 125
+    content: "\r\e[0m\e[27m\e[24m\e[J\e[01;31m\e[00m\r\n\e[32m~/Repos/github.com/axis7818/dotfiles\e[00m \e[01;33m\e[01;35mmaster\e[01;33m∼\e[00m\e[00m\e[01;34m✱\e[00m\e[01;36m?\e[00m\r\n\e[01;35m❱\e[00m \e[K\e[?1h\e=\e[?2004h"
+  - delay: 497
+    content: d
+  - delay: 148
+    content: "\bdo"
+  - delay: 208
+    content: t
+  - delay: 327
+    content: p
+  - delay: 128
+    content: a
+  - delay: 183
+    content: t
+  - delay: 205
+    content: i
+  - delay: 71
+    content: "n"
+  - delay: 85
+    content: a
+  - delay: 433
+    content: " "
+  - delay: 746
+    content: a
+  - delay: 130
+    content: p
+  - delay: 124
+    content: p
+  - delay: 173
+    content: l
+  - delay: 161
+    content: "y"
+  - delay: 125
+    content: " "
+  - delay: 207
+    content: p
+  - delay: 146
+    content: a
+  - delay: 150
+    content: t
+  - delay: 167
+    content: "ina-mac.toml\e[1m \e[0m"
+  - delay: 377
+    content: "\b\e[0m -"
+  - delay: 135
+    content: "-"
+  - delay: 106
+    content: v
+  - delay: 116
+    content: a
+  - delay: 74
+    content: r
+  - delay: 182
+    content: s
+  - delay: 99
+    content: " "
+  - delay: 120
+    content: o
+  - delay: 105
+    content: t
+  - delay: 205
+    content: "her-vars.toml\e[1m \e[0m"
+  - delay: 394
+    content: "\b\e[0m -"
+  - delay: 130
+    content: "-"
+  - delay: 247
+    content: t
+  - delay: 232
+    content: a
+  - delay: 79
+    content: g
+  - delay: 211
+    content: s
+  - delay: 93
+    content: " "
+  - delay: 400
+    content: g
+  - delay: 51
+    content: i
+  - delay: 97
+    content: t
+  - delay: 176
+    content: "\e[?1l\e>\e[?2004l\r\r\n\e]2;dotpatina apply patina-mac.toml --vars other-vars.toml --tags git\a\e]1;dotpatina\a"
+  - delay: 5
+    content: "\r\nFiles without changes:\r\n  \e[33m/Users/cameron/Library/Application Support/lazygit/config.yml\e[0m \e[34m\e[34m13 unchanged lines\r\n\e[0m\e[34m\e[0m\r\n\e[1;4;33m/Users/cameron/.gitconfig\r\n\e[0m   1  1 | [user]\r\n\e[31m-  2    |     email = <axis7818@gmail.com>\r\n\e[0m\e[32m+     2 |     email = <cameron.taylor7818@gmail.com>\r\n\e[0m   3  3 |     name = <Cameron Taylor>\r\n   4  4 | [pager]\r\n   5  5 |     branch = false\r\n   6  6 | [core]\r\n\e[34m7 unchanged lines\r\n\e[0m\r\nDo you want to continue? (y/n): "
+  - delay: 1964
+    content: "y"
+  - delay: 429
+    content: "\r\n\r\nApplying patina files\r\n   /Users/cameron/.gitconfig"
+  - delay: 5
+    content: "\e[32m ✓\r\n\e[0m   /Users/cameron/Library/Application Support/lazygit/config.yml \e[32m✓\e[0m \e[90m(no change)\e[0m\r\nDone\e[90m (original files moved to trash)\e[0m\r\n\e[1m\e[7m%\e[27m\e[1m\e[0m                                                                                                   \r \r"
+  - delay: 117
+    content: "\e]2;cameron@Slartibartfast:~/Repos/github.com/axis7818/dotfiles\a\e]1;..7818/dotfiles\a"
+  - delay: 115
+    content: "\r\e[0m\e[27m\e[24m\e[J\e[01;31m\e[00m\r\n\e[32m~/Repos/github.com/axis7818/dotfiles\e[00m \e[01;33m\e[01;35mmaster\e[01;33m∼\e[00m\e[00m\e[01;34m✱\e[00m\e[01;36m?\e[00m\r\n\e[01;35m❱\e[00m \e[K\e[?1h\e=\e[?2004h"
+  - delay: 3519
+    content: "\e[?2004l\r\r\n"

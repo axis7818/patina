@@ -8,7 +8,7 @@ config:
 
   # Specify the current working directory path
   # the default is the current working directory path
-  cwd: /Users/cameron/Repos/github.com/axis7818/dotpatina
+  cwd: /Users/cameron/Repos/github.com/axis7818/dotfiles
 
   # Export additional ENV variables
   env:
@@ -22,7 +22,7 @@ config:
   # Explicitly set the number of rows
   # or use `auto` to take the current
   # number of rows of your shell
-  rows: 42
+  rows: 36
 
   # Amount of times to repeat GIF
   # If value is -1, play once
@@ -113,103 +113,107 @@ config:
 
 # Records, feel free to edit them
 records:
-  - delay: 489
+  - delay: 854
     content: "\e[1m\e[7m%\e[27m\e[1m\e[0m                                                                                                   \r \r"
-  - delay: 107
-    content: "\e]2;cameron@Slartibartfast:~/Repos/github.com/axis7818/dotpatina\a\e]1;..818/dotpatina\a"
-  - delay: 116
-    content: "\r\e[0m\e[27m\e[24m\e[J\e[01;31m\e[00m\r\n\e[32m~/Repos/github.com/axis7818/dotpatina\e[00m \e[01;33m\e[01;35maxis7818/docs\e[01;33m∼\e[00m\e[00m\e[01;34m✱\e[00m\e[01;36m?\e[00m\r\n\e[01;35m❱\e[00m \e[K\e[?1h\e=\e[?2004h"
-  - delay: 738
-    content: c
-  - delay: 210
-    content: "\bcd"
-  - delay: 115
-    content: " "
-  - delay: 172
-    content: e
-  - delay: 241
-    content: x
-  - delay: 271
-    content: "amples\e[1m/\e[0m"
-  - delay: 486
-    content: "\b\e[0m/g"
-  - delay: 89
-    content: i
-  - delay: 121
-    content: "tconfig\e[1m/\e[0m"
-  - delay: 524
-    content: "\b\e[0m \b\e[?1l\e>\e[?2004l\r\r\n\e]2;cd examples/gitconfig\a\e]1;cd\a\e[1m\e[7m%\e[27m\e[1m\e[0m                                                                                                   \r \r"
-  - delay: 130
-    content: "\e]2;cameron@Slartibartfast:~/Repos/github.com/axis7818/dotpatina/examples/gitconfig\a\e]1;..les/gitconfig\a"
-  - delay: 123
-    content: "\r\e[0m\e[27m\e[24m\e[J\e[01;31m\e[00m\r\n\e[32m~/Repos/github.com/axis7818/dotpatina/examples/gitconfig\e[00m \e[01;33m\e[01;35maxis7818/docs\e[01;33m∼\e[00m\e[00m\e[01;34m✱\e[00m\e[01;36m?\e[00m\r\n\e[01;35m❱\e[00m \e[K\e[?1h\e=\e[?2004h"
-  - delay: 499
+  - delay: 105
+    content: "\e]2;cameron@Slartibartfast:~/Repos/github.com/axis7818/dotfiles\a\e]1;..7818/dotfiles\a"
+  - delay: 114
+    content: "\r\e[0m\e[27m\e[24m\e[J\e[01;31m\e[00m\r\n\e[32m~/Repos/github.com/axis7818/dotfiles\e[00m \e[01;33m\e[01;35mmaster\e[01;33m∼\e[00m\e[00m\e[01;34m✱\e[00m\r\n\e[01;35m❱\e[00m \e[K\e[?1h\e=\e[?2004h"
+  - delay: 1389
     content: d
-  - delay: 95
+  - delay: 133
     content: "\bdo"
-  - delay: 63
+  - delay: 154
     content: t
-  - delay: 171
+  - delay: 177
     content: p
-  - delay: 114
-    content: a
-  - delay: 387
-    content: t
-  - delay: 95
-    content: i
-  - delay: 62
-    content: "n"
-  - delay: 91
-    content: a
-  - delay: 252
-    content: " "
-  - delay: 164
-    content: r
-  - delay: 79
-    content: e
-  - delay: 70
-    content: "n"
-  - delay: 92
-    content: d
-  - delay: 180
-    content: e
-  - delay: 64
-    content: r
-  - delay: 65
-    content: " "
-  - delay: 301
-    content: p
-  - delay: 58
-    content: a
-  - delay: 220
-    content: "tina.toml\e[1m \e[0m"
-  - delay: 502
-    content: "\b\e[0m -"
-  - delay: 114
-    content: "-"
-  - delay: 129
-    content: v
-  - delay: 132
+  - delay: 109
     content: a
   - delay: 61
-    content: r
-  - delay: 189
-    content: s
-  - delay: 78
-    content: " "
-  - delay: 272
-    content: v
-  - delay: 110
+    content: t
+  - delay: 76
+    content: i
+  - delay: 68
+    content: "n"
+  - delay: 80
     content: a
-  - delay: 253
-    content: "rs.toml\e[1m \e[0m"
-  - delay: 654
-    content: "\b\e[0m \b\e[?1l\e>\e[?2004l\r\r\n\e]2;dotpatina render patina.toml --vars vars.toml\a\e]1;dotpatina\a"
-  - delay: 7
-    content: "Rendered 2 files\r\n\r\n\e[1;4;33m\r\ngitconfig.hbs\r\n\e[0m[user]\r\n    email = <user@email.com>\r\n    name = <User Name>\r\n[pager]\r\n    branch = false\r\n[core]\r\n\teditor = vim\r\n[pull]\r\n\trebase = false\r\n[init]\r\n\tdefaultBranch = main\r\n[fetch]\r\n\tprune = true\r\n\r\n\e[1;4;33m\r\nlazygit.config.yml\r\n\e[0mgui:\r\n  showBottomLine: false\r\n  showCommandLog: false\r\n  showPanelJumps: false\r\n  border: rounded\r\n  showNumstatInFilesView: true\r\n\r\ncustomCommands:\r\n  - key: \"U\"\r\n    command: \"git submodule update --init --recursive\"\r\n    context: \"files, localBranches, status\"\r\n    description: \"Update submodules\"\r\n    stream: true\r\n\r\n\e[1m\e[7m%\e[27m\e[1m\e[0m                                                                                                   \r \r"
-  - delay: 118
-    content: "\e]2;cameron@Slartibartfast:~/Repos/github.com/axis7818/dotpatina/examples/gitconfig\a\e]1;..les/gitconfig\a"
-  - delay: 119
-    content: "\r\e[0m\e[27m\e[24m\e[J\e[01;31m\e[00m\r\n\e[32m~/Repos/github.com/axis7818/dotpatina/examples/gitconfig\e[00m \e[01;33m\e[01;35maxis7818/docs\e[01;33m∼\e[00m\e[00m\e[01;34m✱\e[00m\e[01;36m?\e[00m\r\n\e[01;35m❱\e[00m \e[K\e[?1h\e=\e[?2004h"
-  - delay: 3252
+  - delay: 260
+    content: " "
+  - delay: 467
+    content: r
+  - delay: 63
+    content: e
+  - delay: 74
+    content: "n"
+  - delay: 123
+    content: d
+  - delay: 233
+    content: e
+  - delay: 70
+    content: r
+  - delay: 71
+    content: " "
+  - delay: 774
+    content: p
+  - delay: 87
+    content: a
+  - delay: 150
+    content: t
+  - delay: 142
+    content: "ina-mac.toml\e[1m \e[0m"
+  - delay: 764
+    content: "\b\e[0m -"
+  - delay: 133
+    content: "-"
+  - delay: 362
+    content: v
+  - delay: 180
+    content: a
+  - delay: 52
+    content: r
+  - delay: 246
+    content: s
+  - delay: 62
+    content: " "
+  - delay: 277
+    content: v
+  - delay: 137
+    content: a
+  - delay: 65
+    content: r
+  - delay: 180
+    content: s
+  - delay: 162
+    content: .
+  - delay: 130
+    content: "toml\e[1m \e[0m"
+  - delay: 699
+    content: "\b\e[0m -"
+  - delay: 138
+    content: "-"
+  - delay: 215
+    content: t
+  - delay: 155
+    content: a
+  - delay: 84
+    content: g
+  - delay: 187
+    content: s
+  - delay: 84
+    content: " "
+  - delay: 282
+    content: g
+  - delay: 86
+    content: i
+  - delay: 102
+    content: t
+  - delay: 823
+    content: "\e[?1l\e>\e[?2004l\r\r\n\e]2;dotpatina render patina-mac.toml --vars vars.toml --tags git\a\e]1;dotpatina\a"
+  - delay: 12
+    content: "Rendered 2 files\r\n\r\n\e[1;4;33mgit/gitconfig\r\n\e[0m[user]\r\n    email = <axis7818@gmail.com>\r\n    name = <Cameron Taylor>\r\n[pager]\r\n    branch = false\r\n[core]\r\n    editor = vim\r\n[pull]\r\n    rebase = false\r\n[init]\r\n    defaultBranch = main\r\n[fetch]\r\n    prune = true\r\n\r\n\e[1;4;33mlazygit/config.yml\r\n\e[0mgui:\r\n  showBottomLine: false\r\n  showCommandLog: false\r\n  showPanelJumps: false\r\n  border: rounded\r\n  showNumstatInFilesView: true\r\n\r\ncustomCommands:\r\n  - key: \"U\"\r\n    command: \"git submodule update --init --recursive\"\r\n    context: \"files, localBranches, status\"\r\n    description: \"Update submodules\"\r\n    stream: true\r\n\r\n\e[1m\e[7m%\e[27m\e[1m\e[0m                                                                                                   \r \r"
+  - delay: 129
+    content: "\e]2;cameron@Slartibartfast:~/Repos/github.com/axis7818/dotfiles\a\e]1;..7818/dotfiles\a"
+  - delay: 109
+    content: "\r\e[0m\e[27m\e[24m\e[J\e[01;31m\e[00m\r\n\e[32m~/Repos/github.com/axis7818/dotfiles\e[00m \e[01;33m\e[01;35mmaster\e[01;33m∼\e[00m\e[00m\e[01;34m✱\e[00m\r\n\e[01;35m❱\e[00m \e[K\e[?1h\e=\e[?2004h"
+  - delay: 2551
     content: "\e[?2004l\r\r\n"

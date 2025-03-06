@@ -40,7 +40,7 @@ struct DiffLine {
 }
 
 impl DiffLine {
-    fn to_string(&self, line_number_width: usize) -> std::string::String {
+    fn to_string(&self, line_number_width: usize) -> String {
         let old_line_num = match self.old_line_num {
             Some(l) => l.to_string(),
             None => "".to_string(),
@@ -91,17 +91,12 @@ where
         // This is used for determining what lines are far away enough from changes to skip displaying.
         let mut count_from_change = -1;
 
-        // Keep track if there have been any changes at all.
-        // If not, we can return early.
-        let mut any_changes = false;
-
         // This closure is used for the first iteration over the changes.
         // It generates a DiffLine struct with relevant data for the diff
         // and keeps track of the variables defined above.
         let change_to_diff_line = |change: Change<&O>| match change.tag() {
             ChangeTag::Insert => {
                 count_from_change = 0;
-                any_changes = true;
                 let line = DiffLine {
                     old_line_num: None,
                     new_line_num: Some(new_line_count),
@@ -133,7 +128,6 @@ where
             }
             ChangeTag::Delete => {
                 count_from_change = 0;
-                any_changes = true;
                 let line = DiffLine {
                     old_line_num: Some(old_line_count),
                     new_line_num: None,
@@ -154,14 +148,6 @@ where
             .map(change_to_diff_line)
             .collect::<Vec<DiffLine>>();
 
-        // If there aren't any changes, return early with a message noting the number of lines
-        if !any_changes {
-            return format!("{} lines, no changes detected\n", diff_lines.len())
-                .bold()
-                .blue()
-                .to_string();
-        }
-
         // Determine the width of the line number columns
         let line_number_width = max(
             old_line_count.to_string().len(),
@@ -169,13 +155,13 @@ where
         );
 
         // Keep a count of the number of lines until a change happens.
-        // If negative, there wont be another change.
+        // If negative, there won't be another change.
         // This is used for determining what lines are far away enough from changes to skip displaying.
         let mut count_to_changed = -1;
 
         // This closure is used in the second (reversed) iteration through the diff lines.
         // It updates the count_to_changed, and uses that value to determine (and return)
-        // whether or not this line should be displayed.
+        // whether this line should be displayed.
         let mut check_diff_gap = |diff_line: &mut DiffLine| {
             match diff_line.change_tag {
                 ChangeTag::Insert => {
@@ -214,8 +200,7 @@ where
                 // If we are showing a line, but have been skipping lines,
                 // display the number of unchanged lines
                 if skipped_lines > 0 {
-                    result = format!("\n... {} unchanged lines\n\n", skipped_lines)
-                        .bold()
+                    result = format!("{} unchanged lines\n", skipped_lines)
                         .blue()
                         .to_string()
                         + &result;
@@ -235,8 +220,7 @@ where
         // then display the number of unchanged lines again.
         // This is the case when there aren't any changes at the beginning of a file.
         if skipped_lines > 0 {
-            result = format!("\n... {} unchanged lines\n\n", skipped_lines)
-                .bold()
+            result = format!("{} unchanged lines\n", skipped_lines)
                 .blue()
                 .to_string()
                 + &result;
@@ -379,9 +363,7 @@ mod tests {
             "   7  5 | [pager]",
             "   8  6 |     branch = false",
             "   9  7 | ",
-            "",
-            "... 10 unchanged lines",
-            "",
+            "10 unchanged lines",
             "  20 18 |     clean = git-lfs clean -- %f",
             "  21 19 |     smudge = git-lfs smudge -- %f",
             "  22 20 |     process = git-lfs filter-process",
@@ -447,9 +429,7 @@ mod tests {
 
         let result = diff.to_string();
         let expected_lines = [
-            "",
-            "... 5 unchanged lines",
-            "",
+            "5 unchanged lines",
             "   6  6 | ",
             "   7  7 | [pager]",
             "   8  8 |     branch = false",
@@ -461,9 +441,7 @@ mod tests {
             "  14 11 |     rebase = false",
             "  15 12 | ",
             "  16 13 | [init]",
-            "",
-            "... 7 unchanged lines",
-            "",
+            "7 unchanged lines",
             "",
         ];
         assert_eq!(result, expected_lines.join("\n"));
@@ -482,7 +460,7 @@ mod tests {
         let diff = TextDiff::from_lines(old, new);
 
         let result = diff.to_string();
-        let expected_lines = ["3 lines, no changes detected", ""];
+        let expected_lines = ["3 unchanged lines", ""];
         assert_eq!(result, expected_lines.join("\n"));
     }
 }

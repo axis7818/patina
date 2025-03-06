@@ -403,7 +403,11 @@
 <a href="#402" id="402">402</a>
 <a href="#403" id="403">403</a>
 <a href="#404" id="404">404</a>
-<a href="#405" id="405">405</a></pre></div><pre class="rust"><code><span class="doccomment">//! The engine module contains the core logic for dotpatina operations.
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a></pre></div><pre class="rust"><code><span class="doccomment">//! The engine module contains the core logic for dotpatina operations.
 
 </span><span class="kw">use </span>std::{
     fs,
@@ -551,7 +555,8 @@
             }
         }
 
-        <span class="kw">if </span>!files_without_changes.is_empty() {
+        <span class="kw">let </span>any_unchanged_files = !files_without_changes.is_empty();
+        <span class="kw">if </span>any_unchanged_files {
             <span class="self">self</span>.pi.output(<span class="string">"\nFiles without changes:\n"</span>);
             <span class="kw">for </span>(target_path, diff_str) <span class="kw">in </span>files_without_changes {
                 <span class="self">self</span>.pi.output(<span class="macro">format!</span>(
@@ -564,11 +569,14 @@
         }
 
         <span class="kw">if </span>!files_with_changes.is_empty() {
+            <span class="kw">if </span>!any_unchanged_files {
+                <span class="self">self</span>.pi.output(<span class="string">"\n"</span>);
+            }
             <span class="kw">for </span>(target_path, diff_str) <span class="kw">in </span>files_with_changes {
                 <span class="self">self</span>.pi.output_file_header(<span class="kw-2">&amp;</span>target_path);
                 <span class="self">self</span>.pi.output(diff_str);
+                <span class="self">self</span>.pi.output(<span class="string">"\n"</span>);
             }
-            <span class="self">self</span>.pi.output(<span class="string">"\n"</span>);
         }
 
         any_changes

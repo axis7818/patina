@@ -3,12 +3,8 @@
 use std::path::Path;
 
 use colored::Colorize;
-use similar::TextDiff;
 
-use crate::{
-    diff::DiffAnalysis,
-    utils::{Error, Result},
-};
+use crate::utils::{Error, Result};
 
 /// Specifies operations for interfacing with [super::PatinaEngine]
 pub trait PatinaInterface {
@@ -43,17 +39,12 @@ pub trait PatinaInterface {
     fn output_file_header(&self, template_path: &Path) {
         let template_path = template_path.display().to_string();
         self.output(
-            format!("\n{}\n", template_path)
+            format!("{}\n", template_path)
                 .yellow()
                 .bold()
                 .underline()
                 .to_string(),
         );
-    }
-
-    /// Output a diff view
-    fn output_diff<'a>(&self, diff: &TextDiff<'a, 'a, 'a, str>) {
-        self.output(diff.to_string());
     }
 }
 

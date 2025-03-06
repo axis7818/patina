@@ -124,6 +124,9 @@ where
     ) -> bool {
         let mut any_changes = false;
 
+        let mut files_with_changes: Vec<(PathBuf, String)> = vec![];
+        let mut files_without_changes: Vec<(PathBuf, String)> = vec![];
+
         // Generate and display diffs
         for r in render.iter_mut() {
             let target_path = patina.get_patina_path(&r.patina_file.target);
@@ -136,10 +139,33 @@ where
                 any_changes = true
             }
 
-            self.pi.output_file_header(&target_path);
-            self.pi.output_diff(&diff);
+            if r.any_changes.unwrap() {
+                files_with_changes.push((target_path, diff.to_string()));
+            } else {
+                files_without_changes.push((target_path, diff.to_string()));
+            }
+        }
+
+        if !files_without_changes.is_empty() {
+            self.pi.output("\nFiles without changes:\n");
+            for (target_path, diff_str) in files_without_changes {
+                self.pi.output(format!(
+                    "  {} {}",
+                    target_path.display().to_string().yellow(),
+                    diff_str.blue()
+                ));
+            }
             self.pi.output("\n");
         }
+
+        if !files_with_changes.is_empty() {
+            for (target_path, diff_str) in files_with_changes {
+                self.pi.output_file_header(&target_path);
+                self.pi.output(diff_str);
+            }
+            self.pi.output("\n");
+        }
+
         any_changes
     }
 
@@ -228,7 +254,6 @@ Templates use the Handebars templating language. For more information, see <http
         assert_eq!(
             pi.get_all_output(),
             r#"Rendered 1 files
-
 
 template.txt.hbs
 Hello, Patina User!

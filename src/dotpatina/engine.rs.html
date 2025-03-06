@@ -378,7 +378,32 @@
 <a href="#377" id="377">377</a>
 <a href="#378" id="378">378</a>
 <a href="#379" id="379">379</a>
-<a href="#380" id="380">380</a></pre></div><pre class="rust"><code><span class="doccomment">//! The engine module contains the core logic for dotpatina operations.
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
+<a href="#392" id="392">392</a>
+<a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a></pre></div><pre class="rust"><code><span class="doccomment">//! The engine module contains the core logic for dotpatina operations.
 
 </span><span class="kw">use </span>std::{
     fs,
@@ -504,6 +529,9 @@
     ) -&gt; bool {
         <span class="kw">let </span><span class="kw-2">mut </span>any_changes = <span class="bool-val">false</span>;
 
+        <span class="kw">let </span><span class="kw-2">mut </span>files_with_changes: Vec&lt;(PathBuf, String)&gt; = <span class="macro">vec!</span>[];
+        <span class="kw">let </span><span class="kw-2">mut </span>files_without_changes: Vec&lt;(PathBuf, String)&gt; = <span class="macro">vec!</span>[];
+
         <span class="comment">// Generate and display diffs
         </span><span class="kw">for </span>r <span class="kw">in </span>render.iter_mut() {
             <span class="kw">let </span>target_path = patina.get_patina_path(<span class="kw-2">&amp;</span>r.patina_file.target);
@@ -516,10 +544,33 @@
                 any_changes = <span class="bool-val">true
             </span>}
 
-            <span class="self">self</span>.pi.output_file_header(<span class="kw-2">&amp;</span>target_path);
-            <span class="self">self</span>.pi.output_diff(<span class="kw-2">&amp;</span>diff);
+            <span class="kw">if </span>r.any_changes.unwrap() {
+                files_with_changes.push((target_path, diff.to_string()));
+            } <span class="kw">else </span>{
+                files_without_changes.push((target_path, diff.to_string()));
+            }
+        }
+
+        <span class="kw">if </span>!files_without_changes.is_empty() {
+            <span class="self">self</span>.pi.output(<span class="string">"\nFiles without changes:\n"</span>);
+            <span class="kw">for </span>(target_path, diff_str) <span class="kw">in </span>files_without_changes {
+                <span class="self">self</span>.pi.output(<span class="macro">format!</span>(
+                    <span class="string">"  {} {}"</span>,
+                    target_path.display().to_string().yellow(),
+                    diff_str.blue()
+                ));
+            }
             <span class="self">self</span>.pi.output(<span class="string">"\n"</span>);
         }
+
+        <span class="kw">if </span>!files_with_changes.is_empty() {
+            <span class="kw">for </span>(target_path, diff_str) <span class="kw">in </span>files_with_changes {
+                <span class="self">self</span>.pi.output_file_header(<span class="kw-2">&amp;</span>target_path);
+                <span class="self">self</span>.pi.output(diff_str);
+            }
+            <span class="self">self</span>.pi.output(<span class="string">"\n"</span>);
+        }
+
         any_changes
     }
 
@@ -608,7 +659,6 @@ Templates use the Handebars templating language. For more information, see &lt;h
         <span class="macro">assert_eq!</span>(
             pi.get_all_output(),
             <span class="string">r#"Rendered 1 files
-
 
 template.txt.hbs
 Hello, Patina User!

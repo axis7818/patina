@@ -97,26 +97,13 @@
 <a href="#96" id="96">96</a>
 <a href="#97" id="97">97</a>
 <a href="#98" id="98">98</a>
-<a href="#99" id="99">99</a>
-<a href="#100" id="100">100</a>
-<a href="#101" id="101">101</a>
-<a href="#102" id="102">102</a>
-<a href="#103" id="103">103</a>
-<a href="#104" id="104">104</a>
-<a href="#105" id="105">105</a>
-<a href="#106" id="106">106</a>
-<a href="#107" id="107">107</a>
-<a href="#108" id="108">108</a></pre></div><pre class="rust"><code><span class="doccomment">//! This module contains definitions for interfacing with [super::PatinaEngine]
+<a href="#99" id="99">99</a></pre></div><pre class="rust"><code><span class="doccomment">//! This module contains definitions for interfacing with [super::PatinaEngine]
 
 </span><span class="kw">use </span>std::path::Path;
 
 <span class="kw">use </span>colored::Colorize;
-<span class="kw">use </span>similar::TextDiff;
 
-<span class="kw">use crate</span>::{
-    diff::DiffAnalysis,
-    utils::{Error, <span class="prelude-ty">Result</span>},
-};
+<span class="kw">use </span><span class="kw">crate</span>::utils::{Error, <span class="prelude-ty">Result</span>};
 
 <span class="doccomment">/// Specifies operations for interfacing with [super::PatinaEngine]
 </span><span class="kw">pub trait </span>PatinaInterface {
@@ -151,17 +138,12 @@
     </span><span class="kw">fn </span>output_file_header(<span class="kw-2">&amp;</span><span class="self">self</span>, template_path: <span class="kw-2">&amp;</span>Path) {
         <span class="kw">let </span>template_path = template_path.display().to_string();
         <span class="self">self</span>.output(
-            <span class="macro">format!</span>(<span class="string">"\n{}\n"</span>, template_path)
+            <span class="macro">format!</span>(<span class="string">"{}\n"</span>, template_path)
                 .yellow()
                 .bold()
                 .underline()
                 .to_string(),
         );
-    }
-
-    <span class="doccomment">/// Output a diff view
-    </span><span class="kw">fn </span>output_diff&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, diff: <span class="kw-2">&amp;</span>TextDiff&lt;<span class="lifetime">'a</span>, <span class="lifetime">'a</span>, <span class="lifetime">'a</span>, str&gt;) {
-        <span class="self">self</span>.output(diff.to_string());
     }
 }
 

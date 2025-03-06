@@ -464,29 +464,7 @@
 <a href="#463" id="463">463</a>
 <a href="#464" id="464">464</a>
 <a href="#465" id="465">465</a>
-<a href="#466" id="466">466</a>
-<a href="#467" id="467">467</a>
-<a href="#468" id="468">468</a>
-<a href="#469" id="469">469</a>
-<a href="#470" id="470">470</a>
-<a href="#471" id="471">471</a>
-<a href="#472" id="472">472</a>
-<a href="#473" id="473">473</a>
-<a href="#474" id="474">474</a>
-<a href="#475" id="475">475</a>
-<a href="#476" id="476">476</a>
-<a href="#477" id="477">477</a>
-<a href="#478" id="478">478</a>
-<a href="#479" id="479">479</a>
-<a href="#480" id="480">480</a>
-<a href="#481" id="481">481</a>
-<a href="#482" id="482">482</a>
-<a href="#483" id="483">483</a>
-<a href="#484" id="484">484</a>
-<a href="#485" id="485">485</a>
-<a href="#486" id="486">486</a>
-<a href="#487" id="487">487</a>
-<a href="#488" id="488">488</a></pre></div><pre class="rust"><code><span class="doccomment">//! The diff module provides diffing behavior for files. This includes diff analysis and utilities
+<a href="#466" id="466">466</a></pre></div><pre class="rust"><code><span class="doccomment">//! The diff module provides diffing behavior for files. This includes diff analysis and utilities
 //! for displaying diff results.
 
 </span><span class="kw">use </span>std::cmp::max;
@@ -528,7 +506,7 @@
 }
 
 <span class="kw">impl </span>DiffLine {
-    <span class="kw">fn </span>to_string(<span class="kw-2">&amp;</span><span class="self">self</span>, line_number_width: usize) -&gt; std::string::String {
+    <span class="kw">fn </span>to_string(<span class="kw-2">&amp;</span><span class="self">self</span>, line_number_width: usize) -&gt; String {
         <span class="kw">let </span>old_line_num = <span class="kw">match </span><span class="self">self</span>.old_line_num {
             <span class="prelude-val">Some</span>(l) =&gt; l.to_string(),
             <span class="prelude-val">None </span>=&gt; <span class="string">""</span>.to_string(),
@@ -579,17 +557,12 @@
         // This is used for determining what lines are far away enough from changes to skip displaying.
         </span><span class="kw">let </span><span class="kw-2">mut </span>count_from_change = -<span class="number">1</span>;
 
-        <span class="comment">// Keep track if there have been any changes at all.
-        // If not, we can return early.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>any_changes = <span class="bool-val">false</span>;
-
         <span class="comment">// This closure is used for the first iteration over the changes.
         // It generates a DiffLine struct with relevant data for the diff
         // and keeps track of the variables defined above.
         </span><span class="kw">let </span>change_to_diff_line = |change: Change&lt;<span class="kw-2">&amp;</span>O&gt;| <span class="kw">match </span>change.tag() {
             ChangeTag::Insert =&gt; {
                 count_from_change = <span class="number">0</span>;
-                any_changes = <span class="bool-val">true</span>;
                 <span class="kw">let </span>line = DiffLine {
                     old_line_num: <span class="prelude-val">None</span>,
                     new_line_num: <span class="prelude-val">Some</span>(new_line_count),
@@ -621,7 +594,6 @@
             }
             ChangeTag::Delete =&gt; {
                 count_from_change = <span class="number">0</span>;
-                any_changes = <span class="bool-val">true</span>;
                 <span class="kw">let </span>line = DiffLine {
                     old_line_num: <span class="prelude-val">Some</span>(old_line_count),
                     new_line_num: <span class="prelude-val">None</span>,
@@ -642,14 +614,6 @@
             .map(change_to_diff_line)
             .collect::&lt;Vec&lt;DiffLine&gt;&gt;();
 
-        <span class="comment">// If there aren't any changes, return early with a message noting the number of lines
-        </span><span class="kw">if </span>!any_changes {
-            <span class="kw">return </span><span class="macro">format!</span>(<span class="string">"{} lines, no changes detected\n"</span>, diff_lines.len())
-                .bold()
-                .blue()
-                .to_string();
-        }
-
         <span class="comment">// Determine the width of the line number columns
         </span><span class="kw">let </span>line_number_width = max(
             old_line_count.to_string().len(),
@@ -657,13 +621,13 @@
         );
 
         <span class="comment">// Keep a count of the number of lines until a change happens.
-        // If negative, there wont be another change.
+        // If negative, there won't be another change.
         // This is used for determining what lines are far away enough from changes to skip displaying.
         </span><span class="kw">let </span><span class="kw-2">mut </span>count_to_changed = -<span class="number">1</span>;
 
         <span class="comment">// This closure is used in the second (reversed) iteration through the diff lines.
         // It updates the count_to_changed, and uses that value to determine (and return)
-        // whether or not this line should be displayed.
+        // whether this line should be displayed.
         </span><span class="kw">let </span><span class="kw-2">mut </span>check_diff_gap = |diff_line: <span class="kw-2">&amp;mut </span>DiffLine| {
             <span class="kw">match </span>diff_line.change_tag {
                 ChangeTag::Insert =&gt; {
@@ -702,8 +666,7 @@
                 <span class="comment">// If we are showing a line, but have been skipping lines,
                 // display the number of unchanged lines
                 </span><span class="kw">if </span>skipped_lines &gt; <span class="number">0 </span>{
-                    result = <span class="macro">format!</span>(<span class="string">"\n... {} unchanged lines\n\n"</span>, skipped_lines)
-                        .bold()
+                    result = <span class="macro">format!</span>(<span class="string">"{} unchanged lines\n"</span>, skipped_lines)
                         .blue()
                         .to_string()
                         + <span class="kw-2">&amp;</span>result;
@@ -723,8 +686,7 @@
         // then display the number of unchanged lines again.
         // This is the case when there aren't any changes at the beginning of a file.
         </span><span class="kw">if </span>skipped_lines &gt; <span class="number">0 </span>{
-            result = <span class="macro">format!</span>(<span class="string">"\n... {} unchanged lines\n\n"</span>, skipped_lines)
-                .bold()
+            result = <span class="macro">format!</span>(<span class="string">"{} unchanged lines\n"</span>, skipped_lines)
                 .blue()
                 .to_string()
                 + <span class="kw-2">&amp;</span>result;
@@ -867,9 +829,7 @@
             <span class="string">"   7  5 | [pager]"</span>,
             <span class="string">"   8  6 |     branch = false"</span>,
             <span class="string">"   9  7 | "</span>,
-            <span class="string">""</span>,
-            <span class="string">"... 10 unchanged lines"</span>,
-            <span class="string">""</span>,
+            <span class="string">"10 unchanged lines"</span>,
             <span class="string">"  20 18 |     clean = git-lfs clean -- %f"</span>,
             <span class="string">"  21 19 |     smudge = git-lfs smudge -- %f"</span>,
             <span class="string">"  22 20 |     process = git-lfs filter-process"</span>,
@@ -935,9 +895,7 @@
 
         <span class="kw">let </span>result = diff.to_string();
         <span class="kw">let </span>expected_lines = [
-            <span class="string">""</span>,
-            <span class="string">"... 5 unchanged lines"</span>,
-            <span class="string">""</span>,
+            <span class="string">"5 unchanged lines"</span>,
             <span class="string">"   6  6 | "</span>,
             <span class="string">"   7  7 | [pager]"</span>,
             <span class="string">"   8  8 |     branch = false"</span>,
@@ -949,9 +907,7 @@
             <span class="string">"  14 11 |     rebase = false"</span>,
             <span class="string">"  15 12 | "</span>,
             <span class="string">"  16 13 | [init]"</span>,
-            <span class="string">""</span>,
-            <span class="string">"... 7 unchanged lines"</span>,
-            <span class="string">""</span>,
+            <span class="string">"7 unchanged lines"</span>,
             <span class="string">""</span>,
         ];
         <span class="macro">assert_eq!</span>(result, expected_lines.join(<span class="string">"\n"</span>));
@@ -970,7 +926,7 @@
         <span class="kw">let </span>diff = TextDiff::from_lines(old, new);
 
         <span class="kw">let </span>result = diff.to_string();
-        <span class="kw">let </span>expected_lines = [<span class="string">"3 lines, no changes detected"</span>, <span class="string">""</span>];
+        <span class="kw">let </span>expected_lines = [<span class="string">"3 unchanged lines"</span>, <span class="string">""</span>];
         <span class="macro">assert_eq!</span>(result, expected_lines.join(<span class="string">"\n"</span>));
     }
 }
